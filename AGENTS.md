@@ -1,0 +1,223 @@
+# AGENTS.md
+
+The operating manual for Kalinga. Read this before writing anything.
+
+`CLAUDE.md` imports this file, so Claude Code and Codex both land here.
+`DESIGN.md` owns the design system and `docs/` holds the product brief, the
+feature breakdown, the data model and the workflow.
+
+---
+
+## Non-negotiables
+
+1. **Build one feature at a time.** The loop is in `docs/workflow.md`. Plan, build small, review, fix, deploy, repeat. Do not start a second feature before the first is deployed and green.
+2. **Deploy at feature one.** Not at the end. A portfolio piece that is not live is not a portfolio piece.
+3. **Every tenant table carries `organisation_id`, and every query is scoped.** See Tenancy. This is the one bug class that would end the project.
+4. **The availability engine ships before any screen consumes it.** Pure functions, tested first.
+5. **Nothing costs money.** Free tiers only. No SMS provider, no payment gateway, no paid image APIs, no App Store fee.
+6. **The sandbox sends nothing.** No email, no SMS. Confirmations and reminders render in the UI and write to a log table.
+7. **This repository is public.** No secrets, ever. No real business data in seeds. See Repository rules.
+8. **Write like a person.** No em dashes, no en dashes, no hyphen standing in for a dash. Colons introduce lists, not clauses. Semicolons are almost never right. Apply the `unslop` skill to anything that ships, including commit messages.
+
+---
+
+## What this is
+
+Booking, records and recall reminders for veterinary clinics in the Philippines,
+starting with Northern Mindanao.
+
+The product's real value is recall. Vaccinations are annual, deworming is
+quarterly, grooming is every four to six weeks. Clinics track this from memory
+and lose the revenue when they forget. Online booking is the surface. Recall is
+the reason anyone pays.
+
+It is simultaneously a portfolio piece, which is why a stranger has to be able to
+open it and use it without an account.
+
+**Audience order.** A vet clinic owner deciding whether to pay. A founder
+evaluating the developer. In that order, because a product built to impress
+developers is a worse product.
+
+---
+
+## Stack
+
+| Layer | Choice | Why |
+| --- | --- | --- |
+| Framework | Next.js 16, App Router | Server actions remove the need for a separate API. One deploy target. |
+| Language | TypeScript, strict | |
+| Database | Postgres on **Neon** | Free tier scales to zero and wakes on request. |
+| ORM | Drizzle | Serverless friendly, no binary engine. |
+| Auth | Better Auth | Real organisation and member primitives, which is what multi-tenancy needs. |
+| Styling | Tailwind v4, shadcn | |
+| Email | Resend | Free tier. Production only, never from the sandbox. |
+| Hosting | Vercel, free tier | |
+
+### Deliberately not used
+
+**Supabase.** Its free tier pauses a project after about a week of inactivity
+and needs a manual restore. A previous project of the author's died exactly this
+way. Neon suspends and resumes itself.
+
+**A separate API service.** Server actions and route handlers are enough for a
+solo build. A second service doubles the deploy surface and the failure modes.
+
+**Any SMS provider.** Every Philippine gateway charges per message. Reminders are
+rendered and logged, and the log is visible in the UI. That is honest, it demos
+well, and it costs nothing.
+
+**A payment gateway.** Philippine clinics take cash and GCash transfers. v1
+records a reference number against a visit, which is what they already do.
+
+**A native mobile app.** Nobody installs a TestFlight build to evaluate a
+developer. The client side is mobile-first web, installable as a PWA. Native
+happens when a paying clinic asks for it.
+
+---
+
+## Architecture
+
+One Next.js application. Marketing at the root, the product underneath it, one
+deploy and one design system.
+
+Server Components by default. `"use client"` only on interactive leaves. Server
+actions for mutations, route handlers where a real HTTP endpoint is needed.
+
+Content that is genuinely static, such as marketing copy, lives as typed data
+rather than markup, following the same pattern as the author's portfolio.
+
+---
+
+## Tenancy
+
+Every tenant-owned table carries `organisation_id`. There are no exceptions and
+no "this one is fine because it is only settings".
+
+Access goes through a scoped query layer that cannot be called without an
+organisation id. A test fails the build if any query touches a tenant table
+without scoping.
+
+Postgres row level security is the stronger claim and Neon supports it. It is
+deliberately **not** in v1, because it fights with Better Auth and the ephemeral
+sandbox, and a misconfigured policy is harder to see than a missing argument in
+code you can read. Revisit as hardening once the feature set is stable.
+
+---
+
+## The demo
+
+This is the part most likely to be got wrong, so it is specified precisely.
+
+There are **two** demo surfaces and they behave differently.
+
+**The read-only demo clinic.** One shared, seeded clinic that backs the marketing
+pages and the public booking page. It is never written to. Crawlers, link
+unfurls, uptime pings and search engines all land here and create nothing.
+
+**The writable sandbox.** A per-visitor ephemeral organisation, seeded on
+creation, that lets someone click through the staff side as any role.
+
+Rules for the sandbox:
+
+- Created only by a POST from an explicit click. **Never on a page load.** A crawler must be physically unable to create a row.
+- The tenant id lives in a cookie for 24 hours.
+- A scheduled job deletes tenants older than 24 hours or with no interactions.
+- `robots.txt` disallows the sandbox paths.
+- It sends no email and no SMS.
+
+Seed rules, so the demo never looks abandoned:
+
+- The demo clinic is open seven days, which removes the closed-day problem entirely.
+- Appointments are generated relative to tenant creation, roughly two weeks back and three weeks forward. Never fixed dates.
+- The day view defaults to the next day that has appointments, not to today, and labels which day it is showing.
+- No holiday calendar in v1. Seven day opening makes it unnecessary.
+
+---
+
+## Time
+
+Every timestamp is `timestamptz` and stored in UTC. The organisation row carries
+a `timezone` column defaulting to `Asia/Manila`.
+
+Availability is computed in clinic local time. The interface renders clinic time
+with the zone labelled, not the viewer's, because someone booking from abroad
+still has to arrive at nine in the morning Philippine time.
+
+**No raw `Date` arithmetic anywhere in scheduling.** Use a timezone-aware library
+for every calculation. This single rule prevents most scheduling bugs.
+
+---
+
+## The availability engine
+
+`src/lib/availability/` is a pure module. It imports nothing from the database,
+nothing from React, and nothing from Next.
+
+One entry point. Given working hours, exceptions, existing appointments, a
+service duration and buffer, a date range and a timezone, it returns open slots.
+
+**Tests come before any screen consumes it.** At minimum: a normal day, a fully
+booked day, partial availability, buffer overlap, a closure exception, a service
+longer than the remaining window, and the midnight boundary.
+
+This is the only part of the product where correctness is subtle, and the failure
+mode is double booking a real customer.
+
+---
+
+## Privacy and abuse
+
+Kalinga collects names, mobile numbers and email addresses from Philippine
+residents. RA 10173 applies, including to the demo.
+
+- A real `/privacy` page ships with v1, not later.
+- Sandbox data is purged within 24 hours. Real bookings are kept until the clinic deletes them or the person asks.
+- A working contact route for deletion requests.
+- The public booking endpoint is rate limited per IP and carries a honeypot field.
+
+---
+
+## Repository rules
+
+This repository is **public**, licensed all rights reserved. Readable as
+evidence, not licensed for reuse, because Kalinga is meant to be sold.
+
+- No secrets in the repository. `.env.example` only.
+- **Seed data must be visibly fictional.** No clinic names, addresses or phone numbers taken from real businesses. Invented names only.
+- No client data from any other project, ever.
+
+---
+
+## Where things live
+
+| Path | What |
+| --- | --- |
+| `src/app/` | Routes. Marketing at the root, product beneath it. |
+| `src/components/primitives/` | The design system. See `DESIGN.md`. |
+| `src/lib/availability/` | The scheduling engine. Pure, tested, no side effects. |
+| `src/lib/db/` | Drizzle schema and the scoped query layer. |
+| `src/content/` | Typed marketing and static copy. |
+| `docs/product/` | Brief, features, roles, data model, decisions. |
+| `docs/design/` | Visual direction and the screens to design. |
+| `docs/workflow.md` | The build loop and when to escalate review depth. |
+
+---
+
+## Definition of done
+
+v1 is done when features one through eight are deployed, the privacy page is
+live, the availability engine is tested, and the case study is written.
+
+**Capture evidence as you build.** Add to `docs/product/decisions.md` when a
+decision is made. Take screenshots at each feature completion. Track the numbers
+the case study will need, which are the engine test count, the permission checks,
+the seed scale, and the accessibility and Lighthouse scores. These are much
+easier to record on the day than to reconstruct in a month.
+
+---
+
+## Accessibility
+
+Match the standard already set by the author's portfolio. WCAG 2A and 2AA,
+verified with axe in the test run. Respect `prefers-reduced-motion`. The client
+side is mobile-first, because pet owners book on a phone.
