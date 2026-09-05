@@ -8,8 +8,10 @@
 | [`product/features.md`](product/features.md) | The eight features of v1, in order, with what done means for each |
 | [`product/roles.md`](product/roles.md) | The four roles and what each can do |
 | [`product/data-model.md`](product/data-model.md) | Entities, relationships and the tenancy rule |
-| [`design/direction.md`](design/direction.md) | How the visual direction gets decided, and with which tools |
-| [`design/screens.md`](design/screens.md) | The screens, in the order they get designed |
+| [`design/direction.md`](design/direction.md) | How the visual direction was decided, what was tried, and what it cost |
+| [`design/pages.md`](design/pages.md) | Every page in v1 by surface, with routes and who can reach it |
+| [`design/screens.md`](design/screens.md) | The screens, in the order they get designed, and where each stands |
+| [`design/explorations/`](design/explorations/README.md) | Generated boards and vectors with the prompts that produced them |
 | [`workflow.md`](../docs/workflow.md) | The build loop, and when to escalate review depth |
 | [`product/decisions.md`](product/decisions.md) | Every decision made so far, and why |
 

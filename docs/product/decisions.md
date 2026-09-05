@@ -150,15 +150,116 @@ get consulted only when a specific interaction is stuck.
 
 ---
 
-## Open
+## 2026-09-05, the design step
 
-**The accent hue.** Decided during the design step. Must work as a small status
-dot on a dense day view, as a large button on a phone in daylight, and must not
-read as an alert.
+Everything below came out of generating boards for the staff sign in page and
+judging them. The full account is in `../design/direction.md`.
+
+### The interface is near white and near black
+
+Supersedes "The interface is not monochrome" above. A grey page, white sheets
+and cards, near black text and a near black primary pill. Warmth comes from
+photography of animals, not from an accent. The earlier entry was right that
+grey on grey would read as cold. It was wrong that colour was the only way to
+fix it.
+
+Tested against three generated boards. The earth tone board looked like paper
+and its clay button read as orange. The monochrome board with a photograph read
+as a product a clinic owner would pay for.
+
+### There is no accent hue
+
+Closes the open question. One pale blue tint, `#D9E5F5`, marks featured
+content cards such as the next appointment, borrowed from how Future Pro tints
+its kickoff card. Buttons, links, focus and text never take a colour. Status
+keeps a small palette of its own, seven states each with a cue that is not
+colour, because the day view genuinely needs it.
+
+### Surfaces are separated by tone, not hairlines
+
+Supersedes the hairline rule inherited from the portfolio. Cards, sheets and
+inputs have no borders and no shadows. An input is always one step of tone
+away from what it sits on. A form made of hairline boxes reads as a settings
+page, and the first board proved it.
+
+### Photography appears on entry surfaces only, and only animals
+
+Auth pages, the demo entry, the landing page and the public booking header
+carry one animal portrait each. Nothing inside the staff application does. The
+subject rules are in `DESIGN.md`: one animal, no people, no clinic, no props,
+natural light, plain wall. Aspin and puspin first.
+
+The vet with a dog on a steel table was tried and rejected as the stock image
+every clinic already has. A human face in the hero also pulled attention from
+the form.
+
+### The mark is a smile with two unequal dots
+
+A thick arc with round caps, a small dot floating above the left end and a
+larger dot resting above the right end. The brief was a dot held by an arc.
+Three models read it three ways: a crescent, a power button, and this face.
+The face was chosen because it reads as tender care without a paw print, and
+the larger dot still reads as the thing being held.
+
+Rebuilt as geometry in `public/brand/` from the chosen render, so the favicon,
+the app icon and the lockup are all the same SVG at different sizes. The
+rejected vectors are kept in `../design/explorations/logo/`.
+
+### Staff auth is designed before public booking
+
+Supersedes the order in the first version of `../design/screens.md`, which put
+public booking first. Auth was the cheapest place to settle the system: five
+pages, one form shape, every state the system has to prove. Public booking is
+next and now inherits a finished system rather than defining one.
+
+### Boards are generated with GPT Image 2 through fal, vectors with Recraft
+
+Prices are checked with the fal pricing tool before every run, because fal
+changes prices without notice. On 2026-09-05 a board at 2560 by 1440 cost
+$0.222 and a vector mark cost $0.08. Nano Banana Pro was tried on the same
+prompt at $0.15 and rejected for rotating phones to landscape and adding text
+it was told not to. The whole design step cost about a dollar.
+
+The fal key lives in the user level MCP config, never in the repository. It
+was pasted into a chat once during setup and rotated afterwards.
+
+### Design explorations are kept with their prompts
+
+Every kept board and every vector goes in `../design/explorations/` beside the
+exact prompt that produced it, with the model and the price. A board without
+its prompt cannot be reproduced or varied, and the case study will need both.
+
+### The phone auth photograph collapses when the keyboard opens
+
+The phone layout puts a photograph in the top 40 percent and rises a sheet over
+it. With the keyboard open the form does not fit. The photograph collapses to a
+64 px band on field focus rather than letting the sheet scroll, so the primary
+button stays in reach.
+
+---
+
+## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a
 case study, or paid from the start. Needs settling before the F4 conversation
 happens, not during it.
 
-**The type scale.** Small and fixed, numbers written back into `DESIGN.md` once
-the design step lands.
+**Client portal identity.** Booking needs no account, but a pet owner "sees
+their own pets and history" needs one. Recommended: a magic link by email at
+booking, rendered on screen in the sandbox, with manage booking reachable by
+reference alone. Decide before the client portal is designed.
+
+**Booking captures a pet.** The data model joins appointments to pets, so the
+public form needs at least pet name and species. The features doc lists only
+name, mobile and email. Recommended: add the two fields. Decide before F2b.
+
+**Who marks an appointment completed.** No feature assigns it. Recommended:
+adding a visit completes the appointment. Decide before F5.
+
+**Reporting.** The roles doc gives the owner "whatever reporting exists" and
+nothing in v1 defines any. Recommended: none in v1.
+
+**The original ChatGPT renders.** The two earlier sign in boards and the chosen
+logo render exist only as images in a chat. They should be dropped into
+`../design/explorations/` under the names listed in its README so the record is
+complete.

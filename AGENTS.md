@@ -197,8 +197,10 @@ evidence, not licensed for reuse, because Kalinga is meant to be sold.
 | `src/lib/availability/` | The scheduling engine. Pure, tested, no side effects. |
 | `src/lib/db/` | Drizzle schema and the scoped query layer. |
 | `src/content/` | Typed marketing and static copy. |
+| `public/brand/` | The mark, lockup, favicon and app icon as SVG. The geometry is the source of truth, never redraw it. |
 | `docs/product/` | Brief, features, roles, data model, decisions. |
-| `docs/design/` | Visual direction and the screens to design. |
+| `docs/design/` | Visual direction, the page inventory, the screens to design. |
+| `docs/design/explorations/` | Generated boards and vectors, each beside the prompt, model and price that produced it. |
 | `docs/workflow.md` | The build loop and when to escalate review depth. |
 
 ---
@@ -209,10 +211,12 @@ v1 is done when features one through eight are deployed, the privacy page is
 live, the availability engine is tested, and the case study is written.
 
 **Capture evidence as you build.** Add to `docs/product/decisions.md` when a
-decision is made. Take screenshots at each feature completion. Track the numbers
-the case study will need, which are the engine test count, the permission checks,
-the seed scale, and the accessibility and Lighthouse scores. These are much
-easier to record on the day than to reconstruct in a month.
+decision is made. Take screenshots at each feature completion. Save every
+generated design board in `docs/design/explorations/` beside its prompt, model
+and price. Track the numbers the case study will need, which are the engine
+test count, the permission checks, the seed scale, and the accessibility and
+Lighthouse scores. These are much easier to record on the day than to
+reconstruct in a month.
 
 ---
 
