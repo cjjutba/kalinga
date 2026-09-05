@@ -137,10 +137,10 @@ function PetPicker({ pets, owners, value, onChange }: { pets: Pet[]; owners: Own
   );
 }
 
-export function NewAppointmentDialog({ orgSlug, open, onOpenChange, day }: { orgSlug: string; open: boolean; onOpenChange: (o: boolean) => void; day?: Date }) {
+export function NewAppointmentDialog({ orgSlug, open, onOpenChange, day, defaultPetId }: { orgSlug: string; open: boolean; onOpenChange: (o: boolean) => void; day?: Date; defaultPetId?: string }) {
   const { org, pets, owners, services, providers, appointments, dispatch } = useOrg(orgSlug);
   const bookable = services.filter((s) => s.publiclyBookable);
-  const [petId, setPetId] = useState<string | null>(null);
+  const [petId, setPetId] = useState<string | null>(defaultPetId ?? null);
   const [serviceId, setServiceId] = useState(bookable[0]?.id ?? "");
   const [providerId, setProviderId] = useState(providers[0]?.id ?? "");
   const [slot, setSlot] = useState<Slot | null>(null);
