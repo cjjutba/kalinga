@@ -8,6 +8,8 @@ import { Lockup } from "@/components/primitives/lockup";
 import { Mark } from "@/components/primitives/mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SandboxBar } from "@/components/sandbox/sandbox-bar";
+import { Tour } from "@/components/sandbox/tour";
+import { Suspense } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useOrg } from "@/lib/mock/store";
 import { can, roleLabel, type Permission } from "@/lib/roles";
@@ -161,6 +163,9 @@ export function StaffShell({ orgSlug, children }: { orgSlug: string; children: R
           <main className="mx-auto w-full max-w-[1200px] px-4 pb-24 pt-4 md:px-6 lg:px-8 lg:pt-8">{children}</main>
         </div>
       </div>
+      <Suspense fallback={null}>
+        <Tour orgSlug={org.slug} />
+      </Suspense>
     </div>
   );
 }

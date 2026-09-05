@@ -8,6 +8,7 @@ import { PageHeader, EmptyState } from "./page-header";
 import { FirstRun } from "./first-run";
 import { AppointmentDrawer } from "./appointment-drawer";
 import { CancelDialog, NewAppointmentDialog, RescheduleDialog, WalkInDialog } from "./dialogs";
+import { ReminderPreview } from "@/components/sandbox/reminder-preview";
 import { Pill } from "@/components/primitives/pill";
 import { StatusPill, statusLabel } from "@/components/primitives/status-pill";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -229,6 +230,8 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
           })}
         </ol>
       )}
+
+      <ReminderPreview orgSlug={org.slug} />
 
       <AppointmentDrawer orgSlug={org.slug} appointmentId={selected} onClose={() => setSelected(null)} onCancel={(id) => { setSelected(null); setCancelId(id); }} onReschedule={(id) => { setSelected(null); setRescheduleId(id); }} />
       <CancelDialog orgSlug={org.slug} appointment={appointments.find((a) => a.id === cancelId) ?? null} open={!!cancelId} onOpenChange={(o) => !o && setCancelId(null)} />
