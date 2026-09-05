@@ -37,17 +37,22 @@ export function GuideCard({
   initials,
   children,
   className,
+  tone = "field",
 }: {
   name: string;
   initials: string;
   children: ReactNode;
   className?: string;
+  /** "auto" is for auth forms: field on the sheet, sheet on the page at laptop width. */
+  tone?: "field" | "sheet" | "auto";
 }) {
+  const tones = { field: "bg-field", sheet: "bg-sheet", auto: "bg-field lg:bg-sheet" };
+  const avatarTones = { field: "bg-sheet", sheet: "bg-field", auto: "bg-sheet lg:bg-field" };
   return (
-    <div className={cn("flex gap-3 rounded-guide bg-field p-4", className)}>
+    <div className={cn("flex gap-3 rounded-guide p-4", tones[tone], className)}>
       <span
         aria-hidden
-        className="grid size-9 shrink-0 place-items-center rounded-full bg-sheet text-[13px] font-medium text-text"
+        className={cn("grid size-9 shrink-0 place-items-center rounded-full text-[13px] font-medium text-text", avatarTones[tone])}
       >
         {initials}
       </span>
@@ -75,7 +80,7 @@ export function Row({
   className?: string;
   href?: string;
   onClick?: () => void;
-  tone?: "sheet" | "field";
+  tone?: "sheet" | "field" | "auto";
 }) {
   const inner = (
     <>
@@ -88,7 +93,7 @@ export function Row({
   );
   const cls = cn(
     "flex w-full items-center gap-4 rounded-guide px-4 py-3.5 text-left",
-    tone === "sheet" ? "bg-sheet" : "bg-field",
+    tone === "sheet" ? "bg-sheet" : tone === "field" ? "bg-field" : "bg-field lg:bg-sheet",
     (href || onClick) && "hover:bg-divider/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page transition-colors duration-150 motion-reduce:transition-none",
     className,
   );

@@ -9,7 +9,15 @@ import { cn } from "@/lib/utils";
 // step of tone away from what it sits on. On a sheet it is --field, on the
 // page it is --sheet. Never a border. Errors are a red ring and one red line.
 
-type Surface = "sheet" | "page";
+// "auto" is for auth forms, which sit on a sheet below the laptop breakpoint
+// and directly on the page above it.
+type Surface = "sheet" | "page" | "auto";
+
+const surfaceFill: Record<Surface, string> = {
+  sheet: "bg-field",
+  page: "bg-sheet",
+  auto: "bg-field lg:bg-sheet",
+};
 
 interface FieldFrameProps {
   label: string;
@@ -49,7 +57,7 @@ export const controlClass = (on: Surface, error?: boolean, extra?: string) =>
   cn(
     "w-full rounded-input px-4 text-[17px] text-text placeholder:text-text-3",
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sheet",
-    on === "sheet" ? "bg-field" : "bg-sheet",
+    surfaceFill[on],
     error ? "ring-2 ring-error focus-visible:ring-error" : "focus-visible:ring-focus",
     "disabled:opacity-60",
     extra,
@@ -92,7 +100,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function
   return (
     <FieldFrame label={label} helper={helper} error={error} hint={hint} on={on} id={id} className={wrapperClassName}>
       {prefix || isPassword ? (
-        <div className={cn("relative flex items-stretch rounded-input", error && "ring-2 ring-error", on === "sheet" ? "bg-field" : "bg-sheet")}>
+        <div className={cn("relative flex items-stretch rounded-input", error && "ring-2 ring-error", surfaceFill[on])}>
           {prefix ? (
             <span className="flex items-center pl-4 pr-1 text-[17px] text-text-3 select-none" aria-hidden>
               {prefix}
