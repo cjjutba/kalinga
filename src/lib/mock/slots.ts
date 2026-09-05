@@ -11,6 +11,19 @@ import { dayKey } from "@/lib/time";
 export interface Slot {
   startsAt: string;
   endsAt: string;
+  /** Set when the slot was found across several providers ("any vet"). */
+  providerId?: string;
+}
+
+/** Open slots across several providers, one entry per start time, first free provider wins. */
+export function openSlotsAny(opts: Omit<Parameters<typeof openSlots>[0], "provider"> & { providers: Provider[] }): Slot[] {
+  const seen = new Map<string, Slot>();
+  for (const provider of opts.providers) {
+    for (const s of openSlots({ ...opts, provider })) {
+      if (!seen.has(s.startsAt)) seen.set(s.startsAt, { ...s, providerId: provider.id });
+    }
+  }
+  return [...seen.values()].sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 }
 
 export function openSlots(opts: {

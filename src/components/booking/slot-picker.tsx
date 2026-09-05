@@ -5,7 +5,7 @@ import { TZDate } from "@date-fns/tz";
 import { addDays, format, isSameDay, startOfDay } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Appointment, Provider, Service } from "@/lib/mock/types";
-import { openSlots, type Slot } from "@/lib/mock/slots";
+import { openSlots, openSlotsAny, type Slot } from "@/lib/mock/slots";
 import { clinicNow, formatTime, formatShortDate, zoneLabel } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 export function SlotPicker({
   tz,
   provider,
+  providers,
   service,
   appointments,
   value,
@@ -28,7 +29,9 @@ export function SlotPicker({
   compact = false,
 }: {
   tz: string;
-  provider: Provider;
+  /** One provider, or several for "any vet". */
+  provider?: Provider;
+  providers?: Provider[];
   service: Pick<Service, "durationMin" | "bufferMin">;
   appointments: Appointment[];
   value: Slot | null;
@@ -45,8 +48,9 @@ export function SlotPicker({
   const now = clinicNow(tz);
 
   const strip = useMemo(() => Array.from({ length: days }, (_, i) => addDays(today, offset + i) as TZDate), [today, offset, days]);
-  const slotsFor = (d: Date) => openSlots({ day: d, tz, provider, service, appointments: relevant, notBefore: now });
-  const slots = useMemo(() => slotsFor(day), [day, tz, provider, service, relevant]); // eslint-disable-line react-hooks/exhaustive-deps
+  const pool = useMemo(() => providers ?? (provider ? [provider] : []), [providers, provider]);
+  const slotsFor = (d: Date) => (pool.length === 1 ? openSlots({ day: d, tz, provider: pool[0], service, appointments: relevant, notBefore: now }) : openSlotsAny({ day: d, tz, providers: pool, service, appointments: relevant, notBefore: now }));
+  const slots = useMemo(() => slotsFor(day), [day, tz, pool, service, relevant]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const nextOpen = useMemo(() => {
     for (let i = 1; i <= 21; i++) {
@@ -55,7 +59,8 @@ export function SlotPicker({
       if (s.length) return { day: d, slot: s[0] };
     }
     return null;
-  }, [day, tz, provider, service, relevant]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [day, tz, pool, service, relevant]); // eslint-disable-line react-hooks/exhaustive-deps
+  const who = pool.length === 1 ? pool[0].name : "Any available vet";
 
   return (
     <div className="flex flex-col gap-4">
@@ -106,7 +111,7 @@ export function SlotPicker({
       <div className="flex items-baseline justify-between">
         <p className="text-small font-medium">{formatShortDate(day, tz)}</p>
         <p className="text-label text-text-2">
-          Times in {zoneLabel(tz)}. {provider.name.replace(/^Dr\.\s*/, "Dr. ")}
+          Times in {zoneLabel(tz)}. {who}
         </p>
       </div>
 
@@ -152,7 +157,7 @@ export function SlotPicker({
               </button>
             </>
           ) : (
-            <p className="mt-1 text-small text-text-2">Nothing is open in the next three weeks with this vet. Try another vet, or call the clinic.</p>
+            <p className="mt-1 text-small text-text-2">Nothing is open in the next three weeks{pool.length === 1 ? " with this vet. Try any available vet, or call the clinic." : ". Call the clinic and they will fit you in."}</p>
           )}
         </div>
       )}

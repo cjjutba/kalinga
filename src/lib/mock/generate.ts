@@ -264,6 +264,10 @@ export function generateFixtures(anchorDay: Date = startOfDay(TZDate.tz(TZ)), fi
   const rand = mulberry32(Number(format(anchor, "yyyyMMdd")));
   const fixtureNow = timeOn(anchor, Math.min(Math.max(fixtureHour, 9), 17), 0);
 
+  // Nothing in the audit trail can be dated after now. A booking made for a
+  // day three weeks out was still made in the past.
+  const pastOf = (d: Date): Date => (isBefore(d, fixtureNow) ? d : addMinutes(fixtureNow, -(60 + Math.floor(rand() * 60 * 72))));
+
   const owners: Owner[] = [];
   const pets: Pet[] = [];
   const seedOwners = (orgId: string, seeds: OwnerSeed[]) => {
@@ -346,12 +350,12 @@ export function generateFixtures(anchorDay: Date = startOfDay(TZDate.tz(TZ)), fi
           endsAt: iso(end),
           status,
           source: rand() < 0.55 ? "online" : "staff",
-          createdAt: iso(subDays(start, 2 + Math.floor(rand() * 10))),
+          createdAt: iso(pastOf(subDays(start, 2 + Math.floor(rand() * 10)))),
         };
         if (status === "cancelled") appt.cancelReason = cancelReasons[Math.floor(rand() * cancelReasons.length)];
         appointments.push(appt);
         log(org.id, actor, appt.source === "online" ? "Booked online" : "Booked at the desk", "appointment", appt.id, `${pet.name}, ${service.name}`, new Date(appt.createdAt), undefined, { status: "booked", startsAt: appt.startsAt });
-        if (status === "cancelled") log(org.id, actor, "Cancelled appointment", "appointment", appt.id, `${pet.name}, ${service.name}`, subDays(start, 1), { status: "confirmed" }, { status: "cancelled", reason: appt.cancelReason });
+        if (status === "cancelled") log(org.id, actor, "Cancelled appointment", "appointment", appt.id, `${pet.name}, ${service.name}`, pastOf(subDays(start, 1)), { status: "confirmed" }, { status: "cancelled", reason: appt.cancelReason });
         if (status === "no_show") log(org.id, actor, "Marked no-show", "appointment", appt.id, `${pet.name}, ${service.name}`, addMinutes(start, 20), { status: "confirmed" }, { status: "no_show" });
         if (status === "completed") {
           const vet = members.find((m) => m.providerId === provider.id) ?? actor;
@@ -403,9 +407,9 @@ export function generateFixtures(anchorDay: Date = startOfDay(TZDate.tz(TZ)), fi
             status: f.status!,
             source: f.source!,
             note: f.note,
-            createdAt: iso(subDays(start, 3)),
+            createdAt: iso(pastOf(subDays(start, 3))),
           });
-          log(org.id, actor, f.source === "walk_in" ? "Added walk-in" : "Booked", "appointment", appointments[appointments.length - 1].id, `${pet.name}`, subDays(start, 3));
+          log(org.id, actor, f.source === "walk_in" ? "Added walk-in" : "Booked", "appointment", appointments[appointments.length - 1].id, `${pet.name}`, pastOf(subDays(start, 3)));
         }
         // Guarantee the counts the design doc names: two cancelled, one no-show.
         const todays = appointments.filter((a) => a.organisationId === org.id && dateKey(new TZDate(new Date(a.startsAt), TZ)) === dateKey(anchor));

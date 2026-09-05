@@ -12,6 +12,7 @@ import type {
   Member,
   Owner,
   Pet,
+  Provider,
   Reminder,
   Role,
   Service,
@@ -46,13 +47,14 @@ type Action =
   | { type: "visit/add"; visit: Omit<Visit, "id" | "organisationId"> }
   | { type: "owner/upsert"; owner: Omit<Owner, "id" | "createdAt" | "organisationId"> & { id?: string } }
   | { type: "pet/upsert"; pet: Omit<Pet, "id" | "organisationId"> & { id?: string } }
-  | { type: "service/upsert"; service: Omit<Service, "organisationId"> & { id?: string } }
+  | { type: "service/upsert"; service: Omit<Service, "organisationId" | "id"> & { id?: string } }
   | { type: "member/invite"; member: Omit<Member, "id" | "organisationId" | "invitedAt"> }
   | { type: "member/role"; id: string; role: Role }
   | { type: "member/remove"; id: string }
   | { type: "reminder/sent"; id: string }
   | { type: "reminder/unsend"; id: string }
   | { type: "org/update"; changes: Partial<Fixtures["organisations"][number]> }
+  | { type: "provider/update"; id: string; changes: Partial<Pick<Provider, "weeklyHours" | "exceptions" | "name" | "title">> }
   | { type: "reset" };
 
 let counter = 1000;
@@ -239,6 +241,17 @@ function reducer(state: StoreState, action: Action): StoreState {
         ...state,
         organisations: state.organisations.map((o) => (o.id === org.id ? { ...o, ...action.changes } : o)),
         audit: [audit(state, "Updated clinic settings", "organisation", org.id, org.name, undefined, action.changes as Record<string, unknown>), ...state.audit],
+      };
+    }
+    case "provider/update": {
+      const p = state.providers.find((x) => x.id === action.id);
+      if (!p) return state;
+      const summary = (x: Provider) => ({ days: x.weeklyHours.map((r) => r.day).join(","), closures: x.exceptions.length });
+      const updated = { ...p, ...action.changes };
+      return {
+        ...state,
+        providers: state.providers.map((x) => (x.id === p.id ? updated : x)),
+        audit: [audit(state, action.changes.exceptions ? "Updated closures" : "Updated working hours", "provider", p.id, p.name, summary(p), summary(updated)), ...state.audit],
       };
     }
     case "reset":
