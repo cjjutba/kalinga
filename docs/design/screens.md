@@ -5,7 +5,10 @@ full page inventory with routes and roles is in `pages.md`. This file is about
 which ones get designed before code and against what.
 
 Only the first four get designed before code. The rest are better decided
-against a running application.
+against a running application, and since 2026-09-05 there is one: every page
+in `pages.md` runs on localhost as an interactive prototype on fixtures.
+Screenshots from that build are in `screenshots/`. Judging the later screens
+now means opening them, not imagining them.
 
 ---
 
@@ -28,7 +31,7 @@ photograph has to collapse or the form will not fit.
 
 ## 1. Public booking
 
-**Next.** The screen the business depends on. A pet owner picks a service,
+**Built in the prototype, board still to come.** The screen the business depends on. A pet owner picks a service,
 picks a vet or accepts any, chooses a slot, and confirms.
 
 Mobile first and one handed. It is the last step before a commitment, so it has
@@ -47,7 +50,7 @@ designed in the browser, not on a board.
 
 ## 2. Staff day view
 
-The screen used most. Today in time order, with status visible at a glance.
+**Built in the prototype.** The screen used most. Today in time order, with status visible at a glance.
 
 Confirm, cancel, reschedule, mark arrived. Walk-ins added without a service.
 
@@ -61,7 +64,7 @@ books. The status palette and its non colour cues are fixed in `DESIGN.md`.
 
 ## 3. Pet record
 
-What a vet opens mid consultation. Who the animal is, what happened last time,
+**Built in the prototype.** What a vet opens mid consultation. Who the animal is, what happened last time,
 what is due next.
 
 Weight, vaccination and deworming dates, visit history. The recall dates are the

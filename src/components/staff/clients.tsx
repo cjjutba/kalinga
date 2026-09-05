@@ -76,7 +76,7 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
                 title={owner.name}
                 secondary={
                   <>
-                    {owner.mobile ? <span className="tabular">{owner.mobile}</span> : <span className="text-text-3">No mobile on file</span>}
+                    {owner.mobile ? <span className="tabular">{owner.mobile}</span> : <span className="text-text-2">No mobile on file</span>}
                     {ps.length ? <span>, {ps.map((p) => p.name).join(", ")}</span> : <span>, no pets on file</span>}
                   </>
                 }
@@ -128,11 +128,11 @@ export function ClientDetail({ orgSlug, id }: { orgSlug: string; id: string }) {
             <dl className="mt-3 flex flex-col gap-2 text-body">
               <div className="flex justify-between gap-4">
                 <dt className="text-text-2">Mobile</dt>
-                <dd className="tabular">{owner.mobile ?? <span className="text-text-3">Not on file</span>}</dd>
+                <dd className="tabular">{owner.mobile ?? <span className="text-text-2">Not on file</span>}</dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-text-2">Email</dt>
-                <dd className="truncate">{owner.email ?? <span className="text-text-3">Not on file</span>}</dd>
+                <dd className="truncate">{owner.email ?? <span className="text-text-2">Not on file</span>}</dd>
               </div>
             </dl>
             {owner.notes ? <p className="mt-3 text-small text-text-2">{owner.notes}</p> : null}

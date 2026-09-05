@@ -115,7 +115,7 @@ export function BookingConfirmation({ slug, reference }: { slug: string; referen
           <h2 id="msg" className="text-label font-medium text-text-2">
             Your confirmation
           </h2>
-          <span className="text-label text-text-3">Nothing is sent in the demo. It shows here.</span>
+          <span className="text-label text-text-2">Nothing is sent in the demo. It shows here.</span>
         </div>
         <blockquote className="mt-2 rounded-guide bg-sheet p-4 text-small leading-[1.5]">{message}</blockquote>
         <Pill

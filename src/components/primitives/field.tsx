@@ -37,7 +37,7 @@ function FieldFrame({ label, helper, error, hint, className, id, children }: Fie
     <div className={cn("flex flex-col gap-1.5", className)}>
       <label htmlFor={id} className="flex items-baseline justify-between text-[13px] font-medium text-text">
         <span>{label}</span>
-        {hint ? <span className="font-normal text-text-3">{hint}</span> : null}
+        {hint ? <span className="font-normal text-text-2">{hint}</span> : null}
       </label>
       {children}
       {error ? (
@@ -102,7 +102,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function
       {prefix || isPassword ? (
         <div className={cn("relative flex items-stretch rounded-input", error && "ring-2 ring-error", surfaceFill[on])}>
           {prefix ? (
-            <span className="flex items-center pl-4 pr-1 text-[17px] text-text-3 select-none" aria-hidden>
+            <span className="flex items-center pl-4 pr-1 text-[17px] text-text-2 select-none" aria-hidden>
               {prefix}
             </span>
           ) : null}

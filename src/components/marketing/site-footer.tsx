@@ -27,7 +27,7 @@ export function SiteFooter() {
           </Link>
         </nav>
       </div>
-      <p className="mt-8 text-label text-text-3">All rights reserved. Built in Cagayan de Oro.</p>
+      <p className="mt-8 text-label text-text-2">All rights reserved. Built in Cagayan de Oro.</p>
     </footer>
   );
 }

@@ -84,7 +84,7 @@ export function AuditTrail({ orgSlug }: { orgSlug: string }) {
 }
 
 function Value({ v }: { v: unknown }) {
-  if (v === undefined || v === null || v === "") return <span className="text-text-3">empty</span>;
+  if (v === undefined || v === null || v === "") return <span className="text-text-2">empty</span>;
   if (Array.isArray(v)) return <>{v.join(", ")}</>;
   if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T/.test(v)) return <span className="tabular">{formatShortDate(v)}, {formatTime(v)}</span>;
   return <>{String(v)}</>;

@@ -10,7 +10,7 @@ import { AppointmentDrawer } from "./appointment-drawer";
 import { CancelDialog, NewAppointmentDialog, RescheduleDialog, WalkInDialog } from "./dialogs";
 import { ReminderPreview } from "@/components/sandbox/reminder-preview";
 import { Pill } from "@/components/primitives/pill";
-import { StatusPill, statusLabel } from "@/components/primitives/status-pill";
+import { StatusPill } from "@/components/primitives/status-pill";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrg } from "@/lib/mock/store";
 import { appointmentsOn, daysWithAppointments, defaultDay, joinAppointment } from "@/lib/mock/selectors";
@@ -201,19 +201,17 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
                     "grid w-full grid-cols-[76px_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1 rounded-guide bg-sheet px-4 py-3 text-left",
                     "md:grid-cols-[80px_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto] md:items-center",
                     "hover:bg-divider/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page transition-colors duration-150 motion-reduce:transition-none",
-                    dim && "opacity-70",
                   )}
-                  aria-label={`${formatTime(a.startsAt, tz)}, ${r.pet?.name ?? "pet"}, ${statusLabel[a.status]}`}
                 >
-                  <span className="whitespace-nowrap text-small font-medium tabular md:text-body">{formatTime(a.startsAt, tz)}</span>
+                  <span className={cn("whitespace-nowrap text-small font-medium tabular md:text-body", dim && "text-text-2")}>{formatTime(a.startsAt, tz)}</span>
                   <span className="min-w-0">
-                    <span className={cn("block text-body font-medium", a.status === "cancelled" && "line-through decoration-1")}>
+                    <span className={cn("block text-body font-medium", dim && "text-text-2", a.status === "cancelled" && "line-through decoration-1")}>
                       {r.pet?.name ?? "Pet"}
                       <span className="font-normal text-text-2">, {r.pet?.breed}</span>
                     </span>
                     <span className="block text-small text-text-2">
                       {r.owner?.name}
-                      {!r.owner?.mobile ? <span className="text-text-3">, no mobile on file</span> : null}
+                      {!r.owner?.mobile ? <span className="text-text-2">, no mobile on file</span> : null}
                     </span>
                   </span>
                   <span className="col-start-3 row-start-1 md:col-start-5">

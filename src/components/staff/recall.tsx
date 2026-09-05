@@ -153,7 +153,7 @@ export function RecallQueue({ orgSlug }: { orgSlug: string }) {
                               </p>
                               <p className="text-small text-text-2">
                                 {owner?.name}
-                                {owner?.mobile ? <span className="tabular">, {owner.mobile}</span> : <span className="text-text-3">, no mobile, use Messenger or call</span>}
+                                {owner?.mobile ? <span className="tabular">, {owner.mobile}</span> : <span className="text-text-2">, no mobile, use Messenger or call</span>}
                               </p>
                             </div>
                             <div className="flex shrink-0 flex-col items-end gap-1">
@@ -259,7 +259,7 @@ export function ReminderLog({ orgSlug }: { orgSlug: string }) {
                       <td className="whitespace-nowrap px-4 py-3 font-medium">{pet?.name}</td>
                       <td className="whitespace-nowrap px-4 py-3">{recallLabel[r.kind]}</td>
                       <td className="whitespace-nowrap px-4 py-3 tabular">{formatDate(r.dueOn, tz)}</td>
-                      <td className="whitespace-nowrap px-4 py-3">{r.sentAt ? `${formatShortDate(r.sentAt, tz)}${by ? ", " + by.split(" ")[0] : ""}` : <span className="text-text-3">Not yet</span>}</td>
+                      <td className="whitespace-nowrap px-4 py-3">{r.sentAt ? `${formatShortDate(r.sentAt, tz)}${by ? ", " + by.split(" ")[0] : ""}` : <span className="text-text-2">Not yet</span>}</td>
                       <td className="max-w-md truncate px-4 py-3 text-text-2">{r.message}</td>
                     </tr>
                   );

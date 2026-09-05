@@ -344,7 +344,7 @@ function ProviderHours({ provider, orgSlug }: { provider: Provider; orgSlug: str
                   <input type="time" value={rule.to} onChange={(e) => update(rules.map((r) => (r.day === day ? { ...r, to: e.target.value } : r)))} className="h-9 rounded-tag bg-field px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus" aria-label={`${d} closes`} />
                 </div>
               ) : (
-                <span className="text-small text-text-3">Off</span>
+                <span className="text-small text-text-2">Off</span>
               )}
             </li>
           );

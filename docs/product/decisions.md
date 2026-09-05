@@ -236,6 +236,51 @@ it. With the keyboard open the form does not fit. The photograph collapses to a
 64 px band on field focus rather than letting the sheet scroll, so the primary
 button stays in reach.
 
+## 2026-09-05, the prototype
+
+### The interface is built before the foundation
+
+Supersedes the build order for one pass. Every page in `../design/pages.md`
+was built as an interactive prototype on typed in-memory fixtures, so the
+whole product can be walked on localhost before a database, auth or a server
+action exists. Nothing persists past a reload. The shapes in
+`src/lib/mock/types.ts` mirror the data model so the real schema in F1 can
+replace them without the screens noticing.
+
+Two non-negotiables are paused, knowingly, until F1 starts. "Deploy at feature
+one" waits because there is no feature one yet, only its interface. And the
+slot picker runs on a naive fixture list in `src/lib/mock/slots.ts` rather
+than the availability engine. That file is labelled as such and is deleted when
+F2a ships with tests. No real booking is taken from it.
+
+### Fixtures are deterministic per day and hour
+
+The demo clinic is generated relative to the clinic's current day, two weeks
+back and three weeks forward, with today as the heavy day the design has to
+survive. The server layout reads the clinic hour once and passes it down, so
+the server render and hydration build the same fixtures. Ids restart on every
+generation for the same reason. Audit events are never dated after now.
+
+### The photograph placeholder is a token
+
+`--photo` exists only so the white lockup over a placeholder passes contrast
+before real photographs land. It is not part of the design system proper and
+goes when the photographs arrive.
+
+### Type utilities do not share names with colours
+
+`text-small` and `text-heading` rather than `text-secondary` and `text-card`,
+because shadcn defines colours called secondary and card and Tailwind resolved
+the size utilities as colours. Found on the first render of the design sheet.
+
+### Accessibility at the end of the prototype
+
+Lighthouse accessibility on 2026-09-05, mobile for public pages and desktop
+for staff pages: landing 96, sign in 100, day view 96, pet record 100, recall
+queue 100, booking 96, confirmation 96, privacy 95. Best practices 100
+everywhere. The remaining points are on `aria-allowed-role` and heading order
+in the shadcn dialog primitives, recorded here so they are not rediscovered.
+
 ---
 
 ## Open

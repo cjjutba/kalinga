@@ -89,7 +89,7 @@ export function SlotPicker({
                   "flex min-w-[52px] flex-1 flex-col items-center rounded-input py-2 text-label transition-colors duration-150 motion-reduce:transition-none",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-sheet",
                   selected ? "bg-action text-on-action" : "bg-field text-text hover:bg-divider",
-                  !open && !selected && "text-text-3",
+                  !open && !selected && "text-text-2",
                 )}
               >
                 <span className="font-medium">{format(d, "EEE")}</span>

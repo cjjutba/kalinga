@@ -126,7 +126,7 @@ function PetPicker({ pets, owners, value, onChange }: { pets: Pet[]; owners: Own
                   </span>
                   <span className={`block truncate ${selected ? "text-on-action/80" : "text-text-2"}`}>{owner?.name}</span>
                 </span>
-                {!owner?.mobile ? <span className={`shrink-0 text-label ${selected ? "text-on-action/80" : "text-text-3"}`}>No mobile</span> : null}
+                {!owner?.mobile ? <span className={`shrink-0 text-label ${selected ? "text-on-action/80" : "text-text-2"}`}>No mobile</span> : null}
               </button>
             </li>
           );

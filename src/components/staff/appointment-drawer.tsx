@@ -72,7 +72,7 @@ export function AppointmentDrawer({
               <dd>
                 {row.owner?.name}
                 <br />
-                {row.owner?.mobile ? <span className="tabular">{row.owner.mobile}</span> : <span className="text-text-3">No mobile on file</span>}
+                {row.owner?.mobile ? <span className="tabular">{row.owner.mobile}</span> : <span className="text-text-2">No mobile on file</span>}
                 {row.owner?.email ? (
                   <>
                     <br />

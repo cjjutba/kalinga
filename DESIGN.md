@@ -55,6 +55,7 @@ the same tokens with the second column of values.
 | `--tint` | Featured content cards only | `#D9E5F5` | `#1B2A40` |
 | `--error` | Field ring and helper text only | `#D92D20` | `#F97066` |
 | `--focus` | Focus ring | `#0A0A0A` | `#F5F5F7` |
+| `--photo` | The photograph placeholder only, until real photographs land | `#55555B` | `#3A3A40` |
 
 Rules that follow from the table.
 
@@ -120,6 +121,11 @@ Weights are 400 for body, 500 for anything that needs to lead, and 700 for the
 wordmark and nothing else. Sentence case everywhere. No letterspaced caps, no
 display face, no italics.
 
+In code the five sizes are the utilities `text-label`, `text-small`,
+`text-body`, `text-heading` and `text-title`. They are named so they cannot
+collide with a colour. "Secondary" and "card" are shadcn colour names, which
+is why the 15 px and 20 px steps are not called that.
+
 Names wrap. A Filipino name that needs two lines gets two lines. Never
 truncate a person's or a pet's name with an ellipsis. Numbers in the day view
 and the recall queue use tabular figures.
@@ -163,6 +169,10 @@ so a sign in and its error state share the same image.
 **Source.** Demo photographs are generated through fal.ai and carry no third
 party rights. A paying clinic replaces them with its own. Never use a stock
 photograph pulled from the web. Every photograph carries descriptive alt text.
+
+**Until they land.** The `Photo` primitive holds every spot a photograph will
+occupy, as a block of `--photo` with a quiet caption naming the subject. It is
+sized by the layout, so swapping in the real image moves nothing.
 
 There is no illustration and no 3D anywhere. Icons are Lucide, 1.5 px stroke,
 in `--text`, and there are as few of them as possible.

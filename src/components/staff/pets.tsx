@@ -126,7 +126,7 @@ export function PetRecord({ orgSlug, id }: { orgSlug: string; id: string }) {
             <Link href={`/app/${org.slug}/clients/${pet.ownerId}`} className="font-medium text-text hover:underline">
               {owner?.name}
             </Link>
-            {owner?.mobile ? <span className="tabular">, {owner.mobile}</span> : <span className="text-text-3">, no mobile on file</span>}
+            {owner?.mobile ? <span className="tabular">, {owner.mobile}</span> : <span className="text-text-2">, no mobile on file</span>}
           </>
         }
         actions={
@@ -201,7 +201,7 @@ export function PetRecord({ orgSlug, id }: { orgSlug: string; id: string }) {
 
         <Card className="p-5">
           <h2 className="text-label font-medium text-text-2">Visit history</h2>
-          {!seeNotes ? <p className="mt-2 text-label text-text-3">Visit notes are for vets and the owner. The desk sees that a visit happened.</p> : null}
+          {!seeNotes ? <p className="mt-2 text-label text-text-2">Visit notes are for vets and the owner. The desk sees that a visit happened.</p> : null}
           {history.length ? (
             <ol className="mt-3 divide-y divide-divider">
               {history.map((v) => {
@@ -274,7 +274,7 @@ export function VisitDetail({ orgSlug, petId, visitId }: { orgSlug: string; petI
             {visit.paymentRef ? <span className="tabular">, ref {visit.paymentRef}</span> : null}
           </dd>
           <dt className="text-text-2">Notes</dt>
-          <dd>{seeNotes ? visit.notes || "None" : <span className="text-text-3">Visit notes are for vets and the owner.</span>}</dd>
+          <dd>{seeNotes ? visit.notes || "None" : <span className="text-text-2">Visit notes are for vets and the owner.</span>}</dd>
         </dl>
       </Card>
     </div>

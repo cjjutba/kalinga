@@ -214,7 +214,7 @@ export function DesignSheet() {
                       <Link href={r.href} className="text-small font-medium hover:underline">
                         {r.label}
                       </Link>
-                      <span className="truncate text-label text-text-3">{r.href}</span>
+                      <span className="truncate text-label text-text-2">{r.href}</span>
                     </li>
                   ))}
                 </ul>

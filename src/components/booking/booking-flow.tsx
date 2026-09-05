@@ -157,10 +157,10 @@ export function BookingFlow({ slug }: { slug: string }) {
         ) : step === 0 ? (
           <>
             <h1 className="text-title font-medium">What does your pet need?</h1>
-            <ul role="radiogroup" aria-label="Service" className="mt-5 flex flex-col gap-2">
+            <div role="radiogroup" aria-label="Service" className="mt-5 flex flex-col gap-2">
               {services.map((s) => (
-                <li key={s.id}>
                   <button
+                    key={s.id}
                     type="button"
                     role="radio"
                     aria-checked={serviceId === s.id}
@@ -180,17 +180,16 @@ export function BookingFlow({ slug }: { slug: string }) {
                     </span>
                     <span className="text-body tabular">{formatPeso(s.pricePhp)}</span>
                   </button>
-                </li>
               ))}
-            </ul>
+            </div>
           </>
         ) : step === 1 ? (
           <>
             <h1 className="text-title font-medium">Who would you like to see?</h1>
-            <ul role="radiogroup" aria-label="Vet" className="mt-5 flex flex-col gap-2">
+            <div role="radiogroup" aria-label="Vet" className="mt-5 flex flex-col gap-2">
               {[{ id: "any", name: "Any available", title: "Soonest slot wins" }, ...providers.filter((p) => (service?.recallKind === "grooming" ? p.title === "Groomer" : p.title === "Vet")).map((p) => ({ id: p.id, name: p.name, title: p.title }))].map((p) => (
-                <li key={p.id}>
                   <button
+                    key={p.id}
                     type="button"
                     role="radio"
                     aria-checked={providerId === p.id}
@@ -209,9 +208,8 @@ export function BookingFlow({ slug }: { slug: string }) {
                       <span className={cn("block text-small", providerId === p.id ? "text-on-action/80" : "text-text-2")}>{p.title}</span>
                     </span>
                   </button>
-                </li>
               ))}
-            </ul>
+            </div>
           </>
         ) : step === 2 ? (
           <>
