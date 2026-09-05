@@ -11,13 +11,13 @@ import { Pill } from "@/components/primitives/pill";
 import { Card, Row } from "@/components/primitives/surfaces";
 import { StatusPill } from "@/components/primitives/status-pill";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOrg } from "@/lib/mock/store";
-import { dueItems, recallLabel, soonest } from "@/lib/mock/recall";
-import { ageLabel, speciesLabel } from "@/lib/mock/selectors";
+import { useOrg } from "@/lib/org-data";
+import { dueItems, recallLabel, soonest } from "@/lib/domain/recall";
+import { ageLabel, speciesLabel } from "@/lib/domain/selectors";
 import { can, roleLabel } from "@/lib/roles";
 import { dueLabel, formatDate, formatShortDate, formatTime } from "@/lib/time";
 import { useUiState } from "@/lib/use-ui-state";
-import type { Pet } from "@/lib/mock/types";
+import type { Pet } from "@/lib/domain/types";
 
 // Pets, and the record a vet opens mid consultation. Who the animal is, what
 // happened last time, what is due next. The recall dates are the part that
@@ -295,20 +295,27 @@ export function PetForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
   const [weight, setWeight] = useState(existing?.weightKg?.toString() ?? "");
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [error, setError] = useState<string | undefined>();
+  const [busy, setBusy] = useState(false);
   if (!can(role, "edit_clients")) return <NotForRole role={roleLabel[role]} page="Editing pets" />;
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
       setError("The pet needs a name.");
       return;
     }
-    const newId = existing?.id ?? `pet_${Date.now().toString(36)}`;
-    dispatch({
+    if (!ownerId) {
+      setError("Add the client first, then their pet.");
+      return;
+    }
+    setBusy(true);
+    const r = await dispatch({
       type: "pet/upsert",
-      pet: { id: newId, ownerId, name: name.trim(), species, breed: breed.trim() || (species === "dog" ? "Aspin" : "Puspin"), sex, birthDate: birthDate || new Date().toISOString().slice(0, 10), weightKg: weight ? Number(weight) : undefined, notes: notes.trim() || undefined, lastVaccination: existing?.lastVaccination, lastDeworming: existing?.lastDeworming, lastGroom: existing?.lastGroom },
+      pet: { id: existing?.id, ownerId, name: name.trim(), species, breed: breed.trim() || (species === "dog" ? "Aspin" : "Puspin"), sex, birthDate: birthDate || undefined, weightKg: weight ? Number(weight) : undefined, notes: notes.trim() || undefined, lastVaccination: existing?.lastVaccination, lastDeworming: existing?.lastDeworming, lastGroom: existing?.lastGroom },
     });
-    router.push(`/app/${org.slug}/pets/${newId}`);
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    router.push(`/app/${org.slug}/pets/${r.id ?? existing?.id}`);
   }
 
   return (
@@ -331,7 +338,7 @@ export function PetForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
           <Pill asChild size="sm" variant="secondary">
             <Link href={existing ? `/app/${org.slug}/pets/${existing.id}` : `/app/${org.slug}/pets`}>Cancel</Link>
           </Pill>
-          <Pill type="submit" size="sm">
+          <Pill type="submit" size="sm" loading={busy} loadingLabel="Saving">
             {existing ? "Save changes" : "Add pet"}
           </Pill>
         </div>

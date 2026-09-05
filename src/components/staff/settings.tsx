@@ -9,15 +9,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { InputField, SelectField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
 import { Card } from "@/components/primitives/surfaces";
-import { useOrg } from "@/lib/mock/store";
+import { useOrg } from "@/lib/org-data";
 import { can, roleDescription, roleLabel, staffRoles, type Role } from "@/lib/roles";
-import type { Provider, Service, WeeklyRule } from "@/lib/mock/types";
+import type { Provider, Service, WeeklyRule } from "@/lib/domain/types";
 import { renderBookingChanged, renderBookingConfirmation, renderReminder, templateCatalogue } from "@/content/templates";
 import { formatDate, formatPeso } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 // Owner settings. Dull and important. Six pages under one sub navigation,
-// every change written to the store and the audit trail.
+// every change a command the server applies and writes to the audit trail.
 
 const sections = [
   { segment: "", label: "Clinic" },
@@ -28,10 +28,10 @@ const sections = [
   { segment: "recall", label: "Recall rules" },
 ];
 
-function SettingsFrame({ orgSlug, title, lead, actions, children }: { orgSlug: string; title: string; lead?: string; actions?: ReactNode; children: ReactNode }) {
+function SettingsFrame({ title, lead, actions, children }: { title: string; lead?: string; actions?: ReactNode; children: ReactNode }) {
   const pathname = usePathname();
-  const base = `/app/${orgSlug}/settings`;
-  const { role } = useOrg(orgSlug);
+  const { org, role } = useOrg();
+  const base = `/app/${org.slug}/settings`;
   if (!can(role, "view_settings")) return <NotForRole role={roleLabel[role]} page="Settings" />;
   return (
     <>
@@ -41,15 +41,7 @@ function SettingsFrame({ orgSlug, title, lead, actions, children }: { orgSlug: s
           const href = s.segment ? `${base}/${s.segment}` : base;
           const active = s.segment ? pathname.startsWith(href) : pathname === base;
           return (
-            <Link
-              key={s.label}
-              href={href}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "h-8 shrink-0 rounded-full px-3 text-label font-medium leading-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
-                active ? "bg-action text-on-action" : "bg-sheet text-text-2 hover:text-text",
-              )}
-            >
+            <Link key={s.label} href={href} aria-current={active ? "page" : undefined} className={cn("h-8 shrink-0 rounded-full px-3 text-label font-medium leading-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page", active ? "bg-action text-on-action" : "bg-sheet text-text-2 hover:text-text")}>
               {s.label}
             </Link>
           );
@@ -68,34 +60,36 @@ function Saved({ show }: { show: boolean }) {
   );
 }
 
-export function ClinicSettings({ orgSlug }: { orgSlug: string }) {
-  const { org, dispatch } = useOrg(orgSlug);
+export function ClinicSettings() {
+  const { org, dispatch } = useOrg();
   const [form, setForm] = useState({ name: org.name, address: org.address, city: org.city, mobile: org.mobile, email: org.email, openFrom: org.openFrom, openTo: org.openTo, timezone: org.timezone });
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
-    dispatch({ type: "org/update", changes: form });
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 1500);
+    const r = await dispatch({ type: "org/update", changes: form });
+    if (r.ok) {
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 1500);
+    }
   }
   return (
-    <SettingsFrame orgSlug={orgSlug} title="Settings" lead="The clinic as pet owners see it.">
+    <SettingsFrame title="Settings" lead="The clinic as pet owners see it.">
       <form onSubmit={submit} noValidate className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Card className="flex flex-col gap-5 p-6">
           <InputField label="Clinic name" value={form.name} onChange={set("name")} />
-          <InputField label="Address" value={form.address} onChange={set("address")} />
+          <InputField label="Address" value={form.address} onChange={set("address")} placeholder="Door 3, Velez corner Capistrano" />
           <div className="grid gap-4 sm:grid-cols-2">
-            <InputField label="City" value={form.city} onChange={set("city")} />
+            <InputField label="City" value={form.city} onChange={set("city")} placeholder="Cagayan de Oro" />
             <SelectField label="Time zone" value={form.timezone} onChange={(v) => setForm((f) => ({ ...f, timezone: v }))} options={[{ value: "Asia/Manila", label: "Asia/Manila" }]} helper="Appointments show in this zone, labelled." />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <InputField label="Mobile" value={form.mobile} onChange={set("mobile")} inputMode="tel" />
+            <InputField label="Mobile" value={form.mobile} onChange={set("mobile")} inputMode="tel" placeholder="0917 555 0142" />
             <InputField label="Email" type="email" value={form.email} onChange={set("email")} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <InputField label="Opens" type="time" value={form.openFrom} onChange={set("openFrom")} helper="Seven days a week. Per vet hours are under Hours." />
+            <InputField label="Opens" type="time" value={form.openFrom} onChange={set("openFrom")} helper="Shown on your public page. Per vet hours are under Hours." />
             <InputField label="Closes" type="time" value={form.openTo} onChange={set("openTo")} />
           </div>
           <div className="flex items-center justify-end gap-3">
@@ -105,10 +99,10 @@ export function ClinicSettings({ orgSlug }: { orgSlug: string }) {
             </Pill>
           </div>
         </Card>
-        <Card className="flex flex-col gap-3 p-6 self-start">
+        <Card className="flex flex-col gap-3 self-start p-6">
           <p className="text-label font-medium text-text-2">Public booking link</p>
           <p className="break-all text-body tabular">kalinga.cjjutba.dev/{org.slug}</p>
-          <p className="text-small text-text-2">This is the link you share. Changing it breaks every link already shared, so it is not editable here.</p>
+          <p className="text-small text-text-2">This is the link you share. Changing it would break every link already shared, so it is fixed.</p>
           <Pill
             size="sm"
             variant="secondary"
@@ -134,37 +128,20 @@ export function ClinicSettings({ orgSlug }: { orgSlug: string }) {
   );
 }
 
-function ServiceDialog({ orgSlug, service, open, onOpenChange }: { orgSlug: string; service: Service | null | "new"; open: boolean; onOpenChange: (o: boolean) => void }) {
-  const { dispatch } = useOrg(orgSlug);
+function ServiceDialog({ service, open, onOpenChange }: { service: Service | null | "new"; open: boolean; onOpenChange: (o: boolean) => void }) {
+  const { dispatch } = useOrg();
   const existing = service && service !== "new" ? service : null;
-  const [form, setForm] = useState({
-    name: existing?.name ?? "",
-    durationMin: String(existing?.durationMin ?? 30),
-    bufferMin: String(existing?.bufferMin ?? 0),
-    pricePhp: String(existing?.pricePhp ?? 500),
-    publiclyBookable: existing?.publiclyBookable ?? true,
-    recallKind: existing?.recallKind ?? "",
-  });
+  const [form, setForm] = useState({ name: existing?.name ?? "", durationMin: String(existing?.durationMin ?? 30), bufferMin: String(existing?.bufferMin ?? 0), pricePhp: String(existing?.pricePhp ?? 500), publiclyBookable: existing?.publiclyBookable ?? true, recallKind: existing?.recallKind ?? "" });
   const [error, setError] = useState<string | undefined>();
-  function save(e: FormEvent) {
+  const [busy, setBusy] = useState(false);
+  async function save(e: FormEvent) {
     e.preventDefault();
-    if (!form.name.trim()) {
-      setError("Give the service a name pet owners will recognise.");
-      return;
-    }
-    dispatch({
-      type: "service/upsert",
-      service: {
-        id: existing?.id,
-        name: form.name.trim(),
-        durationMin: Number(form.durationMin) || 30,
-        bufferMin: Number(form.bufferMin) || 0,
-        pricePhp: Number(form.pricePhp) || 0,
-        publiclyBookable: form.publiclyBookable,
-        recallKind: (form.recallKind || undefined) as Service["recallKind"],
-      },
-    });
-    onOpenChange(false);
+    if (!form.name.trim()) return setError("Give the service a name pet owners will recognise.");
+    setBusy(true);
+    const r = await dispatch({ type: "service/upsert", service: { id: existing?.id, name: form.name.trim(), durationMin: Number(form.durationMin) || 30, bufferMin: Number(form.bufferMin) || 0, pricePhp: Number(form.pricePhp) || 0, publiclyBookable: form.publiclyBookable, recallKind: (form.recallKind || undefined) as Service["recallKind"] } });
+    setBusy(false);
+    if (r.ok) onOpenChange(false);
+    else setError(r.error);
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -179,28 +156,25 @@ function ServiceDialog({ orgSlug, service, open, onOpenChange }: { orgSlug: stri
             <InputField label="Buffer" inputMode="numeric" value={form.bufferMin} onChange={(e) => setForm((f) => ({ ...f, bufferMin: e.target.value }))} helper="Minutes after" />
             <InputField label="Price, ₱" inputMode="numeric" value={form.pricePhp} onChange={(e) => setForm((f) => ({ ...f, pricePhp: e.target.value }))} />
           </div>
-          <SelectField
-            label="Sets a recall date"
-            value={form.recallKind}
-            onChange={(v) => setForm((f) => ({ ...f, recallKind: v }))}
-            options={[
-              { value: "", label: "No" },
-              { value: "vaccination", label: "Vaccination, due yearly" },
-              { value: "deworming", label: "Deworming, due quarterly" },
-              { value: "grooming", label: "Grooming, on the clinic interval" },
-            ]}
-          />
+          <SelectField label="Sets a recall date" value={form.recallKind} onChange={(v) => setForm((f) => ({ ...f, recallKind: v }))} options={[{ value: "", label: "No" }, { value: "vaccination", label: "Vaccination, due yearly" }, { value: "deworming", label: "Deworming, due quarterly" }, { value: "grooming", label: "Grooming, on the clinic interval" }]} />
           <label className="flex items-center gap-2 text-small">
             <input type="checkbox" checked={form.publiclyBookable} onChange={(e) => setForm((f) => ({ ...f, publiclyBookable: e.target.checked }))} className="size-4 accent-[var(--action)]" />
             Pet owners can book this online
           </label>
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Pill type="button" size="sm" variant="secondary" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Pill>
-            <Pill type="submit" size="sm">
-              {existing ? "Save" : "Add service"}
-            </Pill>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+            {existing ? (
+              <Pill type="button" size="sm" variant="text" onClick={async () => { const r = await dispatch({ type: "service/archive", id: existing.id }); if (r.ok) onOpenChange(false); }}>
+                Archive
+              </Pill>
+            ) : <span />}
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <Pill type="button" size="sm" variant="secondary" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Pill>
+              <Pill type="submit" size="sm" loading={busy} loadingLabel="Saving">
+                {existing ? "Save" : "Add service"}
+              </Pill>
+            </div>
           </div>
         </form>
       </DialogContent>
@@ -208,12 +182,11 @@ function ServiceDialog({ orgSlug, service, open, onOpenChange }: { orgSlug: stri
   );
 }
 
-export function ServicesSettings({ orgSlug }: { orgSlug: string }) {
-  const { services } = useOrg(orgSlug);
+export function ServicesSettings() {
+  const { services } = useOrg();
   const [editing, setEditing] = useState<Service | "new" | null>(null);
   return (
     <SettingsFrame
-      orgSlug={orgSlug}
       title="Services"
       lead="What can be booked, how long it takes, and what it costs."
       actions={
@@ -222,86 +195,119 @@ export function ServicesSettings({ orgSlug }: { orgSlug: string }) {
         </Pill>
       }
     >
-      <ul className="grid gap-3 md:grid-cols-2">
-        {services.map((s) => (
-          <li key={s.id}>
-            <button type="button" onClick={() => setEditing(s)} className="w-full rounded-card bg-sheet p-5 text-left hover:bg-divider/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page">
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-body font-medium">{s.name}</p>
-                <p className="text-body tabular">{formatPeso(s.pricePhp)}</p>
-              </div>
-              <p className="mt-1 text-small text-text-2">
-                {s.durationMin} min{s.bufferMin ? `, ${s.bufferMin} min buffer` : ""}
-                {s.recallKind ? `, sets ${s.recallKind} recall` : ""}
-              </p>
-              <p className="mt-2 text-label text-text-2">{s.publiclyBookable ? "Bookable online" : "Desk only"}</p>
-            </button>
-          </li>
-        ))}
-      </ul>
-      {editing ? <ServiceDialog key={editing === "new" ? "new" : editing.id} orgSlug={orgSlug} service={editing} open onOpenChange={(o) => !o && setEditing(null)} /> : null}
+      {services.length === 0 ? (
+        <Card className="p-8 text-center">
+          <p className="text-heading font-medium">No services yet</p>
+          <p className="mx-auto mt-2 max-w-sm text-small text-text-2">Consultation, vaccination, deworming and grooming are the usual four. Add one and the public booking page opens.</p>
+          <Pill size="sm" className="mt-4" onClick={() => setEditing("new")}>
+            Add your first service
+          </Pill>
+        </Card>
+      ) : (
+        <ul className="grid gap-3 md:grid-cols-2">
+          {services.map((s) => (
+            <li key={s.id}>
+              <button type="button" onClick={() => setEditing(s)} className="w-full rounded-card bg-sheet p-5 text-left hover:bg-divider/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-body font-medium">{s.name}</p>
+                  <p className="text-body tabular">{formatPeso(s.pricePhp)}</p>
+                </div>
+                <p className="mt-1 text-small text-text-2">
+                  {s.durationMin} min{s.bufferMin ? `, ${s.bufferMin} min buffer` : ""}
+                  {s.recallKind ? `, sets ${s.recallKind} recall` : ""}
+                </p>
+                <p className="mt-2 text-label text-text-2">{s.publiclyBookable ? "Bookable online" : "Desk only"}</p>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {editing ? <ServiceDialog key={editing === "new" ? "new" : editing.id} service={editing} open onOpenChange={(o) => !o && setEditing(null)} /> : null}
     </SettingsFrame>
   );
 }
 
-export function StaffSettings({ orgSlug }: { orgSlug: string }) {
-  const { members, providers, actorMemberId, dispatch } = useOrg(orgSlug);
-  const [form, setForm] = useState({ name: "", email: "", role: "front_desk" as Role });
+export function StaffSettings() {
+  const { members, invitations, providers, actorMemberId, dispatch } = useOrg();
+  const [form, setForm] = useState({ email: "", role: "front_desk" as Role });
   const [error, setError] = useState<string | undefined>();
-  function invite(e: FormEvent) {
+  const [notice, setNotice] = useState<string | undefined>();
+  const [busy, setBusy] = useState(false);
+  async function invite(e: FormEvent) {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.includes("@")) {
-      setError("A name and a real email, so the invitation has somewhere to go.");
-      return;
-    }
+    if (!form.email.includes("@")) return setError("A real email, so the invitation has somewhere to go.");
     setError(undefined);
-    dispatch({ type: "member/invite", member: { name: form.name.trim(), email: form.email.trim(), role: form.role } });
-    setForm({ name: "", email: "", role: "front_desk" });
+    setBusy(true);
+    const r = await dispatch({ type: "member/invite", member: { email: form.email.trim(), role: form.role } });
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    setNotice(r.message);
+    setForm({ email: "", role: "front_desk" });
   }
   return (
-    <SettingsFrame orgSlug={orgSlug} title="Staff and permissions" lead="Every permission is checked on the server. Hiding a button is not a permission.">
+    <SettingsFrame title="Staff and permissions" lead="Every permission is checked on the server. Hiding a button is not a permission.">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <Card className="p-2">
-          <ul className="divide-y divide-divider">
-            {members.map((m) => {
-              const provider = providers.find((p) => p.id === m.providerId);
-              const isYou = m.id === actorMemberId;
-              return (
-                <li key={m.id} className="flex flex-wrap items-center gap-3 px-3 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-body font-medium">
-                      {m.name} {isYou ? <span className="text-label font-normal text-text-2">you</span> : null}
-                    </p>
-                    <p className="truncate text-small text-text-2">
-                      {m.email}
-                      {provider ? `, ${provider.title.toLowerCase()} on the schedule` : ""}
-                      {!m.lastActiveAt ? `, invited ${formatDate(m.invitedAt)}` : ""}
-                    </p>
-                  </div>
-                  <SelectField label="Role" value={m.role} onChange={(v) => dispatch({ type: "member/role", id: m.id, role: v as Role })} options={staffRoles.map((r) => ({ value: r, label: roleLabel[r] }))} className="w-40" disabled={isYou} />
-                  <button
-                    type="button"
-                    onClick={() => dispatch({ type: "member/remove", id: m.id })}
-                    disabled={isYou}
-                    aria-label={`Remove ${m.name}`}
-                    className="grid size-10 place-items-center self-end rounded-full text-text-2 hover:bg-field hover:text-text disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-                  >
-                    <Trash2 className="size-5" strokeWidth={1.5} />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </Card>
+        <div className="flex flex-col gap-4">
+          <Card className="p-2">
+            <ul className="divide-y divide-divider">
+              {members.map((m) => {
+                const provider = providers.find((p) => p.id === m.providerId);
+                const isYou = m.id === actorMemberId;
+                return (
+                  <li key={m.id} className="flex flex-wrap items-center gap-3 px-3 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-body font-medium">
+                        {m.name} {isYou ? <span className="text-label font-normal text-text-2">you</span> : null}
+                      </p>
+                      <p className="truncate text-small text-text-2">
+                        {m.email}
+                        {provider ? `, ${provider.title.toLowerCase()} on the schedule` : ""}
+                      </p>
+                    </div>
+                    <SelectField label="Role" value={m.role} onChange={(v) => dispatch({ type: "member/role", id: m.id, role: v as Role })} options={staffRoles.map((r) => ({ value: r, label: roleLabel[r] }))} className="w-40" disabled={isYou} />
+                    <button type="button" onClick={() => dispatch({ type: "member/remove", id: m.id })} disabled={isYou} aria-label={`Remove ${m.name}`} className="grid size-10 place-items-center self-end rounded-full text-text-2 hover:bg-field hover:text-text disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+                      <Trash2 className="size-5" strokeWidth={1.5} />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+          {invitations.length ? (
+            <Card className="p-2">
+              <p className="px-3 pt-2 text-label font-medium text-text-2">Invited, not yet joined</p>
+              <ul className="divide-y divide-divider">
+                {invitations.map((i) => (
+                  <li key={i.id} className="flex items-center gap-3 px-3 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-body">{i.email}</p>
+                      <p className="text-small text-text-2">
+                        {roleLabel[i.role]}, invited {formatDate(i.createdAt)}, expires {formatDate(i.expiresAt)}
+                      </p>
+                    </div>
+                    <button type="button" onClick={() => dispatch({ type: "invitation/cancel", id: i.id })} aria-label={`Cancel invitation to ${i.email}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+                      <Trash2 className="size-5" strokeWidth={1.5} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+        </div>
         <form onSubmit={invite} noValidate className="flex flex-col gap-4 self-start rounded-card bg-sheet p-6">
           <h2 className="text-heading font-medium">Invite someone</h2>
-          <InputField label="Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} error={error} />
-          <InputField label="Email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+          <InputField label="Email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} error={error} placeholder="maria@clinic.com" />
           <SelectField label="Role" value={form.role} onChange={(v) => setForm((f) => ({ ...f, role: v as Role }))} options={staffRoles.map((r) => ({ value: r, label: roleLabel[r] }))} helper={roleDescription[form.role]} />
-          <Pill type="submit" size="sm">
+          <Pill type="submit" size="sm" loading={busy} loadingLabel="Inviting">
             Send invitation
           </Pill>
-          <p className="text-label text-text-2">In the sandbox nothing is sent. The person appears in the list as invited.</p>
+          {notice ? (
+            <p role="status" className="break-all text-label text-text-2">
+              {notice}
+            </p>
+          ) : (
+            <p className="text-label text-text-2">They get a link that works for seven days. Vets and groomers also need a place on the schedule, under Hours.</p>
+          )}
         </form>
       </div>
     </SettingsFrame>
@@ -310,14 +316,16 @@ export function StaffSettings({ orgSlug }: { orgSlug: string }) {
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-function ProviderHours({ provider, orgSlug }: { provider: Provider; orgSlug: string }) {
-  const { dispatch } = useOrg(orgSlug);
+function ProviderHours({ provider }: { provider: Provider }) {
+  const { dispatch } = useOrg();
   const [saved, setSaved] = useState(false);
   const rules = provider.weeklyHours;
-  function update(next: WeeklyRule[]) {
-    dispatch({ type: "provider/update", id: provider.id, changes: { weeklyHours: next } });
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 1200);
+  async function update(next: WeeklyRule[]) {
+    const r = await dispatch({ type: "provider/upsert", provider: { id: provider.id, name: provider.name, title: provider.title, memberId: provider.memberId ?? null, weeklyHours: next } });
+    if (r.ok) {
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 1200);
+    }
   }
   return (
     <Card className="p-5">
@@ -326,7 +334,12 @@ function ProviderHours({ provider, orgSlug }: { provider: Provider; orgSlug: str
           <h2 className="text-body font-medium">{provider.name}</h2>
           <p className="text-small text-text-2">{provider.title}</p>
         </div>
-        <Saved show={saved} />
+        <div className="flex items-center gap-2">
+          <Saved show={saved} />
+          <button type="button" onClick={() => dispatch({ type: "provider/archive", id: provider.id })} aria-label={`Remove ${provider.name} from the schedule`} className="grid size-9 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+            <Trash2 className="size-4" strokeWidth={1.5} />
+          </button>
+        </div>
       </div>
       <ul className="mt-4 flex flex-col gap-2">
         {dayNames.map((d, day) => {
@@ -354,40 +367,68 @@ function ProviderHours({ provider, orgSlug }: { provider: Provider; orgSlug: str
   );
 }
 
-export function HoursSettings({ orgSlug }: { orgSlug: string }) {
-  const { providers } = useOrg(orgSlug);
+export function HoursSettings() {
+  const { providers, members, dispatch } = useOrg();
+  const [form, setForm] = useState({ name: "", title: "Vet" as Provider["title"], memberId: "" });
+  const [error, setError] = useState<string | undefined>();
+  const [busy, setBusy] = useState(false);
+  const unlinked = members.filter((m) => !providers.some((p) => p.memberId === m.id));
+  async function add(e: FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) return setError("The name as it appears on the booking page.");
+    setError(undefined);
+    setBusy(true);
+    const r = await dispatch({ type: "provider/upsert", provider: { name: form.name.trim(), title: form.title, memberId: form.memberId || null } });
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    setForm({ name: "", title: "Vet", memberId: "" });
+  }
   return (
-    <SettingsFrame orgSlug={orgSlug} title="Working hours" lead="Weekly rules per vet or groomer. The slot picker reads these directly. Closures and leave are under Closures.">
-      <div className="grid gap-4 lg:grid-cols-2">
-        {providers.map((p) => (
-          <ProviderHours key={p.id} provider={p} orgSlug={orgSlug} />
-        ))}
+    <SettingsFrame title="Working hours" lead="Who is on the schedule and when. The slot picker reads these directly. Closures and leave are under Closures.">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div className="grid gap-4">
+          {providers.length === 0 ? <Card className="p-6 text-small text-text-2">Nobody is on the schedule yet. Add a vet or groomer and their hours become bookable.</Card> : providers.map((p) => <ProviderHours key={p.id} provider={p} />)}
+        </div>
+        <form onSubmit={add} noValidate className="flex flex-col gap-4 self-start rounded-card bg-sheet p-6">
+          <h2 className="text-heading font-medium">Add to the schedule</h2>
+          <InputField label="Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} error={error} placeholder="Dr. Ana Reyes" />
+          <SelectField label="Role on the schedule" value={form.title} onChange={(v) => setForm((f) => ({ ...f, title: v as Provider["title"] }))} options={[{ value: "Vet", label: "Vet" }, { value: "Groomer", label: "Groomer" }]} helper="Groomers only take grooming bookings." />
+          <SelectField
+            label="Signs in as"
+            hint="Optional"
+            value={form.memberId}
+            onChange={(v) => setForm((f) => ({ ...f, memberId: v, name: f.name || members.find((m) => m.id === v)?.name || "" }))}
+            options={[{ value: "", label: "No account, schedule only" }, ...unlinked.map((m) => ({ value: m.id, label: `${m.name}, ${roleLabel[m.role]}` }))]}
+            helper="Linking a member lets a vet see their own column."
+          />
+          <Pill type="submit" size="sm" loading={busy} loadingLabel="Adding">
+            Add with default hours
+          </Pill>
+          <p className="text-label text-text-2">Default hours are Monday to Saturday at the clinic&apos;s opening times. Adjust per day on the left.</p>
+        </form>
       </div>
     </SettingsFrame>
   );
 }
 
-export function ClosuresSettings({ orgSlug }: { orgSlug: string }) {
-  const { org, providers, dispatch } = useOrg(orgSlug);
+export function ClosuresSettings() {
+  const { org, providers, dispatch } = useOrg();
   const [form, setForm] = useState({ date: "", reason: "", who: "all" });
   const [error, setError] = useState<string | undefined>();
   const all = providers.flatMap((p) => p.exceptions.map((e) => ({ ...e, provider: p }))).sort((a, b) => a.date.localeCompare(b.date));
-  function add(e: FormEvent) {
+  async function add(e: FormEvent) {
     e.preventDefault();
-    if (!form.date) {
-      setError("Pick the date.");
-      return;
-    }
+    if (!form.date) return setError("Pick the date.");
     setError(undefined);
     const targets = form.who === "all" ? providers : providers.filter((p) => p.id === form.who);
     for (const p of targets) {
       if (p.exceptions.some((x) => x.date === form.date)) continue;
-      dispatch({ type: "provider/update", id: p.id, changes: { exceptions: [...p.exceptions, { date: form.date, reason: form.reason.trim() || "Closed" }] } });
+      await dispatch({ type: "provider/upsert", provider: { id: p.id, name: p.name, title: p.title, memberId: p.memberId ?? null, exceptions: [...p.exceptions, { date: form.date, reason: form.reason.trim() || "Closed" }] } });
     }
     setForm({ date: "", reason: "", who: "all" });
   }
   return (
-    <SettingsFrame orgSlug={orgSlug} title="Closures and leave" lead="Days the slot picker will not offer. The whole clinic, or one person.">
+    <SettingsFrame title="Closures and leave" lead="Days the slot picker will not offer. The whole clinic, or one person.">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card className="p-2">
           {all.length ? (
@@ -400,12 +441,7 @@ export function ClosuresSettings({ orgSlug }: { orgSlug: string }) {
                       {x.reason}, {x.provider.name}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => dispatch({ type: "provider/update", id: x.provider.id, changes: { exceptions: x.provider.exceptions.filter((e) => e.date !== x.date) } })}
-                    aria-label={`Remove closure on ${x.date} for ${x.provider.name}`}
-                    className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-                  >
+                  <button type="button" onClick={() => dispatch({ type: "provider/upsert", provider: { id: x.provider.id, name: x.provider.name, title: x.provider.title, memberId: x.provider.memberId ?? null, exceptions: x.provider.exceptions.filter((e) => e.date !== x.date) } })} aria-label={`Remove closure on ${x.date} for ${x.provider.name}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
                     <Trash2 className="size-5" strokeWidth={1.5} />
                   </button>
                 </li>
@@ -420,7 +456,7 @@ export function ClosuresSettings({ orgSlug }: { orgSlug: string }) {
           <InputField label="Date" type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} error={error} />
           <InputField label="Reason" hint="Optional" value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} placeholder="Fiesta, clinic closed" />
           <SelectField label="Who" value={form.who} onChange={(v) => setForm((f) => ({ ...f, who: v }))} options={[{ value: "all", label: "Whole clinic" }, ...providers.map((p) => ({ value: p.id, label: p.name }))]} />
-          <Pill type="submit" size="sm">
+          <Pill type="submit" size="sm" disabled={providers.length === 0}>
             Add closure
           </Pill>
         </form>
@@ -429,8 +465,8 @@ export function ClosuresSettings({ orgSlug }: { orgSlug: string }) {
   );
 }
 
-export function RecallSettings({ orgSlug }: { orgSlug: string }) {
-  const { org, dispatch } = useOrg(orgSlug);
+export function RecallSettings() {
+  const { org, dispatch } = useOrg();
   const [weeks, setWeeks] = useState(String(org.groomingIntervalWeeks));
   const [saved, setSaved] = useState(false);
   const sample = { petName: "Kiko", ownerName: "Maria", clinicName: org.name, dueOn: "2026-10-02", bookingUrl: `kalinga.cjjutba.dev/${org.slug}` };
@@ -442,16 +478,18 @@ export function RecallSettings({ orgSlug }: { orgSlug: string }) {
     deworming: renderReminder("deworming", sample),
     grooming: renderReminder("grooming", sample),
   };
-  function save(e: FormEvent) {
+  async function save(e: FormEvent) {
     e.preventDefault();
     const n = Math.min(12, Math.max(2, Number(weeks) || org.groomingIntervalWeeks));
     setWeeks(String(n));
-    dispatch({ type: "org/update", changes: { groomingIntervalWeeks: n } });
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 1500);
+    const r = await dispatch({ type: "org/update", changes: { groomingIntervalWeeks: n } });
+    if (r.ok) {
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 1500);
+    }
   }
   return (
-    <SettingsFrame orgSlug={orgSlug} title="Recall rules" lead="What decides that an animal is due, and the words the desk sends.">
+    <SettingsFrame title="Recall rules" lead="What decides that an animal is due, and the words the desk sends.">
       <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
         <form onSubmit={save} noValidate className="flex flex-col gap-4 self-start rounded-card bg-sheet p-6">
           <h2 className="text-heading font-medium">Intervals</h2>

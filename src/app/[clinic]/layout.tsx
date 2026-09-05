@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { Mark } from "@/components/primitives/mark";
 
-// The public side. No staff shell, no sandbox bar. The clinic's name leads
+// The public side. No staff shell. The clinic's name leads
 // and Kalinga sits quietly at the bottom, because the pet owner came to book
 // with their vet, not with us.
 

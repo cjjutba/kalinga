@@ -13,11 +13,12 @@ features where a bug leaks one clinic's data into another's view.
 
 ## F1 Foundation
 
-Tenancy, auth, organisation creation, and the seeded demo clinic.
+Tenancy, auth, organisation creation, and every screen rewired to real rows.
 
 Schema with `organisation_id` on every tenant table. The scoped query layer, and
 the test that fails the build when a query forgets to scope. Better Auth wired
-with organisations and members. One seeded clinic with invented data.
+with organisations and members. No seeded clinic: the first clinic is created
+through the real sign up, and the codebase carries no sample data.
 
 **Done when** an organisation can be created, a member can sign in, the scoping
 test passes, and the empty application is deployed to Vercel on a real URL.
@@ -76,6 +77,10 @@ anything else.
 ---
 
 ## F4 Demo sandbox
+
+**Parked.** Not in the current build. The codebase carries no seed, mock or demo
+data until the real flows have been used by a clinic. The spec below stands for
+when it returns.
 
 The feature that makes it a portfolio piece.
 

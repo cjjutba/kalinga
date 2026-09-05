@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import { BookingConfirmation } from "@/components/booking/confirmation";
+import { getBookingByReference } from "@/lib/db/queries";
 
-export const metadata: Metadata = { title: "Your booking" };
+export const metadata: Metadata = { title: "Your booking", robots: { index: false } };
 
 export default async function Page({ params }: { params: Promise<{ clinic: string; ref: string }> }) {
   const { clinic, ref } = await params;
-  return (
-    <Suspense fallback={null}>
-      <BookingConfirmation slug={clinic} reference={ref} />
-    </Suspense>
-  );
+  const data = await getBookingByReference(clinic, ref.toUpperCase());
+  if (!data) notFound();
+  return <BookingConfirmation data={data} />;
 }

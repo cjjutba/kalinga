@@ -1,25 +1,23 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, CalendarDays, ChevronDown, ClipboardList, Menu, PawPrint, Settings, Users, X, Check, Plus } from "lucide-react";
+import { Bell, CalendarDays, Check, ChevronDown, ClipboardList, LogOut, Menu, PawPrint, Plus, Settings, Users, X } from "lucide-react";
 import { Lockup } from "@/components/primitives/lockup";
 import { Mark } from "@/components/primitives/mark";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { SandboxBar } from "@/components/sandbox/sandbox-bar";
-import { Tour } from "@/components/sandbox/tour";
-import { Suspense } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useOrg } from "@/lib/mock/store";
+import { useOrg } from "@/lib/org-data";
+import { authClient } from "@/lib/auth-client";
 import { can, roleLabel, type Permission } from "@/lib/roles";
-import { initials } from "@/lib/mock/selectors";
+import { initials } from "@/lib/domain/selectors";
 import { cn } from "@/lib/utils";
 
 // The staff shell. Laptop first: a 240 px sidebar and a top bar. On a phone
 // the sidebar becomes a menu. Navigation shows only what the role can reach,
-// and every page still checks on its own, because hiding a button is not a
-// permission. Density over decoration: no photographs in here.
+// and every page and action still checks on the server, because hiding a
+// button is not a permission. Density over decoration: no photographs here.
 
 const nav: { label: string; segment: string; icon: typeof CalendarDays; permission: Permission }[] = [
   { label: "Today", segment: "", icon: CalendarDays, permission: "day_view" },
@@ -30,22 +28,21 @@ const nav: { label: string; segment: string; icon: typeof CalendarDays; permissi
   { label: "Audit", segment: "audit", icon: ClipboardList, permission: "view_audit" },
 ];
 
-export function StaffShell({ orgSlug, children }: { orgSlug: string; children: ReactNode }) {
-  const { org, role, state, dispatch, members, actorMemberId } = useOrg(orgSlug);
+export function StaffShell({ userName, children }: { userName: string; children: ReactNode }) {
+  const { org, role, memberships, pending } = useOrg();
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const actor = members.find((m) => m.id === actorMemberId) ?? members[0];
-
-  // Keep the store pointed at the clinic in the URL, so mutations land in the
-  // right tenant when someone arrives by link rather than through the switcher.
-  useEffect(() => {
-    if (state.orgId !== org.id) dispatch({ type: "org/set", orgId: org.id });
-  }, [org.id, state.orgId, dispatch]);
 
   const base = `/app/${org.slug}`;
   const visible = nav.filter((n) => can(role, n.permission));
   const isActive = (segment: string) => (segment === "" ? pathname === base : pathname.startsWith(`${base}/${segment}`));
+
+  async function signOut() {
+    await authClient.signOut();
+    router.push("/sign-in");
+    router.refresh();
+  }
 
   const switcher = (
     <DropdownMenu>
@@ -54,30 +51,26 @@ export function StaffShell({ orgSlug, children }: { orgSlug: string; children: R
         <ChevronDown className="size-4 shrink-0 text-text-2" strokeWidth={1.5} aria-hidden />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72 rounded-guide border-0 bg-sheet p-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.08)]">
-        {state.organisations.map((o) => {
-          const m = state.members.find((x) => x.organisationId === o.id && x.email === actor?.email) ?? state.members.find((x) => x.organisationId === o.id);
-          return (
-            <DropdownMenuItem
-              key={o.id}
-              className="flex items-center justify-between gap-3 rounded-tag px-3 py-2.5 text-body"
-              onSelect={() => {
-                dispatch({ type: "org/set", orgId: o.id });
-                router.push(`/app/${o.slug}`);
-              }}
-            >
-              <span className="min-w-0">
-                <span className="block truncate">{o.name}</span>
-                <span className="block text-label text-text-2">{m ? roleLabel[m.role] : "Member"}, {o.city}</span>
+        {memberships.map((m) => (
+          <DropdownMenuItem key={m.organisation.id} className="flex items-center justify-between gap-3 rounded-tag px-3 py-2.5 text-body" onSelect={() => router.push(`/app/${m.organisation.slug}`)}>
+            <span className="min-w-0">
+              <span className="block truncate">{m.organisation.name}</span>
+              <span className="block text-label text-text-2">
+                {roleLabel[m.role]}
+                {m.organisation.city ? `, ${m.organisation.city}` : ""}
               </span>
-              {o.id === org.id ? <Check className="size-4" strokeWidth={1.5} aria-label="Current" /> : null}
-            </DropdownMenuItem>
-          );
-        })}
+            </span>
+            {m.organisation.id === org.id ? <Check className="size-4" strokeWidth={1.5} aria-label="Current" /> : null}
+          </DropdownMenuItem>
+        ))}
         <DropdownMenuSeparator className="my-1.5 bg-divider" />
         <DropdownMenuItem asChild className="rounded-tag px-3 py-2.5 text-body">
           <Link href="/new" className="flex items-center gap-2">
             <Plus className="size-4" strokeWidth={1.5} aria-hidden /> Create another clinic
           </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="flex items-center gap-2 rounded-tag px-3 py-2.5 text-body" onSelect={signOut}>
+          <LogOut className="size-4" strokeWidth={1.5} aria-hidden /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -111,7 +104,7 @@ export function StaffShell({ orgSlug, children }: { orgSlug: string; children: R
 
   return (
     <div className="min-h-dvh bg-page">
-      <SandboxBar orgSlug={org.slug} />
+      {pending ? <div className="fixed inset-x-0 top-0 z-50 h-0.5 bg-action/60 motion-reduce:hidden" aria-hidden /> : null}
       <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)]">
         <aside className="sticky top-0 hidden h-dvh flex-col gap-6 px-4 py-6 lg:flex">
           <div className="px-3">
@@ -122,9 +115,9 @@ export function StaffShell({ orgSlug, children }: { orgSlug: string; children: R
           <div className="mt-auto flex flex-col gap-3 px-1">
             <ThemeToggle compact />
             <div className="flex items-center gap-3 px-2">
-              <span className="grid size-9 place-items-center rounded-full bg-pill-2 text-label font-medium">{actor ? initials(actor.name) : "?"}</span>
+              <span className="grid size-9 place-items-center rounded-full bg-pill-2 text-label font-medium">{initials(userName)}</span>
               <span className="min-w-0">
-                <span className="block truncate text-small font-medium">{actor?.name ?? "Signed in"}</span>
+                <span className="block truncate text-small font-medium">{userName}</span>
                 <span className="block text-label text-text-2">{roleLabel[role]}</span>
               </span>
             </div>
@@ -133,14 +126,7 @@ export function StaffShell({ orgSlug, children }: { orgSlug: string; children: R
 
         <div className="min-w-0">
           <header className="sticky top-0 z-20 flex h-14 items-center gap-2 bg-page/95 px-3 backdrop-blur lg:hidden">
-            <button
-              type="button"
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-expanded={menuOpen}
-              aria-controls="staff-menu"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              className="grid size-10 place-items-center rounded-full hover:bg-pill-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-            >
+            <button type="button" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen} aria-controls="staff-menu" aria-label={menuOpen ? "Close menu" : "Open menu"} className="grid size-10 place-items-center rounded-full hover:bg-pill-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
               {menuOpen ? <X className="size-5" strokeWidth={1.5} /> : <Menu className="size-5" strokeWidth={1.5} />}
             </button>
             <Link href={base} aria-label="Today" className="grid size-9 place-items-center rounded-full text-text">
@@ -154,7 +140,7 @@ export function StaffShell({ orgSlug, children }: { orgSlug: string; children: R
               {navList(() => setMenuOpen(false))}
               <div className="mt-3 flex items-center justify-between px-3">
                 <span className="text-small text-text-2">
-                  {actor?.name}, {roleLabel[role]}
+                  {userName}, {roleLabel[role]}
                 </span>
                 <ThemeToggle compact />
               </div>
@@ -163,9 +149,6 @@ export function StaffShell({ orgSlug, children }: { orgSlug: string; children: R
           <main className="mx-auto w-full max-w-[1200px] px-4 pb-24 pt-4 md:px-6 lg:px-8 lg:pt-8">{children}</main>
         </div>
       </div>
-      <Suspense fallback={null}>
-        <Tour orgSlug={org.slug} />
-      </Suspense>
     </div>
   );
 }

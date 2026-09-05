@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { MockStoreProvider } from "@/lib/mock/store";
-import { clinicNow } from "@/lib/time";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,13 +33,11 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Read once on the server so the fixtures the client hydrates match exactly.
-  const fixtureHour = clinicNow().getHours();
   return (
     <html lang="en-PH" suppressHydrationWarning className={inter.variable}>
       <body className="min-h-dvh bg-page text-text">
         <ThemeProvider>
-          <MockStoreProvider fixtureHour={fixtureHour}>{children}</MockStoreProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>

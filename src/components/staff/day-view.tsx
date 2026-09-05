@@ -8,13 +8,12 @@ import { PageHeader, EmptyState } from "./page-header";
 import { FirstRun } from "./first-run";
 import { AppointmentDrawer } from "./appointment-drawer";
 import { CancelDialog, NewAppointmentDialog, RescheduleDialog, WalkInDialog } from "./dialogs";
-import { ReminderPreview } from "@/components/sandbox/reminder-preview";
 import { Pill } from "@/components/primitives/pill";
 import { StatusPill } from "@/components/primitives/status-pill";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOrg } from "@/lib/mock/store";
-import { appointmentsOn, daysWithAppointments, defaultDay, joinAppointment } from "@/lib/mock/selectors";
-import type { AppointmentStatus } from "@/lib/mock/types";
+import { useOrg } from "@/lib/org-data";
+import { appointmentsOn, daysWithAppointments, defaultDay, joinAppointment } from "@/lib/domain/selectors";
+import type { AppointmentStatus } from "@/lib/domain/types";
 import { can } from "@/lib/roles";
 import { clinicNow, dayKey, formatTime, relativeDayLabel, zoneLabel } from "@/lib/time";
 import { useMounted } from "@/lib/use-mounted";
@@ -63,7 +62,7 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
   const isToday = isSameDay(day, today);
   const nowIndex = isToday && mounted ? rows.findIndex((r) => !isBefore(new Date(r.appointment.startsAt), now)) : -1;
 
-  if (ui === "first-run") return <FirstRun orgSlug={org.slug} clinicName={org.name} />;
+  if (ui === "first-run" || (services.length === 0 && providers.length === 0)) return <FirstRun orgSlug={org.slug} clinicName={org.name} />;
 
   return (
     <>
@@ -228,8 +227,6 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
           })}
         </ol>
       )}
-
-      <ReminderPreview orgSlug={org.slug} />
 
       <AppointmentDrawer orgSlug={org.slug} appointmentId={selected} onClose={() => setSelected(null)} onCancel={(id) => { setSelected(null); setCancelId(id); }} onReschedule={(id) => { setSelected(null); setRescheduleId(id); }} />
       <CancelDialog orgSlug={org.slug} appointment={appointments.find((a) => a.id === cancelId) ?? null} open={!!cancelId} onOpenChange={(o) => !o && setCancelId(null)} />

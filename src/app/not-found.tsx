@@ -17,7 +17,7 @@ export default function NotFound() {
           <Link href="/">Back to Kalinga</Link>
         </Pill>
         <Pill asChild block variant="secondary">
-          <Link href="/demo">Try the demo clinic</Link>
+          <Link href="/sign-up">Create your clinic</Link>
         </Pill>
       </div>
     </main>

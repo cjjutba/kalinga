@@ -1,4 +1,4 @@
-import type { RecallKind } from "@/lib/mock/types";
+import type { RecallKind } from "@/lib/domain/types";
 
 // The five rendered messages. Nothing is sent in v1. Staff copy the text and
 // send it through whatever channel they already use with that client, so the
@@ -44,7 +44,7 @@ export function renderReminder(kind: RecallKind, c: ReminderContext): string {
     case "deworming":
       return `Hi ${c.ownerName}, ${c.clinicName} here. ${c.petName} is due for deworming around ${date}. It takes fifteen minutes. Book at ${c.bookingUrl} or reply and we'll sort it out.`;
     case "grooming":
-      return `Hi ${c.ownerName}, it's ${c.clinicName}. ${c.petName} is about due for a groom, around ${date}. Jess has slots this week. Book at ${c.bookingUrl} or reply here.`;
+      return `Hi ${c.ownerName}, it's ${c.clinicName}. ${c.petName} is about due for a groom, around ${date}. Book at ${c.bookingUrl} or reply here.`;
   }
 }
 
@@ -54,7 +54,7 @@ export function renderBookingConfirmation(c: BookingContext): string {
 
 export function renderBookingChanged(c: BookingContext, kind: "cancelled" | "rescheduled"): string {
   if (kind === "cancelled") {
-    return `Hi ${c.ownerName}, ${c.petName}'s ${c.serviceName} at ${c.clinicName} has been cancelled. Reference ${c.reference}. Book again any time at ${c.manageUrl}.`;
+    return `Hi ${c.ownerName}, ${c.petName}'s ${c.serviceName} at ${c.clinicName} has been cancelled. Reference ${c.reference}. Book again any time at ${c.manageUrl.replace(/\/b\/[^/]+$/, "")}.`;
   }
   return `Hi ${c.ownerName}, ${c.petName}'s ${c.serviceName} at ${c.clinicName} has moved to ${c.when}. Reference ${c.reference}. Change or cancel at ${c.manageUrl}.`;
 }

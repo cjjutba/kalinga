@@ -308,23 +308,93 @@ an OAuth provider for MCP clients, and is not needed for v1.
 
 ---
 
+## 2026-09-06, F1 on real data
+
+### There is no seed, mock or demo data, for now
+
+The prototype ran on fixtures, an in-memory store and a per-visitor sandbox.
+All of it was deleted when the database landed: `src/lib/mock/`,
+`src/components/sandbox/` and the `/demo` routes are gone and nothing seeds the
+database. Every feature is exercised by creating a real clinic through sign up.
+
+**Why.** The point of F1 is to prove the product on real rows. Sample data hides
+empty states, masks slow queries and makes it too easy to believe a screen works
+because it renders. F4, the public sandbox, is parked and its spec kept.
+
+### Better Auth's organisation is the tenant root
+
+Every tenant table carries `organisation_id` referencing Better Auth's
+`organization.id`. Clinic settings that Better Auth does not know about
+(timezone, address, opening hours, the grooming interval) live as additional
+fields on that same row rather than in a parallel clinic table.
+
+**Why.** One id for one clinic, and the membership, invitation and role
+machinery comes with it. Roles are `owner`, `vet` and `front_desk` through the
+organisation plugin's access control, checked on the server at the top of every
+action. Pet owners are not members: the portal signs them in with a magic link.
+
+### The scoped query layer is a class, and a test reads the source
+
+`Scope` in `src/lib/db/scoped.ts` is the only door to tenant tables. It takes an
+organisation id at construction and every list, get, insert, update and delete
+adds the scoping clause. `scoping.test.ts` reads the source tree and fails the
+build if any file outside the database layer touches a query builder directly.
+
+**Why.** A missing `where` is the one bug class that ends the project. A test
+that reads code catches it at build time rather than in a customer's data.
+
+### Postgres refuses the double booking, not only the engine
+
+An exclusion constraint on `appointment` (`btree_gist`, one provider, the
+`tstzrange` of start and end, ignoring cancelled and no-show rows) sits behind
+the availability engine's own `isFree` check, which runs inside the booking
+transaction.
+
+**Why.** Two people confirming the same slot at the same second both pass the
+engine. Only one passes the constraint, and the loser sees "that slot was just
+taken".
+
+### Email is optional in development
+
+`sendEmail` uses Resend when `RESEND_API_KEY` is set. Without it, the message
+is logged to the server console with its link, and an invitation link is also
+returned to the inviter's screen. The privacy request form says plainly that the
+request was logged rather than emailed.
+
+**Why.** Nothing should be blocked on a mail provider while the product is being
+proven, and nothing should pretend to have sent what it did not.
+
+### Better Auth 1.7 needs its own CLI, under bun
+
+The schema generated with `@better-auth/cli` 1.4 lacked the `issuer` column
+that Better Auth 1.7 requires on `account`, which made the first sign up fail
+and leave an orphan user row. The 1.7 CLI is the `auth` package and it uses
+`Object.groupBy`, so on Node 20 it runs as `bunx --bun auth@1.7.2 generate`.
+
+**Why recorded.** The failure mode is silent until the first real sign up, and
+the fix is not where the docs point.
+
+### Payloads are filtered by role, not only the navigation
+
+`loadOrgSnapshot` takes the member's role. The audit trail, pending invitations
+and visit notes are left out of the response for roles without the matching
+permission, so a front desk account never receives what its screens will not
+draw.
+
+**Why.** Hiding a button is not a permission, and neither is a payload the
+browser happens not to render.
+
+### Three open questions closed by building
+
+Client portal identity is a magic link to the booking email, with manage booking
+reachable by reference alone. The public form captures pet name and species.
+Adding a visit completes the appointment and sets the next recall date.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a
 case study, or paid from the start. Needs settling before the F4 conversation
 happens, not during it.
-
-**Client portal identity.** Booking needs no account, but a pet owner "sees
-their own pets and history" needs one. Recommended: a magic link by email at
-booking, rendered on screen in the sandbox, with manage booking reachable by
-reference alone. Decide before the client portal is designed.
-
-**Booking captures a pet.** The data model joins appointments to pets, so the
-public form needs at least pet name and species. The features doc lists only
-name, mobile and email. Recommended: add the two fields. Decide before F2b.
-
-**Who marks an appointment completed.** No feature assigns it. Recommended:
-adding a visit completes the appointment. Decide before F5.
 
 **Reporting.** The roles doc gives the owner "whatever reporting exists" and
 nothing in v1 defines any. Recommended: none in v1.

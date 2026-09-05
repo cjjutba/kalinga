@@ -1,6 +1,6 @@
 // The privacy notice. RA 10173, the Data Privacy Act of 2012, applies to the
 // names, mobile numbers and email addresses Kalinga collects from Philippine
-// residents, including in the demo. Plain words, not a wall of legalese.
+// residents. Plain words, not a wall of legalese.
 
 export const privacy = {
   updated: "5 September 2026",
@@ -20,7 +20,7 @@ export const privacy = {
     },
     {
       title: "How long we keep it",
-      body: "Real bookings are kept until the clinic deletes them or you ask us to. Demo and sandbox data is deleted automatically within 24 hours and is never used for anything.",
+      body: "Bookings and records are kept until the clinic deletes them or you ask us to. Sign in links and password reset links expire within an hour.",
     },
     {
       title: "Where it lives",
@@ -32,11 +32,11 @@ export const privacy = {
     },
     {
       title: "Cookies",
-      body: "Kalinga uses one cookie to keep you signed in and, in the demo, one to remember which sandbox is yours. No tracking, no analytics that identify you.",
+      body: "Kalinga uses one cookie to keep you signed in. No tracking, no analytics that identify you.",
     },
   ],
   contact: {
     lead: "To ask for a copy of your data or to have it deleted, use the request form or email us. Say which clinic you booked with and the mobile number you used.",
-    email: "privacy@kalinga.example",
+    email: "privacy@cjjutba.dev",
   },
 } as const;

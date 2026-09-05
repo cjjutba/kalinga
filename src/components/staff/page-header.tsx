@@ -25,6 +25,6 @@ export function EmptyState({ title, lead, action }: { title: string; lead?: stri
 
 export function NotForRole({ role, page }: { role: string; page: string }) {
   return (
-    <EmptyState title={`${page} is not part of the ${role.toLowerCase()} role`} lead="In the real product this page would not be reachable at all. The server checks every request, and hiding a button is not a permission." />
+    <EmptyState title={`${page} is not part of the ${role.toLowerCase()} role`} lead="The server checks every request, so this page holds nothing for your role. Ask the clinic owner if you need it." />
   );
 }

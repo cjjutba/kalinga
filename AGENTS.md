@@ -15,8 +15,8 @@ feature breakdown, the data model and the workflow.
 3. **Every tenant table carries `organisation_id`, and every query is scoped.** See Tenancy. This is the one bug class that would end the project.
 4. **The availability engine ships before any screen consumes it.** Pure functions, tested first.
 5. **Nothing costs money.** Free tiers only. No SMS provider, no payment gateway, no paid image APIs, no App Store fee.
-6. **The sandbox sends nothing.** No email, no SMS. Confirmations and reminders render in the UI and write to a log table.
-7. **This repository is public.** No secrets, ever. No real business data in seeds. See Repository rules.
+6. **No seed, mock or demo data in the codebase for now.** Every screen runs against rows a person created through the real product. Sample clinics return as a separate feature once the real flows are proven. Reminders are never sent by SMS; they render in the UI for the desk to copy, and email goes out only when `RESEND_API_KEY` is set.
+7. **This repository is public.** No secrets, ever. No real business data committed anywhere. See Repository rules.
 8. **Write like a person.** No em dashes, no en dashes, no hyphen standing in for a dash. Colons introduce lists, not clauses. Semicolons are almost never right. Apply the `unslop` skill to anything that ships, including commit messages.
 
 ---
@@ -50,7 +50,7 @@ developers is a worse product.
 | ORM | Drizzle | Serverless friendly, no binary engine. |
 | Auth | Better Auth | Real organisation and member primitives, which is what multi-tenancy needs. |
 | Styling | Tailwind v4, shadcn | |
-| Email | Resend | Free tier. Production only, never from the sandbox. |
+| Email | Resend | Free tier. Sends only when `RESEND_API_KEY` is set. Without it every link is logged to the server console, and an invitation link is also shown to the inviter. |
 | Hosting | Vercel, free tier | |
 
 ### Deliberately not used
@@ -98,39 +98,29 @@ organisation id. A test fails the build if any query touches a tenant table
 without scoping.
 
 Postgres row level security is the stronger claim and Neon supports it. It is
-deliberately **not** in v1, because it fights with Better Auth and the ephemeral
-sandbox, and a misconfigured policy is harder to see than a missing argument in
+deliberately **not** in v1, because it fights with Better Auth, and a misconfigured policy is harder to see than a missing argument in
 code you can read. Revisit as hardening once the feature set is stable.
 
 ---
 
-## The demo
+## Real data, and where the demo went
 
-This is the part most likely to be got wrong, so it is specified precisely.
+There is no seed data, no fixture file, no in-memory store and no demo clinic in
+this codebase. The prototype's `src/lib/mock/`, `src/components/sandbox/` and
+`/demo` routes were deleted when F1 landed, and nothing has replaced them.
 
-There are **two** demo surfaces and they behave differently.
+To see the product, use it. Sign up at `/sign-up`, create a clinic at `/new`,
+add a service and a vet under Settings, then book from `/[slug]`. Every row you
+see was written by that path.
 
-**The read-only demo clinic.** One shared, seeded clinic that backs the marketing
-pages and the public booking page. It is never written to. Crawlers, link
-unfurls, uptime pings and search engines all land here and create nothing.
+The public demo and the writable sandbox described in `docs/product/features.md`
+under F4 are parked, not cancelled. When they return, these rules still hold:
 
-**The writable sandbox.** A per-visitor ephemeral organisation, seeded on
-creation, that lets someone click through the staff side as any role.
-
-Rules for the sandbox:
-
-- Created only by a POST from an explicit click. **Never on a page load.** A crawler must be physically unable to create a row.
-- The tenant id lives in a cookie for 24 hours.
-- A scheduled job deletes tenants older than 24 hours or with no interactions.
+- A sandbox is created only by a POST from an explicit click, never on a page load. A crawler must be physically unable to create a row.
+- The tenant id lives in a cookie for 24 hours and a scheduled job deletes stale tenants.
 - `robots.txt` disallows the sandbox paths.
-- It sends no email and no SMS.
-
-Seed rules, so the demo never looks abandoned:
-
-- The demo clinic is open seven days, which removes the closed-day problem entirely.
-- Appointments are generated relative to tenant creation, roughly two weeks back and three weeks forward. Never fixed dates.
-- The day view defaults to the next day that has appointments, not to today, and labels which day it is showing.
-- No holiday calendar in v1. Seven day opening makes it unnecessary.
+- Sample appointments are generated relative to creation, never on fixed dates.
+- The day view defaults to the next day that has appointments, and says which day it is showing.
 
 ---
 
@@ -168,10 +158,10 @@ mode is double booking a real customer.
 ## Privacy and abuse
 
 Kalinga collects names, mobile numbers and email addresses from Philippine
-residents. RA 10173 applies, including to the demo.
+residents. RA 10173 applies.
 
 - A real `/privacy` page ships with v1, not later.
-- Sandbox data is purged within 24 hours. Real bookings are kept until the clinic deletes them or the person asks.
+- Bookings and records are kept until the clinic deletes them or the person asks.
 - A working contact route for deletion requests.
 - The public booking endpoint is rate limited per IP and carries a honeypot field.
 
@@ -183,7 +173,7 @@ This repository is **public**, licensed all rights reserved. Readable as
 evidence, not licensed for reuse, because Kalinga is meant to be sold.
 
 - No secrets in the repository. `.env.example` only.
-- **Seed data must be visibly fictional.** No clinic names, addresses or phone numbers taken from real businesses. Invented names only.
+- **Any sample data that ever ships must be visibly fictional.** No clinic names, addresses or phone numbers taken from real businesses. Invented names only. Today there is none.
 - No client data from any other project, ever.
 
 ---
@@ -194,9 +184,11 @@ evidence, not licensed for reuse, because Kalinga is meant to be sold.
 | --- | --- |
 | `src/app/` | Routes. Marketing at the root, product beneath it. |
 | `src/components/primitives/` | The design system. See `DESIGN.md`. |
-| `src/lib/availability/` | The scheduling engine. Pure, tested, no side effects. Not built yet. |
-| `src/lib/db/` | Drizzle schema and the scoped query layer. Not built yet. |
-| `src/lib/mock/` | The prototype's fixtures, in-memory store and naive slot list. Every shape mirrors the data model. Replaced by `db/` and `availability/` as F1 and F2a land. |
+| `src/lib/availability/` | The scheduling engine. Pure, tested, no side effects. `openSlots` and `isFree`, nine tests in `engine.test.ts`. |
+| `src/lib/db/` | Drizzle schema, the Better Auth tables, the `Scope` query layer and the scoping test that fails the build. `queries.ts` builds the view models. |
+| `src/lib/actions/` | Server actions. `apply.ts` is the one command handler behind the staff shell, `public.ts` the unauthenticated booking path, `slots.ts` the slot loaders. |
+| `src/lib/auth.ts`, `session.ts`, `access.ts` | Better Auth config, the session helpers every page and action call, and the role permissions. |
+| `drizzle/` | Generated SQL migrations. `pnpm build` applies them before `next build`. |
 | `src/content/` | Typed marketing and static copy, the privacy notice, the message templates, the route directory. |
 | `.claude/launch.json` | Starts `pnpm dev` on port 3000 for the browser preview. |
 | `docs/design/screenshots/` | Screenshots taken at the end of each build phase. |
@@ -217,7 +209,7 @@ live, the availability engine is tested, and the case study is written.
 decision is made. Take screenshots at each feature completion. Save every
 generated design board in `docs/design/explorations/` beside its prompt, model
 and price. Track the numbers the case study will need, which are the engine
-test count, the permission checks, the seed scale, and the accessibility and
+test count, the permission checks, and the accessibility and
 Lighthouse scores. These are much easier to record on the day than to
 reconstruct in a month.
 

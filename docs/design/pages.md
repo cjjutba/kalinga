@@ -9,14 +9,14 @@ Roughly 49 screens across six surfaces, plus five rendered message templates.
 
 ## Marketing and legal
 
-Public, no account, backed by the read-only demo clinic.
+Public, no account. Clinic pages read that clinic's real rows.
 
 | Page | Route | Notes |
 | --- | --- | --- |
-| Landing | `/` | Built after F4. Pesos, Northern Mindanao named, the recall story, buttons to the demo and to book at the demo clinic. |
+| Landing | `/` | Built after F4. Pesos, Northern Mindanao named, the recall story, buttons to staff sign in and to create a clinic. |
 | Privacy | `/privacy` | RA 10173. Ships with v1. |
 | Deletion request | `/privacy/request` | The working contact route. Form with honeypot, rate limited. |
-| Demo entry | `/demo` | Explains the sandbox, the 24 hour expiry, and that it sends nothing. The only place the create button lives. The button is a POST. |
+| Demo entry | `/demo` | Parked with F4. Not in the current codebase. |
 | Not found and error | shared | Clinic slug not found, booking reference not found, generic error. |
 
 ## Public booking
@@ -56,9 +56,10 @@ Designed first. The reference board and its prompt are in `explorations/`.
 
 | Page | Route | Who | Notes |
 | --- | --- | --- | --- |
-| Sign in | `/sign-in` | staff | Email, password, a grey pill "Try the demo clinic, no account needed", a privacy link. States: error, loading, dark. |
+| Sign in | `/sign-in` | staff | Email, password, links to reset and to create a clinic, a privacy link. States: error, loading, dark. |
+| Sign up | `/sign-up` | staff | Name, email, password of ten characters or more. Lands on create clinic. |
 | Accept invitation | `/invite/[token]` | staff | Title carries the clinic name and wraps. Guide card from the inviter explains the role. States: already signed in, expired. |
-| Reset password | `/reset` | staff | Request, sent, sandbox variant showing the link on screen, new password, expired link. Email in production only. |
+| Reset password | `/reset` | staff | Request, sent, new password, expired link. The link is emailed when Resend is configured and logged to the server console otherwise. |
 | Create clinic | `/new` | owner | Name, booking address with the fixed prefix and a taken state, time zone with the current clinic time. F1 done criterion. |
 | First run | `/app/[org]` | owner | Inside the staff shell. A checklist of white cards: add services, set hours, invite staff, share the booking link. |
 | Choose clinic | `/app` | staff | For people with two memberships, with a last opened tag. Also the switcher in the top bar. States: empty, loading. |
@@ -98,8 +99,8 @@ regardless.
 
 ## Sandbox
 
-F4. Mostly components layered over the staff application rather than new
-pages.
+F4, parked. Nothing in this section exists in the current codebase. Mostly
+components layered over the staff application rather than new pages.
 
 | Item | Notes |
 | --- | --- |
@@ -126,7 +127,7 @@ None are decided. Each changes a page, so they need settling before that page
 is designed. Recommendations are marked, and the decision goes in
 `../product/decisions.md` when it is made.
 
-1. **Client portal identity.** Booking needs no account, but "sees their own pets and history" needs one. Recommended: a magic link by email at booking, rendered on screen in the sandbox, with manage booking reachable by reference alone.
+1. **Client portal identity.** Decided: a magic link to the email given at booking, and manage booking reachable by reference alone.
 2. **Booking captures a pet.** The data model joins appointments to pets, so the public form needs at least pet name and species. The features doc lists only name, mobile and email. Recommended: add the two fields.
 3. **Who marks completed.** Statuses include completed but no feature assigns it. Recommended: adding a visit completes the appointment.
 4. **Reporting.** The roles doc gives the owner "whatever reporting exists". Nothing in v1 defines any, so there is no reports page here.

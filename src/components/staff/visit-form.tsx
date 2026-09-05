@@ -7,7 +7,7 @@ import { PageHeader, EmptyState, NotForRole } from "./page-header";
 import { InputField, SelectField, TextareaField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
 import { Card } from "@/components/primitives/surfaces";
-import { useOrg } from "@/lib/mock/store";
+import { useOrg } from "@/lib/org-data";
 import { can, roleLabel } from "@/lib/roles";
 import { formatShortDate, formatTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,7 @@ export function VisitForm({ orgSlug, petId }: { orgSlug: string; petId: string }
   const [method, setMethod] = useState<"cash" | "gcash" | "">("");
   const [ref, setRef] = useState("");
   const [error, setError] = useState<string | undefined>();
+  const [busy, setBusy] = useState(false);
 
   if (!can(role, "add_visit")) return <NotForRole role={roleLabel[role]} page="Adding a visit" />;
   if (!pet) return <EmptyState title="That pet is not on file" />;
@@ -54,7 +55,7 @@ export function VisitForm({ orgSlug, petId }: { orgSlug: string; petId: string }
     setChosen((c) => (c.includes(item) ? c.filter((x) => x !== item) : [...c, item]));
   }
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     if (!appointmentId) {
       setError("Pick the appointment this visit belongs to, or book one first.");
@@ -65,7 +66,8 @@ export function VisitForm({ orgSlug, petId }: { orgSlug: string; petId: string }
       return;
     }
     setError(undefined);
-    dispatch({
+    setBusy(true);
+    const r = await dispatch({
       type: "visit/add",
       visit: {
         appointmentId,
@@ -79,6 +81,8 @@ export function VisitForm({ orgSlug, petId }: { orgSlug: string; petId: string }
         paymentRef: ref.trim() || undefined,
       },
     });
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
     router.push(`/app/${org.slug}/pets/${pet!.id}`);
   }
 
@@ -133,7 +137,7 @@ export function VisitForm({ orgSlug, petId }: { orgSlug: string; petId: string }
           <Pill asChild size="sm" variant="secondary">
             <Link href={`/app/${org.slug}/pets/${pet.id}`}>Cancel</Link>
           </Pill>
-          <Pill type="submit" size="sm" disabled={!candidates.length}>
+          <Pill type="submit" size="sm" disabled={!candidates.length} loading={busy} loadingLabel="Saving">
             Save visit
           </Pill>
         </div>

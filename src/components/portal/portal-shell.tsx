@@ -1,42 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Lockup } from "@/components/primitives/lockup";
-import { SandboxBar } from "@/components/sandbox/sandbox-bar";
-import { useStore } from "@/lib/mock/store";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 // The pet owner's side. A phone first shell with two tabs. The person here
 // reaches almost nothing, which is the point.
 
-export const PORTAL_OWNER_EMAIL = "jonel@example.com";
-
-export function usePortalOwner() {
-  const { state } = useStore();
-  // Jonel has two pets, which is enough to make the pets tab honest.
-  const owner = state.owners.find((o) => o.name === "Jonel Abellanosa") ?? state.owners[0];
-  const org = state.organisations.find((o) => o.id === owner?.organisationId) ?? state.organisations[0];
-  return { owner, org, state };
-}
-
-export function PortalShell({ children }: { children: ReactNode }) {
+export function PortalShell({ signedIn, children }: { signedIn: boolean; children: ReactNode }) {
   const pathname = usePathname();
-  const signedIn = pathname !== "/me";
+  const router = useRouter();
   const tabs = [
     { href: "/me/appointments", label: "Appointments" },
     { href: "/me/pets", label: "My pets" },
   ];
+  async function signOut() {
+    await authClient.signOut();
+    router.push("/me");
+    router.refresh();
+  }
   return (
     <div className="min-h-dvh bg-page">
-      <SandboxBar orgSlug="lunhaw" />
       <header className="mx-auto flex w-full max-w-xl items-center justify-between px-5 pt-5">
         <Lockup href="/" size="sm" />
         {signedIn ? (
-          <Link href="/me" className="text-small font-medium text-text-2 hover:text-text">
+          <button type="button" onClick={signOut} className="text-small font-medium text-text-2 hover:text-text">
             Sign out
-          </Link>
+          </button>
         ) : null}
       </header>
       {signedIn ? (

@@ -10,11 +10,11 @@ import { Pill } from "@/components/primitives/pill";
 import { Card, Row } from "@/components/primitives/surfaces";
 import { StatusPill } from "@/components/primitives/status-pill";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useOrg } from "@/lib/mock/store";
+import { useOrg } from "@/lib/org-data";
 import { can, roleLabel } from "@/lib/roles";
 import { formatDate, formatShortDate, formatTime } from "@/lib/time";
 import { useUiState } from "@/lib/use-ui-state";
-import type { Owner } from "@/lib/mock/types";
+import type { Owner } from "@/lib/domain/types";
 
 // Clients are the owners. Front desk creates and edits contact details, a vet
 // reads them, the owner does everything. A missing mobile is a real state and
@@ -215,17 +215,20 @@ export function ClientForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
   const [email, setEmail] = useState(existing?.email ?? "");
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [error, setError] = useState<string | undefined>();
+  const [busy, setBusy] = useState(false);
   if (!can(role, "edit_clients")) return <NotForRole role={roleLabel[role]} page="Editing clients" />;
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
       setError("A client needs a name.");
       return;
     }
-    const newId = existing?.id ?? `own_${Date.now().toString(36)}`;
-    dispatch({ type: "owner/upsert", owner: { id: newId, name: name.trim(), mobile: mobile.trim() || undefined, email: email.trim() || undefined, notes: notes.trim() || undefined } });
-    router.push(`/app/${org.slug}/clients/${newId}`);
+    setBusy(true);
+    const r = await dispatch({ type: "owner/upsert", owner: { id: existing?.id, name: name.trim(), mobile: mobile.trim() || undefined, email: email.trim() || undefined, notes: notes.trim() || undefined } });
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    router.push(`/app/${org.slug}/clients/${r.id ?? existing?.id}`);
   }
 
   return (
@@ -240,7 +243,7 @@ export function ClientForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
           <Pill asChild size="sm" variant="secondary">
             <Link href={existing ? `/app/${org.slug}/clients/${existing.id}` : `/app/${org.slug}/clients`}>Cancel</Link>
           </Pill>
-          <Pill type="submit" size="sm">
+          <Pill type="submit" size="sm" loading={busy} loadingLabel="Saving">
             {existing ? "Save changes" : "Add client"}
           </Pill>
         </div>

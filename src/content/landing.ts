@@ -5,8 +5,8 @@ export const landing = {
   hero: {
     title: "Your clinic's appointment book, off paper. And it remembers.",
     lead: "Kalinga takes bookings on a page you share on Messenger, runs your day from one screen, and tells you which animals are due for a vaccination, deworming or groom. Built for independent vet clinics in Northern Mindanao.",
-    primary: { label: "Try the demo clinic", href: "/demo" },
-    secondary: { label: "See a booking page", href: "/lunhaw" },
+    primary: { label: "Create your clinic", href: "/sign-up" },
+    secondary: { label: "Staff sign in", href: "/sign-in" },
   },
   problem: {
     title: "The revenue you already earned",
@@ -43,7 +43,7 @@ export const landing = {
   faq: [
     { q: "Do my clients need an account?", a: "No. They book with a name and a mobile number. A link on their confirmation lets them change or cancel." },
     { q: "Does Kalinga send the reminders?", a: "Not yet. Every Philippine SMS gateway charges per message, so Kalinga writes the message and you send it the way you already talk to that client. Real sending comes when a clinic asks for it." },
-    { q: "Is my clients' data safe?", a: "Names and mobile numbers are personal information under the Data Privacy Act. Kalinga keeps them only for the clinic that collected them, deletes demo data within a day, and has a working route for deletion requests." },
+    { q: "Is my clients' data safe?", a: "Names and mobile numbers are personal information under the Data Privacy Act. Kalinga keeps them only for the clinic that collected them, encrypts them in transit and at rest, and has a working route for deletion requests." },
     { q: "What about medical records?", a: "Kalinga holds weight, vaccination and deworming dates and visit notes. Not diagnoses, not prescriptions. It is a booking and recall tool, not a clinical record." },
   ],
 } as const;

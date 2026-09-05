@@ -1,6 +1,6 @@
 import { TZDate } from "@date-fns/tz";
 import { addDays, differenceInCalendarDays, startOfDay } from "date-fns";
-import type { Appointment, Fixtures, Owner, Pet, Provider, Service } from "./types";
+import type { Appointment, Owner, Pet, Provider, Service } from "./types";
 import { dayKey, inZone, clinicNow } from "@/lib/time";
 
 // Joins and groupings the screens need, kept out of components so the same
@@ -14,7 +14,7 @@ export interface AppointmentRow {
   provider: Provider | undefined;
 }
 
-export function joinAppointment(f: Pick<Fixtures, "pets" | "owners" | "services" | "providers">, a: Appointment): AppointmentRow {
+export function joinAppointment(f: { pets: Pet[]; owners: Owner[]; services: Service[]; providers: Provider[] }, a: Appointment): AppointmentRow {
   return {
     appointment: a,
     pet: f.pets.find((p) => p.id === a.petId),
@@ -44,7 +44,9 @@ export function daysWithAppointments(appointments: Appointment[], tz: string): S
 }
 
 export function ageLabel(birthDate: string, tz: string): string {
+  if (!birthDate) return "age not recorded";
   const days = differenceInCalendarDays(clinicNow(tz), inZone(birthDate, tz));
+  if (Number.isNaN(days)) return "age not recorded";
   if (days < 60) return `${Math.max(1, Math.round(days / 7))} wk`;
   const months = Math.floor(days / 30.4);
   if (months < 24) return `${months} mo`;

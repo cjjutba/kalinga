@@ -10,11 +10,8 @@ export function SiteFooter() {
           <p className="mt-2 max-w-sm text-label text-text-2">Kalinga is Filipino for tender care. Booking, records and recall reminders for veterinary clinics in the Philippines, starting with Northern Mindanao.</p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-small">
-          <Link href="/demo" className="text-text-2 hover:text-text">
-            Demo
-          </Link>
-          <Link href="/lunhaw" className="text-text-2 hover:text-text">
-            Sample booking page
+          <Link href="/sign-up" className="text-text-2 hover:text-text">
+            Create your clinic
           </Link>
           <Link href="/sign-in" className="text-text-2 hover:text-text">
             Staff sign in

@@ -2,41 +2,34 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthTitle, PrivacyFooter } from "@/components/auth/auth-shell";
 import { InputField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
-import { Row } from "@/components/primitives/surfaces";
-import { useUiState } from "@/lib/use-ui-state";
+import { authClient } from "@/lib/auth-client";
 
-// Five screens in one flow: request, sent, the sandbox variant that shows the
-// link on screen because nothing is emailed, choose a new password, expired.
-
-type Step = "request" | "sent" | "sandbox" | "new" | "expired";
+// Request a link, then set a new password from the link. The token arrives
+// in the URL from the email Better Auth sends through Resend. Without a
+// mail key the server logs the link instead, and nothing pretends otherwise.
 
 function mask(email: string): string {
-  const [user, domain] = email.split("@");
-  if (!user || !domain) return "your address";
-  return `${user[0]}•••@${domain}`;
+  const [u, d] = email.split("@");
+  return u && d ? `${u[0]}•••@${d}` : "your address";
 }
 
 export function ResetFlow() {
   const router = useRouter();
-  const forced = useUiState<Step>();
-  const [step, setStep] = useState<Step>(forced ?? "request");
-  const [email, setEmail] = useState(forced ? "maria@lunhaw.example" : "");
+  const params = useSearchParams();
+  const token = params.get("token");
+  const invalid = params.get("error") === "INVALID_TOKEN";
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
 
-  function go(next: Step) {
-    setStep(next);
-    router.replace(next === "request" ? "/reset" : `/reset?state=${next}`);
-  }
-
-  function request(e: FormEvent) {
+  async function request(e: FormEvent) {
     e.preventDefault();
     if (!email.includes("@")) {
       setError("Enter the email you use for Kalinga.");
@@ -44,55 +37,37 @@ export function ResetFlow() {
     }
     setError(undefined);
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
-      go("sandbox");
-    }, 700);
+    await authClient.requestPasswordReset({ email: email.trim(), redirectTo: "/reset" });
+    setLoading(false);
+    setSent(true);
   }
 
-  function save(e: FormEvent) {
+  async function save(e: FormEvent) {
     e.preventDefault();
-    if (password.length < 10) {
-      setError("Use at least 10 characters.");
-      return;
-    }
-    if (password !== confirm) {
-      setError("The two passwords do not match.");
-      return;
-    }
+    if (password.length < 10) return setError("Use at least 10 characters.");
+    if (password !== confirm) return setError("The two passwords do not match.");
+    if (!token) return setError("This link is missing its token. Request a new one.");
     setError(undefined);
     setLoading(true);
-    window.setTimeout(() => router.push("/sign-in"), 800);
+    const { error: err } = await authClient.resetPassword({ newPassword: password, token });
+    setLoading(false);
+    if (err) return setError("This link has expired or was already used. Request a new one.");
+    router.push("/sign-in");
   }
 
-  if (step === "sent" || step === "sandbox") {
+  if (invalid) {
     return (
       <div className="flex flex-col gap-5">
-        {step === "sandbox" ? (
-          <div className="rounded-guide bg-field p-4 lg:bg-sheet">
-            <p className="text-small font-medium text-text">Sandbox. Nothing is sent.</p>
-            <p className="mt-1 text-small text-text-2">In the demo the reset link appears here instead of in an inbox.</p>
-            <Row
-              tone="auto"
-              className="mt-3 bg-sheet px-3 py-2.5 lg:bg-field"
-              title={<span className="text-small font-medium">Open reset link</span>}
-              trailing={<ChevronRight className="size-5 text-text-2" strokeWidth={1.5} />}
-              onClick={() => go("new")}
-            />
-          </div>
-        ) : null}
-        <AuthTitle lead={`We sent a link to ${mask(email)}. It works for one hour.`}>Check your email</AuthTitle>
-        <p className="text-center">
-          <button type="button" onClick={() => go("request")} className="text-small font-medium text-text hover:underline">
-            Send it again
-          </button>
-        </p>
+        <AuthTitle lead="Request a new one and use it within the hour.">This link has expired</AuthTitle>
+        <Pill asChild block variant="secondary">
+          <Link href="/reset">Request a new link</Link>
+        </Pill>
         <PrivacyFooter />
       </div>
     );
   }
 
-  if (step === "new") {
+  if (token) {
     return (
       <form onSubmit={save} noValidate className="flex flex-col gap-5">
         <AuthTitle>Choose a new password</AuthTitle>
@@ -106,13 +81,15 @@ export function ResetFlow() {
     );
   }
 
-  if (step === "expired") {
+  if (sent) {
     return (
       <div className="flex flex-col gap-5">
-        <AuthTitle lead="Request a new one and use it within the hour.">This link has expired</AuthTitle>
-        <Pill block variant="secondary" onClick={() => go("request")}>
-          Request a new link
-        </Pill>
+        <AuthTitle lead={`If ${mask(email)} has an account, a link is on its way. It works for one hour.`}>Check your email</AuthTitle>
+        <p className="text-center">
+          <button type="button" onClick={() => setSent(false)} className="text-small font-medium text-text hover:underline">
+            Send it again
+          </button>
+        </p>
         <PrivacyFooter />
       </div>
     );

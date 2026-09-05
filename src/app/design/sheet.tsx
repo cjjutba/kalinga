@@ -113,7 +113,7 @@ export function DesignSheet() {
           <Card className="flex flex-col gap-6 p-6">
             <div className="flex flex-wrap items-center gap-3">
               <Pill>Sign in</Pill>
-              <Pill variant="secondary">Try the demo clinic, no account needed</Pill>
+              <Pill variant="secondary">New clinic? Create your account</Pill>
               <Pill variant="text">Forgot password?</Pill>
               <Pill loading loadingLabel="Signing in">
                 Sign in
@@ -205,7 +205,7 @@ export function DesignSheet() {
 
         <Section title="Every route" note="From docs/design/pages.md. A route missing here is a route nobody walks.">
           <div className="grid gap-4 md:grid-cols-2">
-            {routeGroups.map((g) => (
+            {routeGroups().map((g) => (
               <Card key={g.title} className="p-5">
                 <h3 className="text-body font-medium">{g.title}</h3>
                 <ul className="mt-3 flex flex-col">

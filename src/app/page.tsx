@@ -29,7 +29,7 @@ export default function Home() {
             Staff sign in
           </Link>
           <Pill asChild size="sm">
-            <Link href="/demo">Try the demo</Link>
+            <Link href="/sign-up">Create your clinic</Link>
           </Pill>
         </nav>
       </header>
@@ -47,7 +47,7 @@ export default function Home() {
                 <Link href={landing.hero.secondary.href}>{landing.hero.secondary.label}</Link>
               </Pill>
             </div>
-            <p className="mt-4 text-label text-text-2">No account. Nothing is sent from the demo.</p>
+            <p className="mt-4 text-label text-text-2">Free during the pilot. Your data stays yours.</p>
           </div>
           <div className="relative">
             <Photo className="aspect-[4/5] rounded-sheet md:aspect-[5/6]" caption="Photograph, an aspin portrait" />

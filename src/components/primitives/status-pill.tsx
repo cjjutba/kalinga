@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { AppointmentStatus } from "@/lib/mock/types";
+import type { AppointmentStatus } from "@/lib/domain/types";
 
 // Status is never carried by colour alone. Every pill carries its label,
 // completed adds a check, cancelled strikes the label through. The seven

@@ -1,16 +1,11 @@
-// Shapes for the in-memory prototype. They mirror docs/product/data-model.md
-// closely enough that the real Drizzle schema in F1 can replace them without
-// the screens noticing. Every tenant-owned record carries organisationId.
+// View models: what the screens render. Timestamps are ISO strings, numbers
+// are numbers, and every tenant-owned record carries organisationId. They are
+// built from database rows in src/lib/db/queries.ts and never hold a Date, so
+// they cross the server to client boundary untouched.
 
-export type Role = "owner" | "vet" | "front_desk" | "pet_owner";
+export type Role = "owner" | "vet" | "front_desk";
 
-export type AppointmentStatus =
-  | "booked"
-  | "confirmed"
-  | "arrived"
-  | "completed"
-  | "cancelled"
-  | "no_show";
+export type AppointmentStatus = "booked" | "confirmed" | "arrived" | "completed" | "cancelled" | "no_show";
 
 export type AppointmentSource = "online" | "staff" | "walk_in";
 
@@ -29,7 +24,7 @@ export interface Organisation {
   mobile: string;
   email: string;
   timezone: string;
-  /** Clinic opening hours in local time, 24h "HH:mm". Open seven days. */
+  /** Clinic opening hours in local time, 24h "HH:mm". */
   openFrom: string;
   openTo: string;
   groomingIntervalWeeks: number;
@@ -38,13 +33,23 @@ export interface Organisation {
 export interface Member {
   id: string;
   organisationId: string;
+  userId: string;
   name: string;
   email: string;
   role: Role;
   /** Set when the member is also a provider on the schedule. */
   providerId?: string;
   invitedAt: string;
-  lastActiveAt?: string;
+}
+
+export interface Invitation {
+  id: string;
+  organisationId: string;
+  email: string;
+  role: Role;
+  status: string;
+  expiresAt: string;
+  createdAt: string;
 }
 
 export interface Service {
@@ -76,6 +81,7 @@ export interface Provider {
   organisationId: string;
   name: string;
   title: "Vet" | "Groomer";
+  memberId?: string;
   weeklyHours: WeeklyRule[];
   exceptions: ProviderException[];
 }
@@ -110,11 +116,9 @@ export interface Pet {
 export interface Appointment {
   id: string;
   organisationId: string;
-  /** Short human reference shown to the pet owner, e.g. KLG-4F7Q. */
   reference: string;
   ownerId: string;
   petId: string;
-  /** Null for a walk-in that has not picked a service. */
   serviceId: string | null;
   providerId: string;
   /** ISO timestamps in UTC. Rendered in clinic time. */
@@ -146,7 +150,6 @@ export interface Reminder {
   organisationId: string;
   petId: string;
   kind: RecallKind;
-  /** ISO date the item is due. */
   dueOn: string;
   message: string;
   generatedAt: string;
@@ -168,9 +171,11 @@ export interface AuditEvent {
   at: string;
 }
 
-export interface Fixtures {
-  organisations: Organisation[];
+/** Everything the staff shell needs for one organisation, loaded on the server per request. */
+export interface OrgSnapshot {
+  organisation: Organisation;
   members: Member[];
+  invitations: Invitation[];
   services: Service[];
   providers: Provider[];
   owners: Owner[];

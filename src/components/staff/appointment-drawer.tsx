@@ -6,8 +6,8 @@ import { Sheet as Drawer, SheetContent, SheetDescription, SheetHeader, SheetTitl
 import { Pill } from "@/components/primitives/pill";
 import { StatusPill } from "@/components/primitives/status-pill";
 import { TextareaField } from "@/components/primitives/field";
-import { useOrg } from "@/lib/mock/store";
-import { joinAppointment } from "@/lib/mock/selectors";
+import { useOrg } from "@/lib/org-data";
+import { joinAppointment } from "@/lib/domain/selectors";
 import { can } from "@/lib/roles";
 import { formatLongDate, formatPeso, formatTime, formatTimeWithZone } from "@/lib/time";
 
