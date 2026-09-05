@@ -281,6 +281,31 @@ queue 100, booking 96, confirmation 96, privacy 95. Best practices 100
 everywhere. The remaining points are on `aria-allowed-role` and heading order
 in the shadcn dialog primitives, recorded here so they are not rediscovered.
 
+## 2026-09-06
+
+### The prototype is deployed before F1
+
+Resumes "deploy at feature one" a step early. The Vercel project is
+`kalinga`, production alias `kalinga-blush.vercel.app`, with
+`kalinga.cjjutba.dev` attached and waiting on a CNAME at Porkbun. Nothing on
+the site needs a secret yet, so the deploy is the prototype as committed.
+
+### Postgres lives in the Neon project `kalinga`, Singapore
+
+Project `autumn-king-19704457` in `aws-ap-southeast-1`, Postgres 18, the
+closest region to Northern Mindanao. Two branches: `main` for production,
+reached only through the Vercel environment, and `dev` for local work through
+`.env.local`. Both connection strings are pooled. `.env.example` lists every
+variable the application will read, with no values.
+
+### Neon tooling needs Node 22
+
+The Neon skills CLI refuses Node 20. It runs under Bun, which is how the
+`neon` and `neon-postgres` skills in `.claude/skills/` were installed. The
+Neon MCP server is registered at user scope for future sessions. The Better
+Auth "MCP plugin" is not a documentation server, it turns an application into
+an OAuth provider for MCP clients, and is not needed for v1.
+
 ---
 
 ## Open

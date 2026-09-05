@@ -37,3 +37,7 @@ tmp/
 *.pem
 .pnpm-debug.log*
 npm-debug.log*
+.env*
+
+# The example is the one env file that must be committed
+!.env.example
