@@ -32,6 +32,7 @@ export interface StoreState extends Fixtures {
   /** Sandbox session start, for the time remaining display. */
   sandboxStartedAt: string;
   tourDismissed: boolean;
+  fixtureHour?: number;
 }
 
 type Action =
@@ -241,14 +242,14 @@ function reducer(state: StoreState, action: Action): StoreState {
       };
     }
     case "reset":
-      return initialState();
+      return initialState(state.fixtureHour);
     default:
       return state;
   }
 }
 
-function initialState(): StoreState {
-  const fixtures = generateFixtures(startOfDay(TZDate.tz("Asia/Manila")));
+function initialState(fixtureHour?: number): StoreState {
+  const fixtures = generateFixtures(startOfDay(TZDate.tz("Asia/Manila")), fixtureHour);
   return {
     ...fixtures,
     role: "owner",
@@ -256,13 +257,18 @@ function initialState(): StoreState {
     actorMemberId: "mem_ana",
     sandboxStartedAt: new Date().toISOString().slice(0, 13) + ":00:00.000Z",
     tourDismissed: false,
+    fixtureHour,
   };
 }
 
 const StoreContext = createContext<{ state: StoreState; dispatch: (a: Action) => void } | null>(null);
 
-export function MockStoreProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, initialState);
+/**
+ * fixtureHour is the clinic's current hour, read once on the server and passed
+ * down, so the server render and hydration build the same fixtures.
+ */
+export function MockStoreProvider({ children, fixtureHour }: { children: ReactNode; fixtureHour?: number }) {
+  const [state, dispatch] = useReducer(reducer, fixtureHour, initialState);
   const value = useMemo(() => ({ state, dispatch }), [state]);
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

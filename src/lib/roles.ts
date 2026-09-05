@@ -1,5 +1,7 @@
 import type { Role } from "@/lib/mock/types";
 
+export type { Role };
+
 // What each role can reach, from docs/product/roles.md. In the prototype this
 // only decides what the navigation shows and which pages render a "not for
 // your role" state. Real enforcement happens on the server in F6, and hiding a

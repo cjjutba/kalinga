@@ -33,12 +33,12 @@ import type {
 import { renderReminder } from "@/content/templates";
 
 // Fixtures are generated relative to the clinic's current day so the demo never
-// looks abandoned. Everything is deterministic for a given anchor day, which
-// keeps server and client renders identical. "Now" inside the fixture day is a
-// fixed clinic hour, FIXTURE_HOUR, rather than the live clock, so a status
-// never flips between the server render and hydration.
+// looks abandoned. Everything is deterministic for a given anchor day and hour,
+// which keeps server and client renders identical: the server layout reads the
+// clinic hour once and passes it down, so both sides build the same day. "Now"
+// inside the fixture day is that hour, not the live clock.
 
-export const FIXTURE_HOUR = 11;
+export const DEFAULT_FIXTURE_HOUR = 11;
 const TZ = "Asia/Manila";
 
 function mulberry32(seed: number) {
@@ -258,11 +258,11 @@ function statusFor(rand: () => number, start: TZDate, fixtureNow: TZDate): Appoi
  * two cancelled, one no-show, the wrapping name, the owner with no mobile, and
  * a walk-in with no service.
  */
-export function generateFixtures(anchorDay: Date = startOfDay(TZDate.tz(TZ))): Fixtures {
+export function generateFixtures(anchorDay: Date = startOfDay(TZDate.tz(TZ)), fixtureHour: number = DEFAULT_FIXTURE_HOUR): Fixtures {
   idCounter = 100;
   const anchor = new TZDate(anchorDay, TZ);
   const rand = mulberry32(Number(format(anchor, "yyyyMMdd")));
-  const fixtureNow = timeOn(anchor, FIXTURE_HOUR, 0);
+  const fixtureNow = timeOn(anchor, Math.min(Math.max(fixtureHour, 9), 17), 0);
 
   const owners: Owner[] = [];
   const pets: Pet[] = [];
@@ -318,9 +318,13 @@ export function generateFixtures(anchorDay: Date = startOfDay(TZDate.tz(TZ))): F
       const count = heavy && isToday ? 16 : heavy ? 4 + Math.floor(rand() * 6) : 1 + Math.floor(rand() * 3);
       const used = new Set<string>();
 
+      const vets = orgProviders.filter((p) => p.title === "Vet");
+      const groomers = orgProviders.filter((p) => p.title === "Groomer");
       for (let i = 0; i < count; i++) {
-        const provider = orgProviders[i % orgProviders.length];
         const service = orgServices[Math.floor(rand() * orgServices.length)];
+        // Groomers only groom. Vets do everything else.
+        const pool = service.recallKind === "grooming" && groomers.length ? groomers : vets.length ? vets : orgProviders;
+        const provider = pool[i % pool.length];
         const totalSlots = ((closeH - openH) * 60) / 15 - Math.ceil(service.durationMin / 15);
         let slot = Math.floor(rand() * totalSlots);
         let guard = 0;
