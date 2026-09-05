@@ -259,7 +259,8 @@ adding a visit completes the appointment. Decide before F5.
 **Reporting.** The roles doc gives the owner "whatever reporting exists" and
 nothing in v1 defines any. Recommended: none in v1.
 
-**The original ChatGPT renders.** The two earlier sign in boards and the chosen
-logo render exist only as images in a chat. They should be dropped into
-`../design/explorations/` under the names listed in its README so the record is
-complete.
+**The two earlier ChatGPT boards.** The chosen logo renders are saved in
+`../design/explorations/logo/`. The earth tone board and the monochrome board
+with the vet photograph exist only as images in a chat and were not saved. If
+they turn up they go in `../design/explorations/boards/` under the names in its
+README. Their content and verdicts are recorded in `../design/direction.md`.
