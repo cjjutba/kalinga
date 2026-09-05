@@ -17,9 +17,9 @@ export function Photo({
   children?: React.ReactNode;
 }) {
   return (
-    <div className={cn("relative overflow-hidden bg-text-2", className)} role="img" aria-label={`${caption} placeholder`}>
+    <div className={cn("relative overflow-hidden bg-photo", className)} role="img" aria-label={`${caption} placeholder`}>
       <div className="absolute inset-0 grid place-items-center">
-        <span className="text-label text-sheet/70">{caption}</span>
+        <span className="text-label text-white/90">{caption}</span>
       </div>
       {children}
     </div>

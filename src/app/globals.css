@@ -26,6 +26,8 @@
   --tint: #d9e5f5;
   --error: #d92d20;
   --focus: #0a0a0a;
+  /* The photograph placeholder. Dark enough that the white lockup over it passes AA. Goes when real photographs land. */
+  --photo: #55555b;
 
   /* Status colours outside the token table. Only the day view and recall use them. */
   --status-noshow: #fde8e6;
@@ -83,6 +85,7 @@
   --tint: #1b2a40;
   --error: #f97066;
   --focus: #f5f5f7;
+  --photo: #3a3a40;
 
   --status-noshow: #3a1512;
   --status-noshow-fg: #f97066;
@@ -106,6 +109,7 @@
   --color-tint: var(--tint);
   --color-error: var(--error);
   --color-focus: var(--focus);
+  --color-photo: var(--photo);
   --color-status-noshow: var(--status-noshow);
   --color-status-noshow-fg: var(--status-noshow-fg);
   --color-status-overdue: var(--status-overdue);

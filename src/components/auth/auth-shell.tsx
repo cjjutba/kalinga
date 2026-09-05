@@ -48,7 +48,7 @@ export function AuthShell({
         </p>
       </div>
 
-      <div className="relative -mt-6 lg:mt-0 lg:flex lg:min-h-dvh lg:flex-col">
+      <main className="relative -mt-6 lg:mt-0 lg:flex lg:min-h-dvh lg:flex-col">
         <div className="hidden lg:block lg:px-10 lg:pt-10">
           <Lockup href="/" />
         </div>
@@ -57,7 +57,7 @@ export function AuthShell({
             {children}
           </Sheet>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
