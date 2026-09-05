@@ -1,3 +1,5 @@
+<img src="public/brand/kalinga-mark.svg" alt="" width="72">
+
 # Kalinga
 
 Booking, records and recall reminders for veterinary clinics in the Philippines.
@@ -5,9 +7,11 @@ Booking, records and recall reminders for veterinary clinics in the Philippines.
 *Kalinga* means tender care. It is what a clinic sells and what the software is
 supposed to protect.
 
-**Status: planning. No application code yet.** Everything in this repository is
-documentation, written before the first feature so the decisions are on paper
-rather than in someone's head.
+**Status: planned and designed. No application code yet.** Everything in this
+repository is documentation and design, written before the first feature so the
+decisions are on paper rather than in someone's head. The design system is
+settled in [`DESIGN.md`](./DESIGN.md) and the boards that settled it are in
+[`docs/design/explorations/`](./docs/design/explorations/README.md).
 
 ## What it does
 

@@ -80,6 +80,11 @@ punctuation, no semicolons, and enough detail that the reasoning survives.
 Add to `product/decisions.md` when something is decided. Take a screenshot when a
 feature is done. Both are much easier on the day than reconstructed in a month.
 
+Design boards go in `design/explorations/` beside the prompt, model and price
+that produced them. Read the price from the fal pricing tool before every run,
+because fal changes prices without notice. A board without its prompt cannot be
+reproduced.
+
 ## Skills worth building, and when
 
 **After F1, a verification skill.** Drives the running application the way a user

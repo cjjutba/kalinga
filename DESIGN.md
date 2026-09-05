@@ -3,69 +3,222 @@
 Kalinga is a product, not a portfolio. That difference decides most of what
 follows.
 
+This is the second version of this file. The first was written before any
+screen existed and proposed a warm earth tone accent with hairline borders.
+The design step on 2026-09-05 tested that against generated boards and it
+lost. What replaced it is recorded here as numbers, and the reasoning is in
+`docs/design/direction.md` and `docs/product/decisions.md`. The reference
+board is `docs/design/explorations/boards/2026-09-05-staff-sign-in-gpt-image-2.png`.
+
+## The direction in one paragraph
+
+Near white and near black. A soft grey page, white sheets and cards, no
+borders and no shadows, so surfaces are told apart by tone alone. Pill
+buttons, a near black primary. One pale blue tint reserved for featured
+content. All the warmth comes from photography of animals and from the mark,
+never from an accent hue. The reference points are Future, Oura and Linear.
+
 ## What it inherits, and what it does not
 
-It takes the **architecture** of the design system on cjjutba.dev. A single
-neutral ramp addressed through semantic tokens, hierarchy from weight and colour
-rather than size, hairlines instead of boxes, and a small fixed type scale.
-Those choices survive because they make a system maintainable by one person.
+It takes the **architecture** of the design system on cjjutba.dev. Semantic
+tokens over raw values, hierarchy from weight and colour rather than size, a
+small fixed type scale, and dark mode as a token remap. Those choices survive
+because one person can maintain them.
 
-It does **not** take the monochrome. A portfolio can be austere. A product called
-tender care cannot. A pure greyscale interface for a clinic that treats sick
-animals reads as cold, and it also fails a practical test, because staff need to
-scan a day view and see at a glance what is confirmed, arrived, cancelled or
-overdue. Status needs colour to be legible at speed.
+It does not take hairlines. The portfolio separates regions with one pixel
+lines. Kalinga separates them with tone, because a form made of hairline boxes
+reads as a settings page and a clinic owner deciding whether to pay should not
+be looking at a settings page.
 
-## The accent rule
+The first draft of this file said the interface could not be monochrome. It
+can, once photography carries the warmth and status keeps its own small
+palette. What it cannot be is grey on grey with nothing alive in it.
 
-**One accent, used in two places only.** The primary action, and status.
-Everything else stays on the neutral ramp.
+## Colour
 
-The hue is deliberately not fixed here. It gets chosen during the design step,
-where the point is to look at options rather than inherit a decision. The
-starting proposal is a warm earth tone rather than the clinical teal that every
-veterinary product reaches for, and rather than the bright orange that makes them
-look like toy brands.
+Tokens are CSS variables. Never use a hex value in a component. Dark mode is
+the same tokens with the second column of values.
 
-Whatever is chosen has to survive three tests. It must be legible as a small
-status dot on a dense day view. It must work as a large filled button on a phone
-in daylight. It must not read as an alert, because a booking confirmation is not
-a warning.
+| Token | Use | Light | Dark |
+| --- | --- | --- | --- |
+| `--page` | Page background | `#F5F5F7` | `#0A0A0A` |
+| `--sheet` | Sheets, cards, inputs on the page | `#FFFFFF` | `#161618` |
+| `--field` | Inputs and guide cards on a sheet | `#F2F2F4` | `#1F1F22` |
+| `--text` | Primary text, icons, links | `#0A0A0A` | `#F5F5F7` |
+| `--text-2` | Secondary text | `#6B6B70` | `#9A9AA1` |
+| `--text-3` | Placeholder only, never content | `#A0A0A6` | `#6B6B70` |
+| `--divider` | Rare. Table rows in dense views | `#E5E5EA` | `#26262A` |
+| `--action` | Primary pill background | `#0A0A0A` | `#F5F5F7` |
+| `--on-action` | Text on the primary pill | `#FFFFFF` | `#0A0A0A` |
+| `--action-pressed` | Primary pill pressed | `#262626` | `#D9D9DE` |
+| `--pill-2` | Secondary pill background | `#EBEBEE` | `#26262A` |
+| `--tint` | Featured content cards only | `#D9E5F5` | `#1B2A40` |
+| `--error` | Field ring and helper text only | `#D92D20` | `#F97066` |
+| `--focus` | Focus ring | `#0A0A0A` | `#F5F5F7` |
 
-Status colours beyond the accent are limited to what the day view genuinely
-needs. Confirmed, arrived, cancelled, no-show, overdue. Five states, five
-treatments, no more.
+Rules that follow from the table.
 
-## Mobile first, and which screen decides it
+- An input is always one step of tone away from what it sits on. On a sheet it is `--field`. On the page it is `--sheet`. It never has a border.
+- Text links are `--text` at medium weight. No underline at rest, no blue.
+- `--tint` is for cards that show featured content, such as the next appointment. It never colours a button, a status or text.
+- `--error` never fills a banner. A red ring on the field and one line of helper text is the whole treatment.
+- Photographs are the only saturated thing on any screen.
 
-The client side is designed for a phone before anything else, because pet owners
-book on a phone. The desktop layout is the adaptation, not the source.
+## Status
 
-The slot picker is the screen that decides the quality of the whole product. It
-is dense, it is the last step before a commitment, and it is used one-handed. It
-gets designed in the browser against real availability data rather than from a
-mockup, because it is an interaction rather than a picture.
+Six appointment statuses and one recall state. Each has a background, a text
+colour and a cue that is not colour, because a receptionist who cannot tell
+cancelled from confirmed will double book.
 
-The staff side is the reverse. It is used on a desk, all day, at a counter. It is
-designed for a laptop first and has to survive a long day of use, which means
-density over decoration.
+| Status | Light | Dark | Cue beyond colour |
+| --- | --- | --- | --- |
+| Booked | `--pill-2` on `--text` | same tokens | Label |
+| Confirmed | `--tint` on `--text` | same tokens | Label |
+| Arrived | `--action` on `--on-action` | same tokens | Label, the only filled dark pill in a row |
+| Completed | `--pill-2` on `--text-2` | same tokens | Label with a check icon |
+| Cancelled | `--pill-2` on `--text-2` | same tokens | Label struck through |
+| No-show | `#FDE8E6` on `#B42318` | `#3A1512` on `#F97066` | Label |
+| Overdue | `#FDF1D6` on `#8A5A00` | `#3A2A0A` on `#F5C36B` | Label, used only in recall |
+
+The no-show and overdue values are the only colours in the system outside the
+token table, and they exist because the day view and the recall queue need
+them. Nothing else gets a colour of its own.
+
+## Shape and surface
+
+| Element | Radius |
+| --- | --- |
+| Sheet | 24 px |
+| Card | 20 px |
+| Guide card | 16 px |
+| Input | 14 px |
+| Small tag | 8 px |
+| Button, status pill | Full |
+
+No borders on cards, sheets or inputs. No shadows anywhere in the interface.
+The one exception is the floating product card used on photo panels, which
+carries `0 12px 32px rgba(0,0,0,0.08)` because it sits on a photograph rather
+than on a surface.
+
+Focus is a 2 px ring in `--focus` with a 2 px offset, on every interactive
+element, always visible on keyboard focus.
 
 ## Type
 
-The same discipline as the portfolio. A small fixed scale, hierarchy from weight
-and colour, no display face.
+Inter, self hosted through `next/font` so nothing is fetched from Google at
+runtime. One family, three weights.
 
-Four sizes, plus one step up for page titles. Sizes settle during the design step
-and get written back here once they do. The rule that matters more than the
-numbers is that the scale stays small and nothing gets added to it casually.
+| Size | Line height | Use |
+| --- | --- | --- |
+| 28 px | 1.2 | Page title, medium weight |
+| 20 px | 1.25 | Card title, medium weight |
+| 17 px | 1.4 | Body, inputs, buttons |
+| 15 px | 1.4 | Secondary text, guide card body |
+| 13 px | 1.3 | Field labels, tags, helper text |
 
-## Tokens
+Weights are 400 for body, 500 for anything that needs to lead, and 700 for the
+wordmark and nothing else. Sentence case everywhere. No letterspaced caps, no
+display face, no italics.
 
-A neutral ramp stored as raw channels so alpha can be applied at the point of
-use, addressed through semantic aliases rather than directly. Light and dark are
-both real, and dark is a token remap so components need no dark-specific work.
+Names wrap. A Filipino name that needs two lines gets two lines. Never
+truncate a person's or a pet's name with an ellipsis. Numbers in the day view
+and the recall queue use tabular figures.
 
-Never hardcode a colour outside the accent and status definitions.
+## Spacing and layout
+
+Four pixel base. The steps are 4, 8, 12, 16, 24, 32, 48 and 64. Nothing in
+between.
+
+Phone controls are 52 px pills and 48 px inputs, with 20 px gutters and a
+minimum 44 px touch target. The tablet form sheet is 480 px wide. The laptop
+form column is 400 px wide. The staff application runs at up to 1200 px of
+content beside a 240 px sidebar.
+
+**Auth pages** follow the layout the reference board settled.
+
+- Phone: the top 40 percent is the photograph with the white lockup at top left. A white sheet with 24 px top corners rises over it and holds the form. When a field takes focus and the keyboard opens, the photograph collapses to a 64 px band so the form fits without scrolling.
+- Tablet portrait: the photograph fills the top third. A 480 px sheet overlaps its bottom edge by 24 px, centred on the page.
+- Laptop: the left half is the photograph with one floating product card and one line of white text at the bottom left. The right half is the page with the lockup at top left and the form column vertically centred.
+
+## Photography
+
+Photography is the warmth of the system, so where it appears is a rule rather
+than a choice.
+
+**Where it appears.** Staff sign in, invitation, password reset, create clinic
+and choose clinic. The demo entry page. The landing page. The header of a
+clinic's public booking page.
+
+**Where it never appears.** Inside the staff application. The day view, the
+records, the recall queue and the settings are used all day at a counter, and
+a photograph there is decoration that slows someone down.
+
+**Subject rules.** One animal, head and shoulders, looking just past the lens,
+soft daylight from one side, plain wall, shallow depth of field, matte and
+slightly desaturated. No people, no clinic, no steel table, no scrubs, no leash,
+no props, no sick or injured animals, no stock smile at the camera. Aspin and
+puspin first, because this is a Philippine product. One photograph per flow,
+so a sign in and its error state share the same image.
+
+**Source.** Demo photographs are generated through fal.ai and carry no third
+party rights. A paying clinic replaces them with its own. Never use a stock
+photograph pulled from the web. Every photograph carries descriptive alt text.
+
+There is no illustration and no 3D anywhere. Icons are Lucide, 1.5 px stroke,
+in `--text`, and there are as few of them as possible.
+
+## The mark
+
+A smile. A thick arc with round caps sweeping from 168 degrees to 28 degrees
+of a circle, a small dot floating above its left end and a larger dot resting
+above its right end. The larger dot is the thing being held, which is what
+kalinga means. The mark was chosen from generated candidates on 2026-09-05
+and rebuilt as geometry so it scales.
+
+Files live in `public/brand/`.
+
+| File | Use |
+| --- | --- |
+| `kalinga-mark.svg` | The mark in `#0A0A0A`, for light surfaces |
+| `kalinga-mark-white.svg` | The mark in `#F5F5F7`, for photographs and dark surfaces |
+| `kalinga-lockup.svg`, `kalinga-lockup-white.svg` | Mark and wordmark together |
+| `favicon.svg` | Square, follows the operating system theme |
+| `app-icon.svg` | The white mark at 62 percent on a `#0A0A0A` square with a 22 percent corner radius |
+
+The geometry, with R as the arc's centreline radius: stroke 0.29 R, small dot
+radius 0.28 R centred at (-0.83 R, -0.44 R), large dot radius 0.40 R centred
+at (0.65 R, -0.19 R). The SVG is the source of truth. Do not redraw it.
+
+**Lockup.** The wordmark is "Kalinga" in Inter Bold with -2 percent tracking.
+The mark is 1.6 times the cap height, sits half a cap height to the left of
+the K, and its bottom aligns with the descender line. In the product the
+lockup is a component that renders the SVG beside live text, so it always
+matches the interface font.
+
+**Rules.** The mark is `--text` on light surfaces and `#F5F5F7` on photographs
+and dark surfaces. It is never coloured, never tinted, never outlined, never
+rotated, never given a third dot. Clear space on every side equals the large
+dot's diameter. Minimum size in the interface is 24 px tall. Below that use
+`favicon.svg`, which is the same mark on a square canvas.
+
+## Components
+
+A primitive exists when a pattern appears three times, and it lives in
+`src/components/primitives/` with the reasoning in its file header. The
+reference board already implies these, so they are expected rather than
+speculative.
+
+Pill, in primary, secondary and text variants. Field, which owns the label,
+the input, the helper line and the error state together. Sheet. Card. Guide
+card, the note from a colleague used on onboarding steps. Status pill. Mark
+and Lockup. Skeleton, for the Neon cold start. The floating product card is
+marketing only and does not belong in primitives.
+
+## Motion
+
+Almost none. State changes ease over 150 ms. The auth sheet rises over 250 ms
+on first paint. Nothing animates on entry inside the staff application. Every
+transition is removed under `prefers-reduced-motion`.
 
 ## The states nobody designs
 
@@ -86,16 +239,28 @@ tidiest one.
 
 ## Accessibility
 
-WCAG 2A and 2AA, verified with axe in the test run. Status must never be carried
-by colour alone, because a day view that distinguishes cancelled from confirmed
-only by hue fails for a colourblind receptionist. Pair every status colour with a
-label or a shape.
+WCAG 2A and 2AA, verified with axe in the test run. Contrast on the tokens as
+set:
 
-Respect `prefers-reduced-motion`.
+| Pair | Ratio |
+| --- | --- |
+| `--text` on `--page`, light | 18:1 |
+| `--text-2` on `--sheet`, light | 5.3:1 |
+| `--text-2` on `--sheet`, dark | 6.6:1 |
+| `--error` on `--sheet`, light | 4.8:1 |
+| `--error` on `--sheet`, dark | 6.6:1 |
+| No-show text on its background | 5.6:1 |
+| Overdue text on its background | 5.3:1 |
+| `--text-3` on `--field` | 2.3:1, placeholder only, the label carries the meaning |
 
-## Components
+Status is never carried by colour alone. Focus is always visible. Touch
+targets are at least 44 px. `prefers-reduced-motion` is respected. The
+document language is `en-PH`.
 
-The component list is written here as it is built, not invented in advance. What
-is fixed now is the principle. A primitive exists when a pattern appears three
-times, and it lives in `src/components/primitives/` with the reasoning in its
-file header.
+## What changed from the first draft
+
+- The accent hue question is closed. There is no accent hue. One pale blue tint marks featured content, and status has its own small palette.
+- Hairlines became tone. Cards and inputs have no borders.
+- Photography is part of the system, on entry surfaces only, with subject rules.
+- The type scale, radii and spacing are fixed numbers now, not placeholders.
+- The mark exists, as geometry, in `public/brand/`.
