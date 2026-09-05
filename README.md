@@ -10,9 +10,8 @@ supposed to protect.
 **Status: designed, prototyped and live.** Every page in
 [`docs/design/pages.md`](./docs/design/pages.md) runs as an interactive
 prototype on in-memory fixtures at
-[kalinga-blush.vercel.app](https://kalinga-blush.vercel.app), moving to
-`kalinga.cjjutba.dev` once DNS lands. There is no database, no auth and
-nothing persists past a reload yet. The design system is settled in
+[kalinga.cjjutba.dev](https://kalinga.cjjutba.dev). There is no database, no
+auth and nothing persists past a reload yet. The design system is settled in
 [`DESIGN.md`](./DESIGN.md), the boards that settled it are in
 [`docs/design/explorations/`](./docs/design/explorations/README.md), and the
 decisions are in [`docs/product/decisions.md`](./docs/product/decisions.md).
