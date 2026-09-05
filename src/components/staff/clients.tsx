@@ -1,0 +1,250 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronRight, Plus } from "lucide-react";
+import { PageHeader, EmptyState, NotForRole } from "./page-header";
+import { InputField, TextareaField } from "@/components/primitives/field";
+import { Pill } from "@/components/primitives/pill";
+import { Card, Row } from "@/components/primitives/surfaces";
+import { StatusPill } from "@/components/primitives/status-pill";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useOrg } from "@/lib/mock/store";
+import { can, roleLabel } from "@/lib/roles";
+import { formatDate, formatShortDate, formatTime } from "@/lib/time";
+import { useUiState } from "@/lib/use-ui-state";
+import type { Owner } from "@/lib/mock/types";
+
+// Clients are the owners. Front desk creates and edits contact details, a vet
+// reads them, the owner does everything. A missing mobile is a real state and
+// is shown, not hidden.
+
+function resolveId(id: string, owners: Owner[]): Owner | undefined {
+  if (id === "first") return owners[0];
+  return owners.find((o) => o.id === id);
+}
+
+export function ClientsList({ orgSlug }: { orgSlug: string }) {
+  const { org, owners, pets, role } = useOrg(orgSlug);
+  const ui = useUiState<"empty" | "loading">();
+  const [q, setQ] = useState("");
+  const rows = useMemo(() => {
+    if (ui === "empty") return [];
+    const s = q.trim().toLowerCase();
+    return owners
+      .filter((o) => !s || o.name.toLowerCase().includes(s) || o.mobile?.replace(/\s/g, "").includes(s.replace(/\s/g, "")) || o.email?.toLowerCase().includes(s))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((o) => ({ owner: o, pets: pets.filter((p) => p.ownerId === o.id) }));
+  }, [owners, pets, q, ui]);
+  if (!can(role, "view_clients")) return <NotForRole role={roleLabel[role]} page="Clients" />;
+  return (
+    <>
+      <PageHeader
+        title="Clients"
+        lead={`${owners.length} on file`}
+        actions={
+          can(role, "edit_clients") ? (
+            <Pill asChild size="sm">
+              <Link href={`/app/${org.slug}/clients/new`}>
+                <Plus className="size-4" strokeWidth={1.5} aria-hidden /> New client
+              </Link>
+            </Pill>
+          ) : null
+        }
+      />
+      <div className="mb-4 max-w-md">
+        <InputField on="page" label="Search" placeholder="Name, mobile or email" value={q} onChange={(e) => setQ(e.target.value)} type="search" />
+      </div>
+      {ui === "loading" ? (
+        <ul className="flex flex-col gap-2" aria-busy>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <li key={i} className="rounded-guide bg-sheet p-4">
+              <Skeleton className="h-5 w-1/3 rounded-tag bg-field" />
+              <Skeleton className="mt-2 h-4 w-1/4 rounded-tag bg-field" />
+            </li>
+          ))}
+        </ul>
+      ) : rows.length === 0 ? (
+        <EmptyState title={q ? `No client matches "${q}"` : "No clients yet"} lead={q ? "Try the mobile number, or part of the name." : "Clients appear here the first time they book or when the desk adds them."} />
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {rows.map(({ owner, pets: ps }) => (
+            <li key={owner.id}>
+              <Row
+                href={`/app/${org.slug}/clients/${owner.id}`}
+                title={owner.name}
+                secondary={
+                  <>
+                    {owner.mobile ? <span className="tabular">{owner.mobile}</span> : <span className="text-text-2">No mobile on file</span>}
+                    {ps.length ? <span>, {ps.map((p) => p.name).join(", ")}</span> : <span>, no pets on file</span>}
+                  </>
+                }
+                trailing={<ChevronRight className="size-5 text-text-2" strokeWidth={1.5} />}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+export function ClientDetail({ orgSlug, id }: { orgSlug: string; id: string }) {
+  const { org, owners, pets, appointments, services, providers, role } = useOrg(orgSlug);
+  const owner = resolveId(id, owners);
+  if (!can(role, "view_clients")) return <NotForRole role={roleLabel[role]} page="Clients" />;
+  if (!owner) return <EmptyState title="That client is not on file" lead="They may have been removed, or the link is old." action={<Pill asChild size="sm" variant="secondary"><Link href={`/app/${org.slug}/clients`}>Back to clients</Link></Pill>} />;
+  const ps = pets.filter((p) => p.ownerId === owner.id);
+  const appts = appointments.filter((a) => a.ownerId === owner.id).sort((a, b) => b.startsAt.localeCompare(a.startsAt));
+  const upcoming = appts.filter((a) => new Date(a.startsAt) >= new Date() && a.status !== "cancelled").reverse();
+  const past = appts.filter((a) => new Date(a.startsAt) < new Date() || a.status === "cancelled").slice(0, 8);
+  const edit = can(role, "edit_clients");
+
+  return (
+    <>
+      <PageHeader
+        title={owner.name}
+        lead={`Client since ${formatDate(owner.createdAt, org.timezone)}`}
+        actions={
+          edit ? (
+            <>
+              <Pill asChild size="sm" variant="secondary">
+                <Link href={`/app/${org.slug}/clients/${owner.id}/edit`}>Edit</Link>
+              </Pill>
+              <Pill asChild size="sm">
+                <Link href={`/app/${org.slug}/pets/new?owner=${owner.id}`}>
+                  <Plus className="size-4" strokeWidth={1.5} aria-hidden /> Add pet
+                </Link>
+              </Pill>
+            </>
+          ) : null
+        }
+      />
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <div className="flex flex-col gap-4">
+          <Card className="p-5">
+            <h2 className="text-label font-medium text-text-2">Contact</h2>
+            <dl className="mt-3 flex flex-col gap-2 text-body">
+              <div className="flex justify-between gap-4">
+                <dt className="text-text-2">Mobile</dt>
+                <dd className="tabular">{owner.mobile ?? <span className="text-text-2">Not on file</span>}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-text-2">Email</dt>
+                <dd className="truncate">{owner.email ?? <span className="text-text-2">Not on file</span>}</dd>
+              </div>
+            </dl>
+            {owner.notes ? <p className="mt-3 text-small text-text-2">{owner.notes}</p> : null}
+          </Card>
+          <Card className="p-5">
+            <h2 className="text-label font-medium text-text-2">Pets</h2>
+            {ps.length ? (
+              <ul className="mt-3 flex flex-col gap-2">
+                {ps.map((p) => (
+                  <li key={p.id}>
+                    <Row tone="field" href={`/app/${org.slug}/pets/${p.id}`} title={p.name} secondary={`${p.breed}, ${p.sex}`} trailing={<ChevronRight className="size-5 text-text-2" strokeWidth={1.5} />} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-small text-text-2">No pets on file yet.</p>
+            )}
+          </Card>
+        </div>
+        <div className="flex flex-col gap-4">
+          <Card className="p-5">
+            <h2 className="text-label font-medium text-text-2">Upcoming</h2>
+            {upcoming.length ? (
+              <ul className="mt-3 flex flex-col gap-2">
+                {upcoming.map((a) => {
+                  const pet = pets.find((p) => p.id === a.petId);
+                  const svc = services.find((s) => s.id === a.serviceId);
+                  return (
+                    <li key={a.id} className="flex items-center justify-between gap-3 rounded-guide bg-field px-4 py-3">
+                      <span className="min-w-0">
+                        <span className="block text-body">
+                          {pet?.name}, {svc?.name ?? "walk-in"}
+                        </span>
+                        <span className="block text-small text-text-2 tabular">
+                          {formatShortDate(a.startsAt, org.timezone)}, {formatTime(a.startsAt, org.timezone)}, {providers.find((p) => p.id === a.providerId)?.name}
+                        </span>
+                      </span>
+                      <StatusPill status={a.status} size="sm" />
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="mt-3 text-small text-text-2">Nothing booked.</p>
+            )}
+          </Card>
+          <Card className="p-5">
+            <h2 className="text-label font-medium text-text-2">History</h2>
+            {past.length ? (
+              <ul className="mt-3 divide-y divide-divider">
+                {past.map((a) => {
+                  const pet = pets.find((p) => p.id === a.petId);
+                  const svc = services.find((s) => s.id === a.serviceId);
+                  return (
+                    <li key={a.id} className="flex items-center justify-between gap-3 py-2.5">
+                      <span className="min-w-0 text-small">
+                        <span className="tabular text-text-2">{formatShortDate(a.startsAt, org.timezone)}</span> {pet?.name}, {svc?.name ?? "walk-in"}
+                      </span>
+                      <StatusPill status={a.status} size="sm" />
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="mt-3 text-small text-text-2">No visits yet.</p>
+            )}
+          </Card>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export function ClientForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
+  const router = useRouter();
+  const { org, owners, role, dispatch } = useOrg(orgSlug);
+  const existing = id ? resolveId(id, owners) : undefined;
+  const [name, setName] = useState(existing?.name ?? "");
+  const [mobile, setMobile] = useState(existing?.mobile ?? "");
+  const [email, setEmail] = useState(existing?.email ?? "");
+  const [notes, setNotes] = useState(existing?.notes ?? "");
+  const [error, setError] = useState<string | undefined>();
+  if (!can(role, "edit_clients")) return <NotForRole role={roleLabel[role]} page="Editing clients" />;
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) {
+      setError("A client needs a name.");
+      return;
+    }
+    const newId = existing?.id ?? `own_${Date.now().toString(36)}`;
+    dispatch({ type: "owner/upsert", owner: { id: newId, name: name.trim(), mobile: mobile.trim() || undefined, email: email.trim() || undefined, notes: notes.trim() || undefined } });
+    router.push(`/app/${org.slug}/clients/${newId}`);
+  }
+
+  return (
+    <form onSubmit={submit} noValidate className="mx-auto max-w-lg">
+      <PageHeader title={existing ? `Edit ${existing.name}` : "New client"} lead={existing ? undefined : "Name is enough to start. Mobile is how reminders reach them."} />
+      <Card className="flex flex-col gap-5 p-6">
+        <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} error={error} autoComplete="off" placeholder="Maria Santos" />
+        <InputField label="Mobile" hint="Optional" value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="tel" placeholder="0917 555 0142" helper="Reminders are sent to this number by the desk." />
+        <InputField label="Email" hint="Optional" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
+        <TextareaField label="Notes" hint="Optional" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Prefers Messenger. Usually comes in on Saturdays." />
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Pill asChild size="sm" variant="secondary">
+            <Link href={existing ? `/app/${org.slug}/clients/${existing.id}` : `/app/${org.slug}/clients`}>Cancel</Link>
+          </Pill>
+          <Pill type="submit" size="sm">
+            {existing ? "Save changes" : "Add client"}
+          </Pill>
+        </div>
+      </Card>
+    </form>
+  );
+}

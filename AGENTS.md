@@ -194,9 +194,12 @@ evidence, not licensed for reuse, because Kalinga is meant to be sold.
 | --- | --- |
 | `src/app/` | Routes. Marketing at the root, product beneath it. |
 | `src/components/primitives/` | The design system. See `DESIGN.md`. |
-| `src/lib/availability/` | The scheduling engine. Pure, tested, no side effects. |
-| `src/lib/db/` | Drizzle schema and the scoped query layer. |
-| `src/content/` | Typed marketing and static copy. |
+| `src/lib/availability/` | The scheduling engine. Pure, tested, no side effects. Not built yet. |
+| `src/lib/db/` | Drizzle schema and the scoped query layer. Not built yet. |
+| `src/lib/mock/` | The prototype's fixtures, in-memory store and naive slot list. Every shape mirrors the data model. Replaced by `db/` and `availability/` as F1 and F2a land. |
+| `src/content/` | Typed marketing and static copy, the privacy notice, the message templates, the route directory. |
+| `.claude/launch.json` | Starts `pnpm dev` on port 3000 for the browser preview. |
+| `docs/design/screenshots/` | Screenshots taken at the end of each build phase. |
 | `public/brand/` | The mark, lockup, favicon and app icon as SVG. The geometry is the source of truth, never redraw it. |
 | `docs/product/` | Brief, features, roles, data model, decisions. |
 | `docs/design/` | Visual direction, the page inventory, the screens to design. |

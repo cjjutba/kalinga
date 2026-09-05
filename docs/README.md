@@ -12,6 +12,7 @@
 | [`design/pages.md`](design/pages.md) | Every page in v1 by surface, with routes and who can reach it |
 | [`design/screens.md`](design/screens.md) | The screens, in the order they get designed, and where each stands |
 | [`design/explorations/`](design/explorations/README.md) | Generated boards and vectors with the prompts that produced them |
+| `design/screenshots/` | Screenshots of the running prototype, by date and page |
 | [`workflow.md`](../docs/workflow.md) | The build loop, and when to escalate review depth |
 | [`product/decisions.md`](product/decisions.md) | Every decision made so far, and why |
 

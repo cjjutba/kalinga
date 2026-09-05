@@ -32,3 +32,8 @@ e2e/screens/
 .codex/
 .superpowers/
 tmp/
+
+# next.js scaffold additions
+*.pem
+.pnpm-debug.log*
+npm-debug.log*

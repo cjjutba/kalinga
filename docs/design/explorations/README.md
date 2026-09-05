@@ -38,8 +38,9 @@ All vectors from Recraft V4 text to vector at $0.08 each. The prompts are in
 | `logo/recraft-small-size-test.png` | A3, B and C at 16, 32 and 64 px | Showed A3's small dot vanishing at 16 px, which the final geometry fixed. |
 
 The chosen mark was refined in ChatGPT from the Nano Banana Pro reading and
-then rebuilt as geometry in `../../../public/brand/`. The ChatGPT renders
-should be added here as `logo/chatgpt-lockup.png` and `logo/chatgpt-mark.png`.
+then rebuilt as geometry in `../../../public/brand/`. The ChatGPT renders are
+`logo/chatgpt-lockup.png`, the mark with the wordmark on white, and
+`logo/chatgpt-mark.png`, the mark alone on a transparent background.
 
 ## Prompts
 

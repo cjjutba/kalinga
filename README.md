@@ -7,11 +7,20 @@ Booking, records and recall reminders for veterinary clinics in the Philippines.
 *Kalinga* means tender care. It is what a clinic sells and what the software is
 supposed to protect.
 
-**Status: planned and designed. No application code yet.** Everything in this
-repository is documentation and design, written before the first feature so the
-decisions are on paper rather than in someone's head. The design system is
-settled in [`DESIGN.md`](./DESIGN.md) and the boards that settled it are in
-[`docs/design/explorations/`](./docs/design/explorations/README.md).
+**Status: designed and prototyped.** Every page in
+[`docs/design/pages.md`](./docs/design/pages.md) runs on localhost as an
+interactive prototype on in-memory fixtures. There is no database, no auth
+and nothing persists past a reload yet. The design system is settled in
+[`DESIGN.md`](./DESIGN.md), the boards that settled it are in
+[`docs/design/explorations/`](./docs/design/explorations/README.md), and the
+decisions are in [`docs/product/decisions.md`](./docs/product/decisions.md).
+
+```bash
+pnpm install && pnpm dev
+```
+
+Then open `http://localhost:3000/design` for every route, or `/demo` to start
+where a visitor would.
 
 ## What it does
 
