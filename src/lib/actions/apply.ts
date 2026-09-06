@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { TZDate } from "@date-fns/tz";
 import { auth } from "@/lib/auth";
 import { requirePermission, type Actor } from "@/lib/session";
-import { eraseClient, updateOrganisation } from "@/lib/db/queries";
+import { eraseClient, listInvitations, listMembers, updateOrganisation } from "@/lib/db/queries";
 import { appointment, auditEvent, owner, pet, provider, reminder, service, visit } from "@/lib/db/schema";
 import type { Scope } from "@/lib/db/scoped";
 import { actionSchema, type ActionResult, type StoreAction } from "./types";
@@ -218,21 +218,25 @@ async function handle(action: StoreAction, actor: Actor, scope: Scope): Promise<
       return { ok: true, id: res.id, message: process.env.RESEND_API_KEY ? "Invitation sent" : `Invitation created. Nothing is emailed yet, share this link: ${process.env.BETTER_AUTH_URL}/invite/${res.id}` };
     }
     case "member/role": {
-      const before = actor.member.id === action.id ? actor.member.role : undefined;
       if (actor.member.id === action.id) return { ok: false, error: "Ask another owner to change your own role" };
+      const target = (await listMembers(actor.org.id)).find((m) => m.id === action.id);
+      if (!target) return { ok: false, error: "That person is not on the team" };
       await auth.api.updateMemberRole({ headers: await headers(), body: { memberId: action.id, role: action.role, organizationId: actor.org.id } });
-      await audit(scope, actor, "Changed role", "member", action.id, action.id, before ? { role: before } : undefined, { role: action.role });
+      await audit(scope, actor, "Changed role", "member", action.id, target.name, { role: target.role }, { role: action.role });
       return { ok: true };
     }
     case "member/remove": {
       if (actor.member.id === action.id) return { ok: false, error: "You cannot remove yourself" };
+      const target = (await listMembers(actor.org.id)).find((m) => m.id === action.id);
+      if (!target) return { ok: false, error: "That person is not on the team" };
       await auth.api.removeMember({ headers: await headers(), body: { memberIdOrEmail: action.id, organizationId: actor.org.id } });
-      await audit(scope, actor, "Removed member", "member", action.id, action.id);
+      await audit(scope, actor, "Removed member", "member", action.id, `${target.name}, ${target.role.replace("_", " ")}`, { role: target.role });
       return { ok: true };
     }
     case "invitation/cancel": {
+      const inv = (await listInvitations(actor.org.id)).find((i) => i.id === action.id);
       await auth.api.cancelInvitation({ headers: await headers(), body: { invitationId: action.id } });
-      await audit(scope, actor, "Cancelled invitation", "member", action.id, action.id);
+      await audit(scope, actor, "Cancelled invitation", "member", action.id, inv ? `${inv.email}, ${inv.role.replace("_", " ")}` : action.id);
       return { ok: true };
     }
     case "reminder/email": {
