@@ -549,6 +549,27 @@ split the class and the background never applied. The spaces are now encoded.
 
 **Why recorded.** A test that dumps the markup finds what the eye skims past.
 
+## 2026-09-06, the full v1 pass
+
+### Every role walked end to end before the first clinic sees it
+
+One session drove the whole product on the dev clinic: owner, vet, front
+desk and pet owner, every settings page, booking from the public page and
+the desk, reschedule, cancel, walk-in, visits and recall, audit, export and
+deletion, the magic link portal, two tabs racing for one slot, every screen at
+phone width, and the theme switch. Eleven things were fixed on the way and
+each has its own commit. The largest: every dialog rendered 384px wide on
+desktop because the base dialog's small-screen limit outranked the overrides,
+and a long vet name then overflowed and clipped both sides. The rest were
+defaults and words: a vet landing on a day where their column was empty, the
+visit form picking the wrong vet, the day view not following a new booking,
+audit events naming ids instead of people, a closure not reaching a vet added
+later, a status announced to screen readers before anything was saved.
+
+**Why recorded.** The static checks were green throughout. Every one of these
+was found by using the product as a clinic would, which is the argument for
+doing that before each release rather than trusting the suite alone.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a
