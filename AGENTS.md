@@ -219,5 +219,8 @@ reconstruct in a month.
 ## Accessibility
 
 Match the standard already set by the author's portfolio. WCAG 2A and 2AA,
-verified with axe in the test run. Respect `prefers-reduced-motion`. The client
+verified with axe in the test run: `src/a11y.test.tsx` renders every screen
+with realistic data and fails the build on any structural violation. Colour
+contrast cannot be measured without the stylesheet, so it is held by the token
+table in `DESIGN.md` and checked in a browser when a token changes. Respect `prefers-reduced-motion`. The client
 side is mobile-first, because pet owners book on a phone.

@@ -521,6 +521,34 @@ Android's mask cannot clip the mark. The render command is sharp through
 **Why.** The geometry is the identity. Two SVG sources and a repeatable render
 beat a folder of hand exported bitmaps that drift.
 
+## 2026-09-06, the accessibility gate
+
+### Every screen is rendered and run through axe in the test suite
+
+`src/a11y.test.tsx` builds one clinic's worth of realistic data in memory,
+renders fifty four screens through React's static renderer under jsdom, and
+runs axe against WCAG 2 A and AA on each. The router, theme and server action
+modules are mocked so no screen needs a database or a browser. The gate runs
+inside `pnpm build`, so a missing label or an unnamed button stops a deploy.
+Two soundness tests keep the gate honest: a deliberately broken fragment must
+produce violations, and the screens must contain their data rather than
+render empty shells.
+
+**Why.** AGENTS.md promised axe in the test run and nothing enforced it. A
+browser based suite would have been more complete but would not run in the
+build, and installing a browser on every deploy costs minutes for the same
+structural findings. Colour contrast is the one rule this cannot measure, and
+it is held by the token table, which is why the two darkened tokens have
+their ratios written down.
+
+### The select chevron was never drawn
+
+Writing the gate exposed it: the select field's chevron is a data URL in a
+Tailwind arbitrary value, and the SVG inside it contained spaces, so Tailwind
+split the class and the background never applied. The spaces are now encoded.
+
+**Why recorded.** A test that dumps the markup finds what the eye skims past.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a
