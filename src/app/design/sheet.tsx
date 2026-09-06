@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import { useState } from "react";
 import Link from "next/link";
 import { Mark } from "@/components/primitives/mark";
@@ -140,10 +141,10 @@ export function DesignSheet() {
         <Section title="Fields" note="A field owns its label, control, helper and error. On a sheet the control is --field. Never a border.">
           <div className="grid gap-4 md:grid-cols-2">
             <Sheet className="flex flex-col gap-5 p-6">
-              <InputField label="Email" type="email" placeholder="you@clinic.com" />
-              <InputField label="Password" type="password" placeholder="Enter your password" helper="At least 10 characters." />
-              <InputField label="Password" type="password" defaultValue="wrong" error="That password is not right. Try again or reset it." />
-              <InputField label="Booking address" prefix="kalinga.cjjutba.dev/" defaultValue="lunhaw" helper="This is the link you share with pet owners." />
+              <InputField label="Email" type="email" placeholder={placeholder.email} />
+              <InputField label="Password" type="password" placeholder={placeholder.password} helper="At least 10 characters." />
+              <InputField label="Password" type="password" placeholder={placeholder.password} defaultValue="wrong" error="That password is not right. Try again or reset it." />
+              <InputField label="Booking address" prefix="kalinga.cjjutba.dev/" placeholder={placeholder.bookingAddress} defaultValue="lunhaw" helper="This is the link you share with pet owners." />
               <SelectField
                 label="Species"
                 value={species}
@@ -153,12 +154,12 @@ export function DesignSheet() {
                   { value: "cat", label: "Cat" },
                 ]}
               />
-              <TextareaField label="Notes" hint="Optional" placeholder="Anything the vet should know before the visit" />
+              <TextareaField label="Notes" hint="Optional" placeholder={placeholder.appointmentNote} />
             </Sheet>
             <div className="flex flex-col gap-5 rounded-sheet bg-page p-6 ring-1 ring-divider ring-inset">
               <p className="text-label text-text-2">The same fields on the page. The control becomes --sheet.</p>
-              <InputField on="page" label="Search clients" placeholder="Name or mobile" />
-              <InputField on="page" label="Mobile" hint="Optional" placeholder="0917 555 0142" />
+              <InputField on="page" label="Search clients" placeholder={placeholder.searchClients} />
+              <InputField on="page" label="Mobile" hint="Optional" placeholder={placeholder.mobile} />
             </div>
           </div>
         </Section>

@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -58,7 +59,7 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
       />
       <NewClientDialog orgSlug={orgSlug} open={newOpen} onOpenChange={setNewOpen} />
       <div className="mb-4 max-w-md">
-        <InputField on="page" label="Search" placeholder="Name, mobile or email" value={q} onChange={(e) => setQ(e.target.value)} type="search" />
+        <InputField on="page" label="Search" placeholder={placeholder.searchClients} value={q} onChange={(e) => setQ(e.target.value)} type="search" />
       </div>
       {ui === "loading" ? (
         <TableSkeleton />
@@ -248,7 +249,7 @@ function PrivacyCard({ orgSlug, owner, petCount, appointmentCount }: { orgSlug: 
       </div>
       <Frame open={open} onOpenChange={setOpen} busy={busy} title={`Delete ${owner.name}`} description={`Removes the client, ${plural(petCount, "pet")} and ${plural(appointmentCount, "appointment")} with their visits and reminders. Their name comes off the audit trail. This cannot be undone.`}>
         <SelectField label="Reason" value={reason} onChange={setReason} options={deleteReasons.map((r) => ({ value: r, label: r }))} />
-        {reason === "Other" ? <TextareaField label="What happened" rows={3} value={other} onChange={(e) => setOther(e.target.value)} /> : null}
+        {reason === "Other" ? <TextareaField label="What happened" placeholder={placeholder.reason} rows={3} value={other} onChange={(e) => setOther(e.target.value)} /> : null}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Pill variant="secondary" size="sm" onClick={() => setOpen(false)} disabled={busy}>
             Keep the record
@@ -307,10 +308,10 @@ export function ClientForm({ orgSlug, id, inDialog, onDone, onBusyChange }: { or
 
   const fields = (
     <>
-      <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} error={error} autoComplete="off" placeholder="Maria Santos" />
-      <InputField label="Mobile" hint="Optional" value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="tel" placeholder="0917 555 0142" helper="Reminders are sent to this number by the desk." />
-      <InputField label="Email" hint="Optional" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
-      <TextareaField label="Notes" hint="Optional" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Prefers Messenger. Usually comes in on Saturdays." />
+      <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} error={error} autoComplete="off" placeholder={placeholder.personName} />
+      <InputField label="Mobile" hint="Optional" value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="tel" placeholder={placeholder.mobile} helper="Reminders are sent to this number by the desk." />
+      <InputField label="Email" hint="Optional" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={placeholder.contactEmail} />
+      <TextareaField label="Notes" hint="Optional" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={placeholder.clientNotes} />
     </>
   );
 

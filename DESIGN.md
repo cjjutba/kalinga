@@ -256,6 +256,15 @@ removes should not read as a link. Icon buttons that remove turn red on hover
 rather than staying neutral. Every one of them goes through the confirmation
 dialog, so a red button in this product never acts on the first click.
 
+**Every field says what belongs in it.** A placeholder shows the shape of the
+answer, never an example of a person: no invented names, clinics, streets or
+phone numbers that could be read as real. They live in
+`src/content/placeholders.ts`, one entry per kind of field, so a mobile number
+reads the same on the booking page as it does at the desk. Two tests fail the
+build: one on a field without a placeholder, one on a placeholder written
+inline instead of taken from that list. Date and time inputs are exempt,
+because the browser draws its own format.
+
 **A button says one to three words.** It names the act and never repeats the
 date, the pet or the clinic that are already on the screen beside it: "Move my
 booking", not "Move to Mon 7 Sep, 9:00 AM PHT". Short enough to read at a

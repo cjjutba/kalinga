@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { InputField, SelectField, TextareaField } from "@/components/primitives/field";
@@ -62,7 +63,7 @@ export function CancelDialog({ appointment, open, onOpenChange }: { orgSlug?: st
   return (
     <Frame open={open} onOpenChange={onOpenChange} busy={busy} title="Cancel this appointment" description="The slot opens up again and the reason goes in the audit trail.">
       <SelectField label="Reason" value={reason} onChange={setReason} options={reasons.map((r) => ({ value: r, label: r }))} />
-      {reason === "Other" ? <TextareaField label="What happened" rows={3} value={other} onChange={(e) => setOther(e.target.value)} /> : null}
+      {reason === "Other" ? <TextareaField label="What happened" placeholder={placeholder.reason} rows={3} value={other} onChange={(e) => setOther(e.target.value)} /> : null}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Pill variant="secondary" size="sm" onClick={() => onOpenChange(false)} disabled={busy}>
           Keep it
@@ -148,7 +149,7 @@ function PetPicker({ pets, owners, value, onChange }: { pets: Pet[]; owners: Own
   const chosenOwner = chosen ? owners.find((o) => o.id === chosen.ownerId) : undefined;
   return (
     <div className="flex flex-col gap-2">
-      <InputField label="Pet" placeholder="Search by pet, owner or mobile" value={query} onChange={(e) => setQuery(e.target.value)} helper={chosen ? `Chosen: ${chosen.name}, ${chosenOwner?.name ?? ""}` : pets.length === 0 ? "No pets on file yet. Add the client and pet first." : undefined} />
+      <InputField label="Pet" placeholder={placeholder.searchPetOrOwner} value={query} onChange={(e) => setQuery(e.target.value)} helper={chosen ? `Chosen: ${chosen.name}, ${chosenOwner?.name ?? ""}` : pets.length === 0 ? "No pets on file yet. Add the client and pet first." : undefined} />
       <ul role="listbox" aria-label="Matching pets" className="flex max-h-56 flex-col gap-1 overflow-y-auto">
         {options.map(({ pet, owner }) => {
           const selected = pet.id === value;
@@ -206,7 +207,7 @@ export function NewAppointmentDialog({ open, onOpenChange, day, defaultPetId, on
         <SelectField label="With" value={providerId} onChange={(v) => { setProviderId(v); setSlot(null); }} options={providers.map((p) => ({ value: p.id, label: p.name }))} />
       </div>
       {serviceId && providerId ? <SlotPicker tz={org.timezone} load={load} value={slot} onChange={setSlot} who={provider?.name ?? ""} startDay={day} reloadKey={`${serviceId}:${providerId}`} compact /> : <p className="text-small text-text-2">Add a service and someone to the schedule in Settings before booking.</p>}
-      <TextareaField label="Note for the vet" hint="Optional" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
+      <TextareaField label="Note for the vet" hint="Optional" placeholder={placeholder.appointmentNote} rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Pill variant="secondary" size="sm" onClick={() => onOpenChange(false)}>
           Close
@@ -266,7 +267,7 @@ export function WalkInDialog({ open, onOpenChange, onDone }: { orgSlug?: string;
         <SelectField label="Service" hint="Optional" value={serviceId} onChange={setServiceId} options={[{ value: "", label: "Not chosen yet" }, ...services.map((s) => ({ value: s.id, label: s.name }))]} />
         <SelectField label="Seen by" value={providerId} onChange={setProviderId} options={providers.map((p) => ({ value: p.id, label: p.name }))} />
       </div>
-      <TextareaField label="What they came in for" hint="Optional" rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
+      <TextareaField label="What they came in for" hint="Optional" placeholder={placeholder.appointmentNote} rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Pill variant="secondary" size="sm" onClick={() => onOpenChange(false)}>
           Close

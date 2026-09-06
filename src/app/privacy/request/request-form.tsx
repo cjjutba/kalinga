@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import { useState, type FormEvent } from "react";
 import { InputField, SelectField, TextareaField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
@@ -50,10 +51,10 @@ export function DeletionRequestForm() {
         <p className="mt-2 text-small text-text-2">Free, and answered within fifteen days. Say which clinic you booked with and how to reach you.</p>
       </div>
       <Card className="flex flex-col gap-5 p-6">
-        <InputField label="Mobile or email you booked with" value={form.contact} onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))} error={error} autoComplete="off" />
-        <InputField label="Clinic" hint="If you know it" value={form.clinic} onChange={(e) => setForm((f) => ({ ...f, clinic: e.target.value }))} placeholder="The clinic's name" />
+        <InputField label="Mobile or email you booked with" placeholder={placeholder.mobileOrEmail} value={form.contact} onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))} error={error} autoComplete="off" />
+        <InputField label="Clinic" hint="If you know it" value={form.clinic} onChange={(e) => setForm((f) => ({ ...f, clinic: e.target.value }))} placeholder={placeholder.theirClinicName} />
         <SelectField label="What would you like" value={form.kind} onChange={(v) => setForm((f) => ({ ...f, kind: v as typeof form.kind }))} options={[{ value: "delete", label: "Delete everything about me and my pets" }, { value: "copy", label: "A copy of what you hold" }, { value: "correct", label: "Correct something" }]} />
-        <TextareaField label="Anything else" hint="Optional" rows={3} value={form.details} onChange={(e) => setForm((f) => ({ ...f, details: e.target.value }))} />
+        <TextareaField label="Anything else" placeholder={placeholder.reason} hint="Optional" rows={3} value={form.details} onChange={(e) => setForm((f) => ({ ...f, details: e.target.value }))} />
         <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden>
           <label>
             Website <input tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} />

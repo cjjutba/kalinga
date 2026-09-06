@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { ChevronRight } from "lucide-react";
@@ -58,7 +59,7 @@ export function PortalSignIn() {
         <h1 className="text-title font-medium">Your pets and appointments</h1>
         <p className="mt-2 text-small text-text-2">Enter the email you booked with and we will send a link. No account, no password.</p>
       </div>
-      <InputField on="page" label="Email" type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} placeholder="you@example.com" disabled={loading} />
+      <InputField on="page" label="Email" type="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} placeholder={placeholder.email} disabled={loading} />
       <Pill type="submit" block loading={loading} loadingLabel="Sending">
         Send me a link
       </Pill>

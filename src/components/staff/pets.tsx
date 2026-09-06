@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -58,7 +59,7 @@ export function PetsList({ orgSlug }: { orgSlug: string }) {
       />
       <NewPetDialog orgSlug={orgSlug} open={newOpen} onOpenChange={setNewOpen} />
       <div className="mb-4 max-w-md">
-        <InputField on="page" label="Search" placeholder="Pet, breed or owner" value={q} onChange={(e) => setQ(e.target.value)} type="search" />
+        <InputField on="page" label="Search" placeholder={placeholder.searchPets} value={q} onChange={(e) => setQ(e.target.value)} type="search" />
       </div>
       {ui === "loading" ? (
         <TableSkeleton />
@@ -345,7 +346,7 @@ export function PetForm({ orgSlug, id, owner, inDialog, onDone, onBusyChange }: 
   const fields = (
     <>
       <SelectField label="Owner" value={ownerId} onChange={setOwnerId} options={owners.map((o) => ({ value: o.id, label: o.name }))} />
-        <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} error={error} placeholder="Kiko" />
+        <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} error={error} placeholder={placeholder.petName} />
         <div className="grid gap-4 sm:grid-cols-2">
           <SelectField label="Species" value={species} onChange={(v) => setSpecies(v as "dog" | "cat")} options={[{ value: "dog", label: "Dog" }, { value: "cat", label: "Cat" }]} />
           <SelectField label="Sex" value={sex} onChange={(v) => setSex(v as "male" | "female")} options={[{ value: "male", label: "Male" }, { value: "female", label: "Female" }]} />
@@ -353,9 +354,9 @@ export function PetForm({ orgSlug, id, owner, inDialog, onDone, onBusyChange }: 
         <InputField label="Breed" value={breed} onChange={(e) => setBreed(e.target.value)} placeholder={species === "dog" ? "Aspin" : "Puspin"} helper="Aspin and puspin are breeds here." />
         <div className="grid gap-4 sm:grid-cols-2">
           <InputField label="Birth date" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} hint="Or a best guess" />
-          <InputField label="Weight, kg" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} hint="Optional" placeholder="8.5" />
+          <InputField label="Weight, kg" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} hint="Optional" placeholder={placeholder.weightKg} />
         </div>
-      <TextareaField label="Notes" hint="Optional" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Nervous with clippers. Likes the groomer to go slow." />
+      <TextareaField label="Notes" hint="Optional" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={placeholder.vetNotes} />
     </>
   );
 
