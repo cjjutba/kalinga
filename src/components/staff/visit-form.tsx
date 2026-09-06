@@ -34,7 +34,8 @@ export function VisitForm({ orgSlug, petId }: { orgSlug: string; petId: string }
   );
   const actor = members.find((m) => m.id === actorMemberId);
   const [appointmentId, setAppointmentId] = useState(params.get("appointment") ?? candidates[0]?.id ?? "");
-  const [providerId, setProviderId] = useState(actor?.providerId ?? providers[0]?.id ?? "");
+  // Seen by follows the appointment's vet first, then the signed in vet, then whoever is first on the schedule.
+  const [providerId, setProviderId] = useState(() => appointments.find((a) => a.id === (params.get("appointment") ?? candidates[0]?.id))?.providerId ?? actor?.providerId ?? providers[0]?.id ?? "");
   const [weight, setWeight] = useState(pet?.weightKg?.toString() ?? "");
   const [chosen, setChosen] = useState<string[]>([]);
   const [extra, setExtra] = useState("");
@@ -94,7 +95,11 @@ export function VisitForm({ orgSlug, petId }: { orgSlug: string; petId: string }
           <SelectField
             label="Appointment"
             value={appointmentId}
-            onChange={setAppointmentId}
+            onChange={(id) => {
+              setAppointmentId(id);
+              const next = appointments.find((a) => a.id === id);
+              if (next) setProviderId(next.providerId);
+            }}
             options={candidates.map((a) => ({
               value: a.id,
               label: `${formatShortDate(a.startsAt, org.timezone)}, ${formatTime(a.startsAt, org.timezone)}, ${services.find((s) => s.id === a.serviceId)?.name ?? "walk-in"}`,

@@ -80,7 +80,7 @@ export function RescheduleDialog({ appointment, open, onOpenChange }: { orgSlug?
         <SelectField label="With" value={effectiveProvider} onChange={(v) => { setProviderId(v); setSlot(null); }} options={providers.map((p) => ({ value: p.id, label: p.name }))} />
         <SelectField label="Service" value={effectiveService} onChange={(v) => { setServiceId(v); setSlot(null); }} options={services.map((s) => ({ value: s.id, label: `${s.name}, ${s.durationMin} min` }))} helper={!appointment.serviceId ? "Walk-in had no service. Pick one to size the slot." : undefined} />
       </div>
-      {effectiveService && effectiveProvider ? <SlotPicker tz={org.timezone} load={load} value={slot} onChange={setSlot} who={provider?.name ?? ""} reloadKey={`${effectiveService}:${effectiveProvider}`} compact /> : null}
+      {effectiveService && effectiveProvider ? <SlotPicker tz={org.timezone} load={load} value={slot} onChange={setSlot} who={provider?.name ?? ""} startDay={appointment ? new Date(appointment.startsAt) : undefined} reloadKey={`${effectiveService}:${effectiveProvider}`} compact /> : null}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Pill variant="secondary" size="sm" onClick={() => onOpenChange(false)}>
           Keep the time

@@ -96,6 +96,38 @@ export function AuditEventDetail({ orgSlug, id }: { orgSlug: string; id: string 
   if (!can(role, "view_audit")) return <NotForRole role={roleLabel[role]} page="The audit trail" />;
   if (!event) return <EmptyState title="That event is not in the trail" action={<Pill asChild size="sm" variant="secondary"><Link href={`/app/${org.slug}/audit`}>Back to the trail</Link></Pill>} />;
   const keys = Array.from(new Set([...Object.keys(event.before ?? {}), ...Object.keys(event.after ?? {})]));
+  // The stored keys are code names. The owner reads words.
+  const fieldLabel: Record<string, string> = {
+    startsAt: "Starts at",
+    status: "Status",
+    reason: "Reason",
+    role: "Role",
+    emailed: "Client emailed",
+    weightKg: "Weight, kg",
+    administered: "Administered",
+    name: "Name",
+    mobile: "Mobile",
+    email: "Email",
+    to: "Sent to",
+    days: "Working days",
+    closures: "Closures",
+    pets: "Pets removed",
+    appointments: "Appointments removed",
+    visits: "Visits removed",
+    reminders: "Reminders removed",
+    price: "Price",
+    pricePhp: "Price",
+    durationMin: "Minutes",
+    bufferMin: "Buffer",
+    publiclyBookable: "Bookable online",
+    recallKind: "Recall",
+    timezone: "Time zone",
+    city: "City",
+    address: "Address",
+    openFrom: "Opens",
+    openTo: "Closes",
+    groomingIntervalWeeks: "Grooming interval, weeks",
+  };
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
@@ -130,7 +162,7 @@ export function AuditEventDetail({ orgSlug, id }: { orgSlug: string; id: string 
                   const changed = JSON.stringify(b) !== JSON.stringify(a);
                   return (
                     <tr key={k}>
-                      <td className="py-2.5 pr-4 text-text-2">{k}</td>
+                      <td className="py-2.5 pr-4 text-text-2">{fieldLabel[k] ?? k}</td>
                       <td className={cn("py-2.5 pr-4", changed && b !== undefined && "line-through decoration-1 text-text-2")}>
                         <Value v={b} />
                       </td>
