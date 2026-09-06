@@ -711,6 +711,34 @@ happened at the visit. And the vet step showing one name when the clinic has
 two people is the rule working: groomers take grooming, vets take everything
 else. It now says so on the step rather than leaving it to be guessed.
 
+## The booking shell, and a clinic page that uses its width
+
+**Date.** 7 September 2026.
+
+**Decided.** The booking flow now follows the Polar onboarding shape properly
+rather than approximately. Below the laptop breakpoint there is no panel: the
+step sits on the page with the back arrow and the segments above it, which is
+what Polar does and what a phone wants. From that breakpoint up, the rail
+stands on the ground and the step becomes a panel beside it, hairline, sheet
+tone, its own height, content centred in a 28rem column. The ground keeps a
+small margin all the way round.
+
+Controls change tone with the width, because what is behind them changes. On a
+phone a choice or an input is a white card on the grey page; inside the panel
+it is the field tone on white. That is one new surface in the Field primitive,
+the mirror of the one the auth pages already use.
+
+A full day of slots would have pushed the button off the screen, so inside the
+panel the times scroll and the panel keeps its shape.
+
+**The clinic page uses the width it has.** It was one narrow column centred in
+an empty laptop window. On a laptop the photograph, the name, the hours and the
+one button hold the left and stay in view, and the services, the people and the
+recall note read down the right.
+
+**Why.** A pet owner books on a phone and a clinic owner evaluates on a laptop.
+The old flow was built for the first and left the second looking unfinished.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a

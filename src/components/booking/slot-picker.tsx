@@ -30,6 +30,7 @@ export function SlotPicker({
   compact = false,
   startDay,
   reloadKey,
+  on = "sheet",
 }: {
   tz: string;
   /** Returns open slots keyed by clinic day for `days` days from `from`. */
@@ -42,7 +43,12 @@ export function SlotPicker({
   startDay?: Date;
   /** Change to force a reload, e.g. when the service or vet changes. */
   reloadKey?: string;
+  /** "shell" is bare page on a phone and a panel from the laptop breakpoint up. */
+  on?: "sheet" | "shell";
 }) {
+  // A tile has to be one step of tone away from whatever is behind it, and
+  // what is behind it changes with the width on the booking flow.
+  const tile = on === "shell" ? "bg-sheet lg:bg-field" : "bg-field";
   const today = useMemo(() => startOfDay(startDay ? new TZDate(startDay, tz) : clinicNow(tz)) as TZDate, [startDay, tz]);
   const [offset, setOffset] = useState(0);
   const [day, setDay] = useState<TZDate>(() => (value ? (startOfDay(new TZDate(new Date(value.startsAt), tz)) as TZDate) : today));
@@ -101,7 +107,7 @@ export function SlotPicker({
                 className={cn(
                   "flex min-w-[52px] flex-1 flex-col items-center rounded-input py-2 text-label transition-colors duration-150 motion-reduce:transition-none",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-sheet",
-                  selected ? "bg-action text-on-action" : "bg-field text-text hover:bg-divider",
+                  selected ? "bg-action text-on-action" : cn(tile, "text-text hover:bg-divider"),
                   byDay && !open && !selected && "text-text-2",
                 )}
               >
@@ -124,18 +130,29 @@ export function SlotPicker({
       </div>
 
       {error ? (
-        <div role="alert" className="rounded-guide bg-field p-4">
+        <div role="alert" className={cn("rounded-guide p-4", tile)}>
           <p className="text-body font-medium">Could not load open times</p>
           <p className="mt-1 text-small text-text-2">{error}</p>
         </div>
       ) : !byDay ? (
-        <div className={cn("grid gap-2", compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4")} aria-busy>
+        <div className={cn("grid gap-2", compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3")} aria-busy>
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 rounded-input bg-field" />
+            <Skeleton key={i} className={cn("h-12 rounded-input", tile)} />
           ))}
         </div>
       ) : slots.length ? (
-        <div role="radiogroup" aria-label="Time" className={cn("grid gap-2", compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4")}>
+        <div
+          role="radiogroup"
+          aria-label="Time"
+          className={cn(
+            "grid gap-2",
+            compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3",
+            // Inside the booking panel a full day of slots would push the
+            // button off the screen, so the times scroll and the panel keeps
+            // its shape.
+            on === "shell" && "lg:max-h-[19rem] lg:overflow-y-auto lg:pr-1",
+          )}
+        >
           {slots.map((s) => {
             const selected = value?.startsAt === s.startsAt;
             return (
@@ -148,7 +165,7 @@ export function SlotPicker({
                 className={cn(
                   "h-12 rounded-input text-body tabular transition-colors duration-150 motion-reduce:transition-none",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-sheet",
-                  selected ? "bg-action text-on-action" : "bg-field text-text hover:bg-divider",
+                  selected ? "bg-action text-on-action" : cn(tile, "text-text hover:bg-divider"),
                 )}
               >
                 {formatTime(s.startsAt, tz)}
@@ -157,7 +174,7 @@ export function SlotPicker({
           })}
         </div>
       ) : (
-        <div className="rounded-guide bg-field p-4">
+        <div className={cn("rounded-guide p-4", tile)}>
           <p className="text-body font-medium">Nothing open on {formatShortDate(day, tz)}</p>
           {nextOpen ? (
             <>
