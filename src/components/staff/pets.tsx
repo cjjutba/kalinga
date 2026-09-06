@@ -301,7 +301,7 @@ export function VisitDetail({ orgSlug, petId, visitId }: { orgSlug: string; petI
   );
 }
 
-export function PetForm({ orgSlug, id, owner, inDialog, onDone }: { orgSlug: string; id?: string; /** Preselected owner, when the form is opened from a client. */ owner?: string; /** Rendered inside a dialog: no page header, and the footer closes instead of navigating. */ inDialog?: boolean; onDone?: (id: string | null) => void }) {
+export function PetForm({ orgSlug, id, owner, inDialog, onDone, onBusyChange }: { orgSlug: string; id?: string; /** Preselected owner, when the form is opened from a client. */ owner?: string; /** Rendered inside a dialog: no page header, and the footer closes instead of navigating. */ inDialog?: boolean; onDone?: (id: string | null) => void; /** Lets the dialog around this form keep itself open while it saves. */ onBusyChange?: (busy: boolean) => void }) {
   const router = useRouter();
   const params = useSearchParams();
   const { org, pets, owners, role, dispatch } = useOrg(orgSlug);
@@ -329,11 +329,13 @@ export function PetForm({ orgSlug, id, owner, inDialog, onDone }: { orgSlug: str
       return;
     }
     setBusy(true);
+    onBusyChange?.(true);
     const r = await dispatch({
       type: "pet/upsert",
       pet: { id: existing?.id, ownerId, name: name.trim(), species, breed: breed.trim() || (species === "dog" ? "Aspin" : "Puspin"), sex, birthDate: birthDate || undefined, weightKg: weight ? Number(weight) : undefined, notes: notes.trim() || undefined, lastVaccination: existing?.lastVaccination, lastDeworming: existing?.lastDeworming, lastGroom: existing?.lastGroom },
     });
     setBusy(false);
+    onBusyChange?.(false);
     if (!r.ok) return setError(r.error);
     const savedId = r.id ?? existing?.id ?? null;
     if (inDialog) return onDone?.(savedId);
@@ -395,12 +397,14 @@ export function PetForm({ orgSlug, id, owner, inDialog, onDone }: { orgSlug: str
  *  who lands on it directly. */
 export function NewPetDialog({ orgSlug, owner, open, onOpenChange }: { orgSlug: string; owner?: string; open: boolean; onOpenChange: (o: boolean) => void }) {
   const toast = useToast();
+  const [busy, setBusy] = useState(false);
   return (
-    <Frame open={open} onOpenChange={onOpenChange} title="New pet" description="Breed can be a best guess. Aspin and puspin are breeds here.">
+    <Frame open={open} onOpenChange={onOpenChange} busy={busy} title="New pet" description="Breed can be a best guess. Aspin and puspin are breeds here.">
       <PetForm
         orgSlug={orgSlug}
         owner={owner}
         inDialog
+        onBusyChange={setBusy}
         onDone={(id) => {
           onOpenChange(false);
           // Stay where the pet was added from, list or client. It appears

@@ -262,6 +262,14 @@ booking", not "Move to Mon 7 Sep, 9:00 AM PHT". Short enough to read at a
 glance, long enough to say what happens. A test fails the build on a label
 written as a sentence.
 
+**A dialog carries its own work.** The button inside it spins, the buttons
+beside it go quiet, and nothing closes it while the work is in flight, not
+Escape, not a click outside, not the corner cross. It closes when the work is
+done, so the answer to "did that happen" is in the same place as the question,
+and a refusal is shown inside the dialog rather than behind it. The shared
+confirmation takes the work as an argument, so there is no way to write one
+that returns a yes and spins somewhere else.
+
 **Removing anything asks first.** One dialog, one shape, everywhere: what is
 being removed in the title, what actually happens underneath, a grey button
 that keeps it and a red one that does it. It says the consequence rather than
