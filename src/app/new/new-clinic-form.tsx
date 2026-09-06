@@ -2,10 +2,9 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { AuthTitle, PrivacyFooter } from "@/components/auth/auth-shell";
+import { CalendarClock, Clock, ListChecks, UserPlus } from "lucide-react";
 import { InputField, SelectField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
-import { GuideCard } from "@/components/primitives/surfaces";
 import { authClient } from "@/lib/auth-client";
 import { applyAction } from "@/lib/actions/apply";
 import { clinicNow, formatTime } from "@/lib/time";
@@ -93,41 +92,91 @@ export function NewClinicForm() {
     router.refresh();
   }
 
+  const previewName = name.trim() || "Your clinic";
+  const previewCity = city.trim() || "Your city";
+  const previewSlug = slug || "your-clinic";
+
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-      <AuthTitle>Set up your clinic</AuthTitle>
-      <GuideCard tone="auto" name="Kalinga" initials="K">
-        Three fields and you can take a booking. Services, hours and staff come next, inside.
-      </GuideCard>
-      {formError ? (
-        <p role="alert" className="text-small text-error">
-          {formError}
-        </p>
-      ) : null}
-      <InputField on="auto" label="Clinic name" name="clinic" placeholder="Lunhaw Animal Clinic" value={name} onChange={(e) => onName(e.target.value)} error={nameError} disabled={loading} />
-      <InputField
-        on="auto"
-        label="Booking address"
-        name="slug"
-        prefix="kalinga.cjjutba.dev/"
-        placeholder="lunhaw"
-        value={slug}
-        onChange={(e) => {
-          setSlugTouched(true);
-          setSlug(slugify(e.target.value));
-        }}
-        helper="This is the link you share with pet owners. It cannot be changed later."
-        error={slugError}
-        disabled={loading}
-        autoCapitalize="off"
-        spellCheck={false}
-      />
-      <InputField on="auto" label="City" hint="Optional" name="city" placeholder="Cagayan de Oro" value={city} onChange={(e) => setCity(e.target.value)} disabled={loading} />
-      <SelectField on="auto" label="Time zone" value={tz} onChange={setTz} options={zones} helper={now ? `It is ${now} in ${tz.split("/")[1]} right now.` : "Appointments show in this zone, labelled."} disabled={loading} />
-      <Pill type="submit" block loading={loading} loadingLabel="Creating clinic">
-        Create clinic
-      </Pill>
-      <PrivacyFooter />
-    </form>
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12">
+      <div className="min-w-0">
+        <h1 className="text-title font-medium text-balance">Set up your clinic</h1>
+        <p className="mt-2 max-w-md text-small text-text-2">Three fields and you can take a booking. Services, hours and staff come next, inside.</p>
+
+        <form onSubmit={submit} noValidate className="mt-6 flex flex-col gap-5 rounded-card bg-sheet p-5 md:p-6">
+          {formError ? (
+            <p role="alert" className="text-small text-error">
+              {formError}
+            </p>
+          ) : null}
+          <InputField label="Clinic name" name="clinic" placeholder="Lunhaw Animal Clinic" value={name} onChange={(e) => onName(e.target.value)} error={nameError} disabled={loading} autoFocus />
+          <InputField
+            label="Booking address"
+            name="slug"
+            prefix="kalinga.cjjutba.dev/"
+            placeholder="lunhaw"
+            value={slug}
+            onChange={(e) => {
+              setSlugTouched(true);
+              setSlug(slugify(e.target.value));
+            }}
+            helper="This is the link you share with pet owners. It cannot be changed later."
+            error={slugError}
+            disabled={loading}
+            autoCapitalize="off"
+            spellCheck={false}
+          />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <InputField label="City" hint="Optional" name="city" placeholder="Cagayan de Oro" value={city} onChange={(e) => setCity(e.target.value)} disabled={loading} />
+            <SelectField label="Time zone" value={tz} onChange={setTz} options={zones} helper={now ? `It is ${now} there right now.` : "Appointments show in this zone, labelled."} disabled={loading} />
+          </div>
+          <Pill type="submit" block loading={loading} loadingLabel="Creating clinic">
+            Create clinic
+          </Pill>
+        </form>
+        <p className="mt-3 text-[13px] text-text-2">The name, city and time zone can change later. The booking address cannot.</p>
+      </div>
+
+      <aside className="flex flex-col gap-4 lg:pt-[5.25rem]">
+        <div className="rounded-card bg-sheet p-5">
+          <p className="text-label font-medium text-text-2">What pet owners see</p>
+          <div className="mt-3 rounded-guide bg-field p-4">
+            <p className="truncate text-[17px] font-medium text-text">{previewName}</p>
+            <p className="mt-0.5 truncate text-[13px] text-text-2">{previewCity}</p>
+            <p className="mt-3 truncate text-[13px] tabular text-text-2">kalinga.cjjutba.dev/{previewSlug}</p>
+            <div className="mt-3 flex items-center gap-2 rounded-tag bg-sheet px-3 py-2 text-[13px] text-text-2">
+              <CalendarClock className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
+              Times shown in {tz.split("/")[1].replace("_", " ")}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-card bg-sheet p-5">
+          <p className="text-label font-medium text-text-2">Then, inside</p>
+          <ul className="mt-3 flex flex-col gap-3">
+            <li className="flex gap-3 text-[15px]">
+              <ListChecks className="mt-0.5 size-4 shrink-0 text-text-2" strokeWidth={1.5} aria-hidden />
+              <span>
+                Add your services
+                <span className="block text-[13px] text-text-2">How long each takes, what it costs.</span>
+              </span>
+            </li>
+            <li className="flex gap-3 text-[15px]">
+              <Clock className="mt-0.5 size-4 shrink-0 text-text-2" strokeWidth={1.5} aria-hidden />
+              <span>
+                Set working hours
+                <span className="block text-[13px] text-text-2">Per vet or groomer, plus closures.</span>
+              </span>
+            </li>
+            <li className="flex gap-3 text-[15px]">
+              <UserPlus className="mt-0.5 size-4 shrink-0 text-text-2" strokeWidth={1.5} aria-hidden />
+              <span>
+                Invite your staff
+                <span className="block text-[13px] text-text-2">Front desk runs the day, vets see their column.</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </div>
   );
 }

@@ -175,7 +175,7 @@ const screens: [string, () => ReactElement, boolean?][] = [
   ["sign in", () => <AuthShell><SignInForm /></AuthShell>, true],
   ["sign up", () => <AuthShell><SignUpForm /></AuthShell>, true],
   ["reset password", () => <AuthShell><ResetFlow /></AuthShell>, true],
-  ["create clinic", () => <AuthShell showCard={false}><NewClinicForm /></AuthShell>, true],
+  ["create clinic", () => <NewClinicForm />, true],
   ["accept invitation", () => <AuthShell><InviteForm invitation={invitation} signedInAs={null} /></AuthShell>, true],
   ["expired invitation", () => <AuthShell><InviteForm invitation={{ ...invitation, expired: true }} signedInAs="jess@lunhaw.test" /></AuthShell>, true],
   ["choose clinic", () => <ChooseClinic memberships={[{ organisation: snapshot.organisation, role: "owner" }, { organisation: { ...snapshot.organisation, id: "org-2", slug: "amihan", name: "Amihan Veterinary Clinic", city: "Iligan" }, role: "vet" }]} />],
