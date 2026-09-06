@@ -363,11 +363,12 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                 </>
               )}
 
-              {/* Back on the left, the way forward on the right, both the
-                  same button so neither reads as an afterthought. */}
-              <div className="flex flex-wrap items-center justify-end gap-3">
+              {/* Both buttons together at the left, back first and the way
+                  forward beside it, so the pair reads in the order it is used
+                  and neither drifts to the far edge of the panel. */}
+              <div className="flex flex-wrap items-center gap-3">
                 {step > 0 ? (
-                  <Pill variant="secondary" onClick={back} className="mr-auto">
+                  <Pill variant="secondary" onClick={back}>
                     Back
                   </Pill>
                 ) : null}
