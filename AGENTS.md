@@ -193,7 +193,7 @@ evidence, not licensed for reuse, because Kalinga is meant to be sold.
 | `src/content/` | Typed marketing and static copy, the privacy notice, the message templates, the route directory. |
 | `.claude/launch.json` | Starts `pnpm dev` on port 3000 for the browser preview. |
 | `docs/design/screenshots/` | Screenshots taken at the end of each build phase. |
-| `public/brand/` | The mark, lockup, favicon and app icon as SVG. The geometry is the source of truth, never redraw it. |
+| `public/brand/` | The mark, lockup, favicon and app icon as SVG. The geometry is the source of truth, never redraw it. The PNG icons the install manifest needs are rendered from `app-icon.svg` and `app-icon-maskable.svg` with sharp, never edited by hand. |
 | `docs/product/` | Brief, features, roles, data model, decisions. |
 | `docs/design/` | Visual direction, the page inventory, the screens to design. |
 | `docs/design/explorations/` | Generated boards and vectors, each beside the prompt, model and price that produced it. |

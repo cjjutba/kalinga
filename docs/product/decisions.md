@@ -494,6 +494,33 @@ values were already clear and do not change. The chevron in the select
 field, drawn as an inline SVG, takes the same grey so it keeps matching
 secondary text.
 
+## 2026-09-06, F11 installable
+
+### The PWA is a manifest and icons, not a service worker
+
+`src/app/manifest.ts` serves the web app manifest, the root metadata points at
+it and carries the Apple touch icon, and four PNGs rendered from the brand SVG
+give Android and iOS what they need to pin Kalinga to a home screen. It opens
+on `/app`, which is the clinic's day for staff and the sign in page for anyone
+else. There is no service worker and nothing works offline.
+
+**Why.** Installability is what AGENTS.md promised, and a home screen icon is
+what a receptionist needs. Offline is a different promise: the product is the
+database, and a cached day view that hides a booking made from a phone in the
+waiting room is worse than a spinner. When a clinic asks for offline, it gets
+designed, not switched on.
+
+### Icons are rendered, never redrawn
+
+`icon-192.png`, `icon-512.png`, `icon-512-maskable.png` and
+`apple-touch-icon.png` come from `app-icon.svg` and a full bleed
+`app-icon-maskable.svg` that reuses the same path data at a smaller scale, so
+Android's mask cannot clip the mark. The render command is sharp through
+`pnpm dlx sharp-cli`.
+
+**Why.** The geometry is the identity. Two SVG sources and a repeatable render
+beat a folder of hand exported bitmaps that drift.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a
