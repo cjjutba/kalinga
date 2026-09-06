@@ -33,7 +33,7 @@ const zones = [
   { value: "Asia/Tokyo", label: "Asia/Tokyo" },
 ];
 
-export function ClinicForm({ inDialog, onDone }: { inDialog?: boolean; onDone?: (slug: string | null) => void } = {}) {
+export function ClinicForm({ inDialog, onDone, onBusyChange }: { inDialog?: boolean; onDone?: (slug: string | null) => void; /** Lets the dialog around this form keep itself open while it saves. */ onBusyChange?: (busy: boolean) => void } = {}) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -84,10 +84,12 @@ export function ClinicForm({ inDialog, onDone }: { inDialog?: boolean; onDone?: 
     }
     if (bad || slugError) return;
     setLoading(true);
+    onBusyChange?.(true);
     setFormError(undefined);
     const { data, error } = await authClient.organization.create({ name: name.trim(), slug });
     if (error || !data) {
       setLoading(false);
+      onBusyChange?.(false);
       setFormError(error?.message ?? "Could not create the clinic.");
       return;
     }

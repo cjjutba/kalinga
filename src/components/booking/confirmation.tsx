@@ -35,11 +35,11 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
   const { organisation: org, appointment: appt, pet, owner, service, provider } = data;
   const tz = org.timezone;
   const [moving, setMoving] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
   const confirm = useConfirm();
   const [slot, setSlot] = useState<Slot | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [moveError, setMoveError] = useState<string | null>(null);
   const [changed, setChanged] = useState<"cancelled" | "rescheduled" | null>(null);
   const [emailed, setEmailed] = useState(emailedOnBooking);
 
@@ -55,10 +55,12 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
     const r = await rescheduleBooking({ orgSlug: org.slug, reference: appt.reference, startsAt: slot.startsAt });
     setBusy(false);
     if (!r.ok) {
-      setError(r.error ?? "Could not move the booking.");
+      // The dialog stays open, so the reason has to be inside it.
+      setMoveError(r.error ?? "Could not move the booking.");
       setSlot(null);
       return;
     }
+    setMoveError(null);
     setChanged("rescheduled");
     setEmailed(Boolean(r.emailed));
     setMoving(false);
@@ -66,25 +68,27 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
     router.refresh();
   }
 
-  async function cancel() {
-    const sure = await confirm({
+  // The dialog holds the spinner and closes itself when the clinic has it.
+  function cancel() {
+    setError(null);
+    return confirm({
       title: "Cancel this booking?",
       description: "The clinic sees it straight away and the slot opens up for someone else. You can book again any time.",
       confirmLabel: "Cancel booking",
       cancelLabel: "Keep it",
+      busyLabel: "Cancelling",
+      run: async () => {
+        const r = await cancelBooking({ orgSlug: org.slug, reference: appt.reference });
+        if (!r.ok) {
+          // Close and say why on the page, where there is room for it.
+          setError(r.error ?? "Could not cancel the booking.");
+          return;
+        }
+        setChanged("cancelled");
+        setEmailed(Boolean(r.emailed));
+        router.refresh();
+      },
     });
-    if (!sure) return;
-    setCancelling(true);
-    setError(null);
-    const r = await cancelBooking({ orgSlug: org.slug, reference: appt.reference });
-    setCancelling(false);
-    if (!r.ok) {
-      setError(r.error ?? "Could not cancel the booking.");
-      return;
-    }
-    setChanged("cancelled");
-    setEmailed(Boolean(r.emailed));
-    router.refresh();
   }
 
   const cancelled = changed === "cancelled" || appt.status === "cancelled";
@@ -155,7 +159,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
               <Pill size="sm" variant="secondary" onClick={() => setMoving(true)}>
                 Change the time
               </Pill>
-              <Pill size="sm" variant="danger" onClick={cancel} loading={cancelling} loadingLabel="Cancelling">
+              <Pill size="sm" variant="danger" onClick={cancel}>
                 Cancel this booking
               </Pill>
             </div>
@@ -177,8 +181,14 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
         .
       </p>
 
-      <Dialog open={moving} onOpenChange={setMoving}>
-        <DialogContent className="flex max-h-[88dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-sheet border-0 bg-sheet p-6 shadow-lifted sm:max-w-lg">
+      <Dialog
+        open={moving}
+        onOpenChange={(next) => {
+          if (next) return setMoving(true);
+          if (!busy) setMoving(false);
+        }}
+      >
+        <DialogContent showCloseButton={!busy} className="flex max-h-[88dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-sheet border-0 bg-sheet p-6 shadow-lifted sm:max-w-lg">
           <DialogHeader className="text-left">
             <DialogTitle className="text-heading font-medium">Pick a new time</DialogTitle>
             <DialogDescription className="text-small text-text-2">With {provider?.name}. Your current slot opens up for someone else.</DialogDescription>
@@ -190,8 +200,13 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
           ) : (
             <p className="mt-4 text-small text-text-2">This booking has no service attached. Call the clinic to move it.</p>
           )}
+          {moveError ? (
+            <p role="alert" className="mt-4 text-small text-error">
+              {moveError}
+            </p>
+          ) : null}
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Pill size="sm" variant="secondary" onClick={() => setMoving(false)}>
+            <Pill size="sm" variant="secondary" onClick={() => setMoving(false)} disabled={busy}>
               Keep my time
             </Pill>
             <Pill size="sm" disabled={!slot} loading={busy} loadingLabel="Moving" onClick={move}>

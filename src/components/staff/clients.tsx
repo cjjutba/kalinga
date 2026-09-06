@@ -246,11 +246,11 @@ function PrivacyCard({ orgSlug, owner, petCount, appointmentCount }: { orgSlug: 
           Delete this client
         </Pill>
       </div>
-      <Frame open={open} onOpenChange={setOpen} title={`Delete ${owner.name}`} description={`Removes the client, ${plural(petCount, "pet")} and ${plural(appointmentCount, "appointment")} with their visits and reminders. Their name comes off the audit trail. This cannot be undone.`}>
+      <Frame open={open} onOpenChange={setOpen} busy={busy} title={`Delete ${owner.name}`} description={`Removes the client, ${plural(petCount, "pet")} and ${plural(appointmentCount, "appointment")} with their visits and reminders. Their name comes off the audit trail. This cannot be undone.`}>
         <SelectField label="Reason" value={reason} onChange={setReason} options={deleteReasons.map((r) => ({ value: r, label: r }))} />
         {reason === "Other" ? <TextareaField label="What happened" rows={3} value={other} onChange={(e) => setOther(e.target.value)} /> : null}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Pill variant="secondary" size="sm" onClick={() => setOpen(false)}>
+          <Pill variant="secondary" size="sm" onClick={() => setOpen(false)} disabled={busy}>
             Keep the record
           </Pill>
           <Pill
@@ -276,7 +276,7 @@ function PrivacyCard({ orgSlug, owner, petCount, appointmentCount }: { orgSlug: 
   );
 }
 
-export function ClientForm({ orgSlug, id, inDialog, onDone }: { orgSlug: string; id?: string; /** Rendered inside a dialog: no page header, and the footer closes instead of navigating. */ inDialog?: boolean; onDone?: (id: string | null) => void }) {
+export function ClientForm({ orgSlug, id, inDialog, onDone, onBusyChange }: { orgSlug: string; id?: string; /** Rendered inside a dialog: no page header, and the footer closes instead of navigating. */ inDialog?: boolean; onDone?: (id: string | null) => void; /** Lets the dialog around this form keep itself open while it saves. */ onBusyChange?: (busy: boolean) => void }) {
   const router = useRouter();
   const { org, owners, role, dispatch } = useOrg(orgSlug);
   const existing = id ? resolveId(id, owners) : undefined;
@@ -295,8 +295,10 @@ export function ClientForm({ orgSlug, id, inDialog, onDone }: { orgSlug: string;
       return;
     }
     setBusy(true);
+    onBusyChange?.(true);
     const r = await dispatch({ type: "owner/upsert", owner: { id: existing?.id, name: name.trim(), mobile: mobile.trim() || undefined, email: email.trim() || undefined, notes: notes.trim() || undefined } });
     setBusy(false);
+    onBusyChange?.(false);
     if (!r.ok) return setError(r.error);
     const savedId = r.id ?? existing?.id ?? null;
     if (inDialog) return onDone?.(savedId);
@@ -351,11 +353,13 @@ export function ClientForm({ orgSlug, id, inDialog, onDone }: { orgSlug: string;
  *  anyone who lands on it directly. */
 export function NewClientDialog({ orgSlug, open, onOpenChange }: { orgSlug: string; open: boolean; onOpenChange: (o: boolean) => void }) {
   const toast = useToast();
+  const [busy, setBusy] = useState(false);
   return (
-    <Frame open={open} onOpenChange={onOpenChange} title="New client" description="Name is enough to start. Mobile is how reminders reach them.">
+    <Frame open={open} onOpenChange={onOpenChange} busy={busy} title="New client" description="Name is enough to start. Mobile is how reminders reach them.">
       <ClientForm
         orgSlug={orgSlug}
         inDialog
+        onBusyChange={setBusy}
         onDone={(id) => {
           onOpenChange(false);
           // Stay on the list. The row appears at the top of the table on the

@@ -14,10 +14,33 @@ import { clinicNow, formatShortDate, formatTimeWithZone } from "@/lib/time";
 // applies, then closes. Slots come from the server through the same engine
 // the public page uses.
 
-export function Frame({ open, onOpenChange, title, description, children }: { open: boolean; onOpenChange: (o: boolean) => void; title: string; description?: string; children: ReactNode }) {
+export function Frame({
+  open,
+  onOpenChange,
+  title,
+  description,
+  busy = false,
+  children,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  title: string;
+  description?: string;
+  /** Work is in flight inside. Nothing closes the dialog until it settles. */
+  busy?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-lg overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-lifted sm:p-7">
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (next) return onOpenChange(true);
+        // Escape, a click outside and the corner cross all wait. The dialog
+        // that started the work is the one that reports it finished.
+        if (!busy) onOpenChange(false);
+      }}
+    >
+      <DialogContent showCloseButton={!busy} className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-lg overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-lifted sm:p-7">
         <DialogHeader className="text-left">
           <DialogTitle className="text-heading font-medium">{title}</DialogTitle>
           {description ? <DialogDescription className="text-small text-text-2">{description}</DialogDescription> : null}
@@ -37,11 +60,11 @@ export function CancelDialog({ appointment, open, onOpenChange }: { orgSlug?: st
   const [busy, setBusy] = useState(false);
   if (!appointment) return null;
   return (
-    <Frame open={open} onOpenChange={onOpenChange} title="Cancel this appointment" description="The slot opens up again and the reason goes in the audit trail.">
+    <Frame open={open} onOpenChange={onOpenChange} busy={busy} title="Cancel this appointment" description="The slot opens up again and the reason goes in the audit trail.">
       <SelectField label="Reason" value={reason} onChange={setReason} options={reasons.map((r) => ({ value: r, label: r }))} />
       {reason === "Other" ? <TextareaField label="What happened" rows={3} value={other} onChange={(e) => setOther(e.target.value)} /> : null}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Pill variant="secondary" size="sm" onClick={() => onOpenChange(false)}>
+        <Pill variant="secondary" size="sm" onClick={() => onOpenChange(false)} disabled={busy}>
           Keep it
         </Pill>
         <Pill
@@ -75,14 +98,14 @@ export function RescheduleDialog({ appointment, open, onOpenChange, onDone }: { 
   if (!appointment) return null;
   const provider = providers.find((p) => p.id === effectiveProvider);
   return (
-    <Frame open={open} onOpenChange={onOpenChange} title="Move this appointment" description={`Currently ${formatShortDate(appointment.startsAt, org.timezone)}, ${formatTimeWithZone(appointment.startsAt, org.timezone)}.`}>
+    <Frame open={open} onOpenChange={onOpenChange} busy={busy} title="Move this appointment" description={`Currently ${formatShortDate(appointment.startsAt, org.timezone)}, ${formatTimeWithZone(appointment.startsAt, org.timezone)}.`}>
       <div className="grid gap-4 sm:grid-cols-2">
         <SelectField label="With" value={effectiveProvider} onChange={(v) => { setProviderId(v); setSlot(null); }} options={providers.map((p) => ({ value: p.id, label: p.name }))} />
         <SelectField label="Service" value={effectiveService} onChange={(v) => { setServiceId(v); setSlot(null); }} options={services.map((s) => ({ value: s.id, label: `${s.name}, ${s.durationMin} min` }))} helper={!appointment.serviceId ? "Walk-in had no service. Pick one to size the slot." : undefined} />
       </div>
       {effectiveService && effectiveProvider ? <SlotPicker tz={org.timezone} load={load} value={slot} onChange={setSlot} who={provider?.name ?? ""} startDay={appointment ? new Date(appointment.startsAt) : undefined} reloadKey={`${effectiveService}:${effectiveProvider}`} compact /> : null}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Pill variant="secondary" size="sm" onClick={() => onOpenChange(false)}>
+        <Pill variant="secondary" size="sm" onClick={() => onOpenChange(false)} disabled={busy}>
           Keep the time
         </Pill>
         <Pill
@@ -176,7 +199,7 @@ export function NewAppointmentDialog({ open, onOpenChange, day, defaultPetId, on
   }
 
   return (
-    <Frame open={open} onOpenChange={onOpenChange} title="New appointment" description="Booked at the desk. The owner gets the same confirmation text as an online booking.">
+    <Frame open={open} onOpenChange={onOpenChange} busy={busy} title="New appointment" description="Booked at the desk. The owner gets the same confirmation text as an online booking.">
       <PetPicker pets={pets} owners={owners} value={petId} onChange={setPetId} />
       <div className="grid gap-4 sm:grid-cols-2">
         <SelectField label="Service" value={serviceId} onChange={(v) => { setServiceId(v); setSlot(null); }} options={services.map((s) => ({ value: s.id, label: `${s.name}, ${s.durationMin} min` }))} />
@@ -237,7 +260,7 @@ export function WalkInDialog({ open, onOpenChange, onDone }: { orgSlug?: string;
   }
 
   return (
-    <Frame open={open} onOpenChange={onOpenChange} title="Walk-in" description="Marked arrived now. The service can be chosen when the vet sees them.">
+    <Frame open={open} onOpenChange={onOpenChange} busy={busy} title="Walk-in" description="Marked arrived now. The service can be chosen when the vet sees them.">
       <PetPicker pets={pets} owners={owners} value={petId} onChange={setPetId} />
       <div className="grid gap-4 sm:grid-cols-2">
         <SelectField label="Service" hint="Optional" value={serviceId} onChange={setServiceId} options={[{ value: "", label: "Not chosen yet" }, ...services.map((s) => ({ value: s.id, label: s.name }))]} />

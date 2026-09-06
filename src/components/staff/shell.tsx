@@ -42,6 +42,7 @@ export function StaffShell({ userName, children }: { userName: string; children:
   const toast = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [newClinicOpen, setNewClinicOpen] = useState(false);
+  const [creatingClinic, setCreatingClinic] = useState(false);
 
   const base = `/app/${org.slug}`;
   // Opening another clinic is an owner's act, and the server refuses it for
@@ -193,8 +194,14 @@ export function StaffShell({ userName, children }: { userName: string; children:
 
           {/* A second clinic is made from inside the first, not on a page of
               its own. Only the address in the bar changes when it lands. */}
-          <Dialog open={newClinicOpen} onOpenChange={setNewClinicOpen}>
-            <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-lifted sm:max-w-lg sm:p-7">
+          <Dialog
+            open={newClinicOpen}
+            onOpenChange={(next) => {
+              if (next) return setNewClinicOpen(true);
+              if (!creatingClinic) setNewClinicOpen(false);
+            }}
+          >
+            <DialogContent showCloseButton={!creatingClinic} className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-lifted sm:max-w-lg sm:p-7">
               <DialogHeader className="text-left">
                 <DialogTitle className="text-heading font-medium">Create another clinic</DialogTitle>
                 <DialogDescription className="text-small text-text-2">You own this one too. Services, hours and staff come next, inside it.</DialogDescription>
@@ -202,6 +209,7 @@ export function StaffShell({ userName, children }: { userName: string; children:
               <div className="mt-4">
                 <ClinicForm
                   inDialog
+                  onBusyChange={setCreatingClinic}
                   onDone={(slug) => {
                     setNewClinicOpen(false);
                     if (!slug) return;
