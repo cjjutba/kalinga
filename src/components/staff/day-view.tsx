@@ -42,6 +42,8 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
   const [newOpen, setNewOpen] = useState(false);
   const [walkInOpen, setWalkInOpen] = useState(false);
 
+  // After a booking, a move or a walk-in, show the day it landed on so the desk sees it.
+  const showDayOf = (startsAt: string) => setDay(startOfDay(new TZDate(new Date(startsAt), tz)) as TZDate);
   const actor = members.find((m) => m.id === actorMemberId);
   const activeFilter = filter ?? (role === "vet" && actor?.providerId ? actor.providerId : "all");
   const manage = can(role, "manage_appointments");
@@ -232,9 +234,9 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
 
       <AppointmentDrawer orgSlug={org.slug} appointmentId={selected} onClose={() => setSelected(null)} onCancel={(id) => { setSelected(null); setCancelId(id); }} onReschedule={(id) => { setSelected(null); setRescheduleId(id); }} />
       <CancelDialog orgSlug={org.slug} appointment={appointments.find((a) => a.id === cancelId) ?? null} open={!!cancelId} onOpenChange={(o) => !o && setCancelId(null)} />
-      <RescheduleDialog orgSlug={org.slug} appointment={appointments.find((a) => a.id === rescheduleId) ?? null} open={!!rescheduleId} onOpenChange={(o) => !o && setRescheduleId(null)} />
-      <NewAppointmentDialog orgSlug={org.slug} open={newOpen} onOpenChange={setNewOpen} day={day} />
-      <WalkInDialog orgSlug={org.slug} open={walkInOpen} onOpenChange={setWalkInOpen} />
+      <RescheduleDialog orgSlug={org.slug} appointment={appointments.find((a) => a.id === rescheduleId) ?? null} open={!!rescheduleId} onOpenChange={(o) => !o && setRescheduleId(null)} onDone={showDayOf} />
+      <NewAppointmentDialog orgSlug={org.slug} open={newOpen} onOpenChange={setNewOpen} day={day} onDone={showDayOf} />
+      <WalkInDialog orgSlug={org.slug} open={walkInOpen} onOpenChange={setWalkInOpen} onDone={showDayOf} />
     </>
   );
 }

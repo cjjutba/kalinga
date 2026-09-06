@@ -63,7 +63,7 @@ export function CancelDialog({ appointment, open, onOpenChange }: { orgSlug?: st
   );
 }
 
-export function RescheduleDialog({ appointment, open, onOpenChange }: { orgSlug?: string; appointment: Appointment | null; open: boolean; onOpenChange: (o: boolean) => void }) {
+export function RescheduleDialog({ appointment, open, onOpenChange, onDone }: { orgSlug?: string; appointment: Appointment | null; open: boolean; onOpenChange: (o: boolean) => void; /** Called with the new start so the day view can follow the appointment. */ onDone?: (startsAt: string) => void }) {
   const { org, providers, services, dispatch } = useOrg();
   const [providerId, setProviderId] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState<string | null>(null);
@@ -95,7 +95,10 @@ export function RescheduleDialog({ appointment, open, onOpenChange }: { orgSlug?
             setBusy(true);
             const r = await dispatch({ type: "appointment/reschedule", id: appointment.id, startsAt: slot.startsAt, endsAt: slot.endsAt, providerId: effectiveProvider });
             setBusy(false);
-            if (r.ok) onOpenChange(false);
+            if (r.ok) {
+              onOpenChange(false);
+              onDone?.(slot.startsAt);
+            }
           }}
         >
           {slot ? `Move to ${formatShortDate(slot.startsAt, org.timezone)}, ${formatTimeWithZone(slot.startsAt, org.timezone)}` : "Pick a new time"}
@@ -146,7 +149,7 @@ function PetPicker({ pets, owners, value, onChange }: { pets: Pet[]; owners: Own
   );
 }
 
-export function NewAppointmentDialog({ open, onOpenChange, day, defaultPetId }: { orgSlug?: string; open: boolean; onOpenChange: (o: boolean) => void; day?: Date; defaultPetId?: string }) {
+export function NewAppointmentDialog({ open, onOpenChange, day, defaultPetId, onDone }: { orgSlug?: string; open: boolean; onOpenChange: (o: boolean) => void; day?: Date; defaultPetId?: string; onDone?: (startsAt: string) => void }) {
   const { org, pets, owners, services, providers, dispatch } = useOrg();
   const [petId, setPetId] = useState<string | null>(defaultPetId ?? null);
   const [serviceId, setServiceId] = useState(services[0]?.id ?? "");
@@ -165,6 +168,7 @@ export function NewAppointmentDialog({ open, onOpenChange, day, defaultPetId }: 
     setBusy(false);
     if (r.ok) {
       onOpenChange(false);
+      onDone?.(slot.startsAt);
       setPetId(null);
       setSlot(null);
       setNote("");
@@ -192,7 +196,7 @@ export function NewAppointmentDialog({ open, onOpenChange, day, defaultPetId }: 
   );
 }
 
-export function WalkInDialog({ open, onOpenChange }: { orgSlug?: string; open: boolean; onOpenChange: (o: boolean) => void }) {
+export function WalkInDialog({ open, onOpenChange, onDone }: { orgSlug?: string; open: boolean; onOpenChange: (o: boolean) => void; onDone?: (startsAt: string) => void }) {
   const { org, pets, owners, services, providers, dispatch } = useOrg();
   const [petId, setPetId] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState("");
@@ -225,6 +229,7 @@ export function WalkInDialog({ open, onOpenChange }: { orgSlug?: string; open: b
     setBusy(false);
     if (r.ok) {
       onOpenChange(false);
+      onDone?.(start.toISOString());
       setPetId(null);
       setServiceId("");
       setNote("");
