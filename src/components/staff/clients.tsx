@@ -35,7 +35,7 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
     if (ui === "empty") return [];
     const s = q.trim().toLowerCase();
     return owners
-      .filter((o) => !s || o.name.toLowerCase().includes(s) || o.mobile?.replace(/\s/g, "").includes(s.replace(/\s/g, "")) || o.email?.toLowerCase().includes(s))
+      .filter((o) => !s || o.name.toLowerCase().includes(s) || o.mobile?.replace(/\s/g, "").includes(s.replace(/\s/g, "")) || o.email?.toLowerCase().includes(s) || pets.some((p) => p.ownerId === o.id && p.name.toLowerCase().includes(s)))
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((o) => ({ owner: o, pets: pets.filter((p) => p.ownerId === o.id) }));
   }, [owners, pets, q, ui]);
@@ -68,7 +68,7 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
           ))}
         </ul>
       ) : rows.length === 0 ? (
-        <EmptyState title={q ? `No client matches "${q}"` : "No clients yet"} lead={q ? "Try the mobile number, or part of the name." : "Clients appear here the first time they book or when the desk adds them."} />
+        <EmptyState title={q ? `No client matches "${q}"` : "No clients yet"} lead={q ? "Try the mobile number, part of the name, or the pet's name." : "Clients appear here the first time they book or when the desk adds them."} />
       ) : (
         <ul className="flex flex-col gap-2">
           {rows.map(({ owner, pets: ps }) => (
