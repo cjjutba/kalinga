@@ -14,6 +14,7 @@ import { InputField, TextareaField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
 import { Card, Row } from "@/components/primitives/surfaces";
 import { DataTable, TableSkeleton } from "@/components/primitives/data-table";
+import { InitialBadge, Tag } from "@/components/primitives/tag";
 import { StatusPill } from "@/components/primitives/status-pill";
 import { useOrg } from "@/lib/org-data";
 import { can, roleLabel } from "@/lib/roles";
@@ -31,7 +32,7 @@ function resolveId(id: string, owners: Owner[]): Owner | undefined {
 }
 
 export function ClientsList({ orgSlug }: { orgSlug: string }) {
-  const { org, owners, pets, role } = useOrg(orgSlug);
+  const { org, owners, pets, appointments, role } = useOrg(orgSlug);
   const ui = useUiState<"empty" | "loading">();
   const [q, setQ] = useState("");
   const [newOpen, setNewOpen] = useState(false);
@@ -41,8 +42,15 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
     return owners
       .filter((o) => !s || o.name.toLowerCase().includes(s) || o.mobile?.replace(/\s/g, "").includes(s.replace(/\s/g, "")) || o.email?.toLowerCase().includes(s) || pets.some((p) => p.ownerId === o.id && p.name.toLowerCase().includes(s)))
       .sort((a, b) => a.name.localeCompare(b.name))
-      .map((o) => ({ owner: o, pets: pets.filter((p) => p.ownerId === o.id) }));
-  }, [owners, pets, q, ui]);
+      .map((o) => ({
+        owner: o,
+        pets: pets.filter((p) => p.ownerId === o.id),
+        // What the desk asks first when a client rings: are they coming in?
+        next: appointments
+          .filter((a) => a.ownerId === o.id && a.status !== "cancelled" && a.status !== "no_show" && new Date(a.startsAt) >= new Date())
+          .sort((a, b) => a.startsAt.localeCompare(b.startsAt))[0],
+      }));
+  }, [owners, pets, appointments, q, ui]);
   if (!can(role, "view_clients")) return <NotForRole role={roleLabel[role]} page="Clients" />;
   return (
     <>
@@ -76,26 +84,46 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
               key: "name",
               header: "Client",
               cell: ({ owner, pets: ps }) => (
-                <>
-                  <span className="block truncate text-body">{owner.name}</span>
-                  <span className="mt-0.5 block truncate text-label text-text-2 sm:hidden">
-                    {owner.mobile ?? "No mobile on file"}
-                    {ps.length ? `, ${ps.map((p) => p.name).join(", ")}` : ""}
+                <span className="flex items-center gap-3">
+                  <InitialBadge name={owner.name} />
+                  <span className="min-w-0">
+                    <span className="block truncate text-body">{owner.name}</span>
+                    <span className="block truncate text-label text-text-2">
+                      {owner.mobile ? <span className="tabular">{owner.mobile}</span> : "No mobile on file"}
+                      <span className="sm:hidden">{ps.length ? `, ${ps.map((p) => p.name).join(", ")}` : ""}</span>
+                    </span>
                   </span>
-                </>
+                </span>
               ),
-            },
-            {
-              key: "mobile",
-              header: "Mobile",
-              className: "hidden sm:table-cell",
-              cell: ({ owner }) => (owner.mobile ? <span className="tabular text-text-2">{owner.mobile}</span> : <span className="text-text-3">Not on file</span>),
             },
             {
               key: "pets",
               header: "Pets",
+              className: "hidden sm:table-cell",
+              cell: ({ pets: ps }) =>
+                ps.length ? (
+                  <span className="flex flex-wrap gap-1">
+                    {ps.slice(0, 3).map((p) => (
+                      <Tag key={p.id}>{p.name}</Tag>
+                    ))}
+                    {ps.length > 3 ? <Tag className="text-text-2">+{ps.length - 3}</Tag> : null}
+                  </span>
+                ) : (
+                  <span className="text-text-3">None on file</span>
+                ),
+            },
+            {
+              key: "next",
+              header: "Next visit",
               className: "hidden md:table-cell",
-              cell: ({ pets: ps }) => (ps.length ? <span className="text-text-2">{ps.map((p) => p.name).join(", ")}</span> : <span className="text-text-3">None on file</span>),
+              cell: ({ next }) =>
+                next ? (
+                  <span className="tabular text-text-2">
+                    {formatShortDate(next.startsAt, org.timezone)}, {formatTime(next.startsAt, org.timezone)}
+                  </span>
+                ) : (
+                  <span className="text-text-3">Nothing booked</span>
+                ),
             },
           ]}
         />

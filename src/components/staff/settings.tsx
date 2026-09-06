@@ -21,42 +21,18 @@ import { cn } from "@/lib/utils";
 // Owner settings. Dull and important. Six pages under one sub navigation,
 // every change a command the server applies and writes to the audit trail.
 
-const sections = [
-  { segment: "", label: "Clinic" },
-  { segment: "services", label: "Services" },
-  { segment: "staff", label: "Staff" },
-  { segment: "hours", label: "Hours" },
-  { segment: "closures", label: "Closures" },
-  { segment: "recall", label: "Recall rules" },
-];
-
 function SettingsFrame({ title, lead, actions, children }: { title: string; lead?: string; actions?: ReactNode; children: ReactNode }) {
-  const pathname = usePathname();
-  const { org, role } = useOrg();
-  const base = `/app/${org.slug}/settings`;
+  const { role } = useOrg();
   if (!can(role, "view_settings")) return <NotForRole role={roleLabel[role]} page="Settings" />;
+  // The sections are in the sidebar, so a page does not carry them as well.
   return (
     <>
       <PageHeader title={title} lead={lead} actions={actions} />
-      <nav aria-label="Settings" className="mb-6 flex gap-1.5 overflow-x-auto [scrollbar-width:none]">
-        {sections.map((s) => {
-          const href = s.segment ? `${base}/${s.segment}` : base;
-          const active = s.segment ? pathname.startsWith(href) : pathname === base;
-          return (
-            <Link key={s.label} href={href} aria-current={active ? "page" : undefined} className={cn("h-8 shrink-0 rounded-full px-3 text-label font-medium leading-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page", active ? "bg-action text-on-action" : "bg-sheet text-text-2 hover:text-text")}>
-              {s.label}
-            </Link>
-          );
-        })}
-      </nav>
       {children}
     </>
   );
 }
 
-// The live region stays mounted so the announcement fires when the text
-// appears; the text itself is only there while it is true, so a screen reader
-// is not told "Saved" on a page nobody has touched.
 function Saved({ show }: { show: boolean }) {
   return (
     <span role="status" aria-live="polite" className={cn("flex min-h-5 items-center gap-1 text-label text-text-2 transition-opacity duration-150", show ? "opacity-100" : "opacity-0")}>

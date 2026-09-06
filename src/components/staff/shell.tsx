@@ -3,13 +3,14 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, CalendarDays, Check, ChevronsUpDown, ClipboardList, ExternalLink, LogOut, Menu, MoreHorizontal, PawPrint, Plus, Settings, Shield, Users } from "lucide-react";
+import { Bell, CalendarDays, Check, ChevronDown, ChevronsUpDown, ClipboardList, ExternalLink, LogOut, Menu, MoreHorizontal, PawPrint, Plus, Settings, Shield, Users } from "lucide-react";
 import { ThemeMenuRow } from "@/components/theme-toggle";
 import { ClinicForm } from "@/components/clinic/clinic-form";
 import { useToast } from "@/components/primitives/toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { settingsSections } from "@/content/settings-sections";
 import { useOrg } from "@/lib/org-data";
 import { authClient } from "@/lib/auth-client";
 import { can, roleLabel, type Permission } from "@/lib/roles";
@@ -28,9 +29,12 @@ const nav: { label: string; segment: string; icon: typeof CalendarDays; permissi
   { label: "Clients", segment: "clients", icon: Users, permission: "view_clients" },
   { label: "Pets", segment: "pets", icon: PawPrint, permission: "view_clients" },
   { label: "Recall", segment: "recall", icon: Bell, permission: "view_recall" },
-  { label: "Settings", segment: "settings", icon: Settings, permission: "view_settings" },
   { label: "Audit", segment: "audit", icon: ClipboardList, permission: "view_audit" },
 ];
+
+// Settings sits under the rest and opens into its sections, so each one is a
+// page of its own rather than a tab repeated on all six.
+const settingsNav = { label: "Settings", segment: "settings", icon: Settings, permission: "view_settings" as Permission };
 
 const menuContent = "w-64 rounded-guide border-0 bg-sheet p-1.5 ring-1 ring-divider shadow-lifted";
 const menuItem = "rounded-tag px-3 py-2.5 text-[15px]";
@@ -42,6 +46,8 @@ export function StaffShell({ userName, children }: { userName: string; children:
   const toast = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [newClinicOpen, setNewClinicOpen] = useState(false);
+  // Open while you are inside settings, unless you closed it yourself.
+  const [settingsToggled, setSettingsToggled] = useState<boolean | null>(null);
   const [creatingClinic, setCreatingClinic] = useState(false);
 
   const base = `/app/${org.slug}`;
@@ -133,6 +139,15 @@ export function StaffShell({ userName, children }: { userName: string; children:
     </DropdownMenu>
   );
 
+  const inSettings = pathname.startsWith(`${base}/settings`);
+  const settingsOpen = settingsToggled ?? inSettings;
+  const itemClass = (active: boolean) =>
+    cn(
+      "flex w-full items-center gap-2.5 rounded-input px-2.5 py-2 text-small transition-colors duration-150 motion-reduce:transition-none",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
+      active ? "bg-sheet font-medium text-text" : "text-text-2 hover:bg-sheet/70 hover:text-text",
+    );
+
   const navList = (
     <ul className="flex flex-col gap-0.5">
       {visible.map((n) => {
@@ -140,21 +155,46 @@ export function StaffShell({ userName, children }: { userName: string; children:
         const active = isActive(n.segment);
         return (
           <li key={n.label}>
-            <Link
-              href={href}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex items-center gap-2.5 rounded-input px-2.5 py-2 text-small transition-colors duration-150 motion-reduce:transition-none",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
-                active ? "bg-sheet font-medium text-text" : "text-text-2 hover:bg-sheet/70 hover:text-text",
-              )}
-            >
+            <Link href={href} aria-current={active ? "page" : undefined} className={itemClass(active)}>
               <n.icon className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
               {n.label}
             </Link>
           </li>
         );
       })}
+
+      {can(role, settingsNav.permission) ? (
+        <li>
+          <button type="button" onClick={() => setSettingsToggled(!settingsOpen)} aria-expanded={settingsOpen} className={itemClass(inSettings)}>
+            <settingsNav.icon className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
+            {settingsNav.label}
+            <ChevronDown className={cn("ml-auto size-4 shrink-0 text-text-3 transition-transform duration-150 motion-reduce:transition-none", settingsOpen && "rotate-180")} strokeWidth={1.5} aria-hidden />
+          </button>
+          {settingsOpen ? (
+            <ul className="mt-0.5 flex flex-col gap-0.5 pl-9">
+              {settingsSections.map((sec) => {
+                const href = sec.segment ? `${base}/settings/${sec.segment}` : `${base}/settings`;
+                const on = sec.segment ? pathname.startsWith(href) : pathname === `${base}/settings`;
+                return (
+                  <li key={sec.label}>
+                    <Link
+                      href={href}
+                      aria-current={on ? "page" : undefined}
+                      className={cn(
+                        "flex items-center rounded-input px-2.5 py-1.5 text-label transition-colors duration-150 motion-reduce:transition-none",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
+                        on ? "bg-sheet font-medium text-text" : "text-text-2 hover:text-text",
+                      )}
+                    >
+                      {sec.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+        </li>
+      ) : null}
     </ul>
   );
 
