@@ -51,7 +51,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
     <ConfirmContext.Provider value={confirm}>
       {children}
       <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : finish(false))}>
-        <DialogContent className="w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.14)] sm:max-w-md" showCloseButton={false}>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] rounded-sheet border-0 bg-sheet p-6 shadow-lifted sm:max-w-md" showCloseButton={false}>
           <DialogHeader className="text-left">
             <DialogTitle className="text-heading font-medium">{options?.title ?? ""}</DialogTitle>
             {options?.description ? <DialogDescription className="mt-1 text-small text-text-2">{options.description}</DialogDescription> : null}

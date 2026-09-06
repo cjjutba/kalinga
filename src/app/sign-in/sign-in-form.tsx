@@ -38,9 +38,9 @@ export function SignInForm() {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       <AuthTitle>Sign in</AuthTitle>
-      <InputField on="auto" label="Email" type="email" name="email" autoComplete="email" inputMode="email" placeholder="you@clinic.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} />
+      <InputField on="auth" label="Email" type="email" name="email" autoComplete="email" inputMode="email" placeholder="you@clinic.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} />
       <InputField
-        on="auto"
+        on="auth"
         label="Password"
         type="password"
         name="password"

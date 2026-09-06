@@ -3,25 +3,15 @@
 import { forwardRef, useId, useState, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
 import { Check, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
+import { controlOn, ringOffsetOn, type On } from "@/lib/design/surfaces";
 import { cn } from "@/lib/utils";
 
 // A field owns its label, control, helper line and error together, so no
-// screen can ship an input without a label. DESIGN.md: an input is always one
-// step of tone away from what it sits on. On a sheet it is --field, on the
-// page it is --sheet. Never a border. Errors are a red ring and one red line.
+// screen can ship an input without a label. What tone the control takes is not
+// decided here: it comes from the surface module, which is the one place that
+// knows a control sits one step in from the ground under it.
 
-// "auto" is for auth forms, which sit on a sheet below the laptop breakpoint
-// and directly on the page above it. "shell" is the other way round, for the
-// booking flow, which is bare on a phone and inside a panel from the laptop
-// breakpoint up.
-type Surface = "sheet" | "page" | "auto" | "shell";
-
-const surfaceFill: Record<Surface, string> = {
-  sheet: "bg-field",
-  page: "bg-sheet",
-  auto: "bg-field lg:bg-sheet",
-  shell: "bg-page lg:bg-field",
-};
+type Surface = On;
 
 interface FieldFrameProps {
   label: string;
@@ -64,8 +54,9 @@ function FieldFrame({ label, helper, error, hint, labelAction, className, id, ch
 export const controlClass = (on: Surface, error?: boolean, extra?: string) =>
   cn(
     "w-full rounded-input px-4 text-[17px] text-text placeholder:text-text-3",
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sheet",
-    surfaceFill[on],
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+    ringOffsetOn[on],
+    controlOn[on],
     error ? "ring-2 ring-error focus-visible:ring-error" : "focus-visible:ring-focus",
     "disabled:opacity-60",
     extra,
@@ -85,7 +76,7 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
 }
 
 export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function InputField(
-  { label, helper, error, hint, labelAction, on = "sheet", prefix, className, wrapperClassName, id: givenId, type, ...props },
+  { label, helper, error, hint, labelAction, on = "panel", prefix, className, wrapperClassName, id: givenId, type, ...props },
   ref,
 ) {
   const auto = useId();
@@ -109,7 +100,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function
   return (
     <FieldFrame label={label} helper={helper} error={error} hint={hint} labelAction={labelAction} on={on} id={id} className={wrapperClassName}>
       {prefix || isPassword ? (
-        <div className={cn("relative flex items-stretch rounded-input", error && "ring-2 ring-error", surfaceFill[on])}>
+        <div className={cn("relative flex items-stretch rounded-input", error && "ring-2 ring-error", controlOn[on])}>
           {prefix ? (
             <span className="flex items-center pl-4 pr-1 text-[17px] text-text-2 select-none" aria-hidden>
               {prefix}
@@ -123,7 +114,8 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function
             aria-describedby={describedBy}
             className={cn(
               "h-12 w-full min-w-0 bg-transparent text-[17px] text-text placeholder:text-text-3 focus:outline-none rounded-input",
-              "focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-sheet",
+              "focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2",
+              ringOffsetOn[on],
               prefix ? "pl-0 pr-4" : "px-4",
               isPassword && "pr-12",
               className,
@@ -160,7 +152,7 @@ export interface TextareaFieldProps extends Omit<TextareaHTMLAttributes<HTMLText
 }
 
 export const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(function TextareaField(
-  { label, helper, error, hint, on = "sheet", className, wrapperClassName, id: givenId, rows = 4, ...props },
+  { label, helper, error, hint, on = "panel", className, wrapperClassName, id: givenId, rows = 4, ...props },
   ref,
 ) {
   const auto = useId();
@@ -204,7 +196,7 @@ const EMPTY = "__none__";
 // an input, a check against the current choice, keyboard and screen reader
 // behaviour handled by the primitive. The label points at the trigger, which
 // is a button and so takes a label like any other control.
-export function SelectField({ label, helper, error, hint, on = "sheet", id: givenId, value, onChange, options, className, disabled, placeholder }: SelectFieldProps) {
+export function SelectField({ label, helper, error, hint, on = "panel", id: givenId, value, onChange, options, className, disabled, placeholder }: SelectFieldProps) {
   const auto = useId();
   const id = givenId ?? auto;
   const describedBy = error ? `${id}-error` : helper ? `${id}-helper` : undefined;
@@ -239,7 +231,7 @@ export function SelectField({ label, helper, error, hint, on = "sheet", id: give
             collisionPadding={12}
             className={cn(
               "z-50 max-h-[min(20rem,var(--radix-select-content-available-height))] w-[var(--radix-select-trigger-width)] min-w-40 overflow-hidden",
-              "rounded-input bg-sheet p-1.5 text-text ring-1 ring-divider shadow-[0_12px_32px_rgba(0,0,0,0.14)]",
+              "rounded-input bg-sheet p-1.5 text-text ring-1 ring-divider shadow-lifted",
               "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 motion-reduce:animate-none",
             )}
           >

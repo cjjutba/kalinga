@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/primitives/toast";
+import { chrome } from "@/lib/design/palette";
 import { ConfirmProvider } from "@/components/primitives/confirm";
 import "./globals.css";
 
@@ -32,8 +33,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f5f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    { media: "(prefers-color-scheme: light)", color: chrome.light },
+    { media: "(prefers-color-scheme: dark)", color: chrome.dark },
   ],
   width: "device-width",
   initialScale: 1,

@@ -1,4 +1,5 @@
 import "server-only";
+import { palette } from "@/lib/design/palette";
 
 // One layout for every message Kalinga sends. Tables and inline styles,
 // because email clients are not browsers: no stylesheet, no flexbox, no
@@ -27,10 +28,10 @@ export interface EmailContent {
   signature?: string;
 }
 
-const card = "#ffffff";
-const ink = "#0a0a0a";
-const muted = "#656569";
-const hairline = "#e5e5ea";
+const card = palette.page;
+const ink = palette.ink;
+const muted = palette.muted;
+const hairline = palette.hairline;
 const font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 // The mark, as a PNG because no mail client can be trusted with an SVG. Its
@@ -69,7 +70,7 @@ export function renderEmail(c: EmailContent): string {
 
   const button = c.action
     ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0"><tr><td style="border-radius:999px;background:${ink}">
-         <a href="${escape(c.action.url)}" style="display:inline-block;padding:13px 24px;font-family:${font};font-size:15px;font-weight:500;line-height:1;color:#ffffff;text-decoration:none;border-radius:999px">${escape(c.action.label)}</a>
+         <a href="${escape(c.action.url)}" style="display:inline-block;padding:13px 24px;font-family:${font};font-size:15px;font-weight:500;line-height:1;color:${palette.onInk};text-decoration:none;border-radius:999px">${escape(c.action.label)}</a>
        </td></tr></table>`
     : "";
 

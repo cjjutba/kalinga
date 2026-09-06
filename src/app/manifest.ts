@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { chrome } from "@/lib/design/palette";
 
 // The install manifest. Staff pin Kalinga to a phone's home screen and it
 // opens on their clinic's day. There is no service worker and no offline
@@ -17,8 +18,8 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#f5f5f7",
-    theme_color: "#0a0a0a",
+    background_color: chrome.light,
+    theme_color: chrome.dark,
     lang: "en-PH",
     categories: ["business", "medical", "productivity"],
     icons: [

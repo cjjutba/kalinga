@@ -61,6 +61,9 @@ Rules that follow from the table.
 
 - The ground is white in light mode and everything raised off it is a step of grey, not the other way round. `--page` is the ground, `--sheet` is what sits on it, `--field` is what sits on that.
 - An input is always one step of tone away from what it sits on. On a sheet it is `--field`. On the page it is `--sheet`. It never has a border.
+- **No component writes a colour.** `src/lib/design/surfaces.ts` holds the four cases a control can be in, two of them responsive, and every component names its case instead of its colour. `src/design.test.ts` fails the build if a colour value appears anywhere but `globals.css` and `src/lib/design/palette.ts`, which exists for the browser chrome and email, the two places a CSS variable cannot reach.
+- One shadow, `shadow-lifted`, and only for something that floats over the page: a dialog, a menu, a toast. Nothing that sits on the page has one.
+- Layout constants more than one component needs are tokens too: the booking group's cap, its rail, its panel height and its content column are `--container-booking`, `--spacing-rail`, `--spacing-panel` and `--container-step`.
 - Text links are `--text` at medium weight. No underline at rest, no blue.
 - `--tint` is for cards that show featured content, such as the next appointment. It never colours a button, a status or text.
 - `--error` never fills a banner. A red ring on the field and one line of helper text is the whole treatment.

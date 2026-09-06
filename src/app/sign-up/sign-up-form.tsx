@@ -40,9 +40,9 @@ export function SignUpForm() {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       <AuthTitle lead="One account runs one or several clinics.">Create your account</AuthTitle>
-      <InputField on="auto" label="Your name" name="name" autoComplete="name" placeholder="Dr. Ana Reyes" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} disabled={loading} />
-      <InputField on="auto" label="Email" type="email" name="email" autoComplete="email" inputMode="email" placeholder="you@clinic.com" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} disabled={loading} />
-      <InputField on="auto" label="Choose a password" type="password" name="password" autoComplete="new-password" placeholder="At least 10 characters" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} disabled={loading} />
+      <InputField on="auth" label="Your name" name="name" autoComplete="name" placeholder="Dr. Ana Reyes" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} disabled={loading} />
+      <InputField on="auth" label="Email" type="email" name="email" autoComplete="email" inputMode="email" placeholder="you@clinic.com" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} disabled={loading} />
+      <InputField on="auth" label="Choose a password" type="password" name="password" autoComplete="new-password" placeholder="At least 10 characters" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} disabled={loading} />
       <Pill type="submit" block loading={loading} loadingLabel="Creating your account">
         Continue
       </Pill>

@@ -8,6 +8,7 @@ import type { Slot } from "@/lib/availability";
 import type { SlotsByDay } from "@/lib/actions/slots";
 import { clinicNow, formatTime, formatShortDate, zoneLabel } from "@/lib/time";
 import { Skeleton } from "@/components/ui/skeleton";
+import { controlOn } from "@/lib/design/surfaces";
 import { cn } from "@/lib/utils";
 
 // The screen that decides the quality of the whole product. A date strip with
@@ -46,9 +47,9 @@ export function SlotPicker({
   /** "shell" is bare page on a phone and a panel from the laptop breakpoint up. */
   on?: "sheet" | "shell";
 }) {
-  // A tile has to be one step of tone away from whatever is behind it, and
-  // what is behind it changes with the width on the booking flow.
-  const tile = on === "shell" ? "bg-page lg:bg-field" : "bg-field";
+  // A tile has to be one step of tone away from whatever is behind it, and on
+  // the booking flow what is behind it changes with the width.
+  const tile = controlOn[on === "shell" ? "shell" : "panel"];
   const today = useMemo(() => startOfDay(startDay ? new TZDate(startDay, tz) : clinicNow(tz)) as TZDate, [startDay, tz]);
   const [offset, setOffset] = useState(0);
   const [day, setDay] = useState<TZDate>(() => (value ? (startOfDay(new TZDate(new Date(value.startsAt), tz)) as TZDate) : today));
