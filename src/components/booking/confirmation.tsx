@@ -187,7 +187,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
       </p>
 
       <Dialog open={moving} onOpenChange={setMoving}>
-        <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.12)]">
+        <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-lg overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.12)]">
           <DialogHeader className="text-left">
             <DialogTitle className="text-heading font-medium">Pick a new time</DialogTitle>
             <DialogDescription className="text-small text-text-2">With {provider?.name}. Your current slot opens up for someone else.</DialogDescription>
@@ -211,7 +211,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
       </Dialog>
 
       <Dialog open={cancelling} onOpenChange={setCancelling}>
-        <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.12)]">
+        <DialogContent className="w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-md rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.12)]">
           <DialogHeader className="text-left">
             <DialogTitle className="text-heading font-medium">Cancel this booking?</DialogTitle>
             <DialogDescription className="text-small text-text-2">The clinic will see it straight away. You can book again any time.</DialogDescription>

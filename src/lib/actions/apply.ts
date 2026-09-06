@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { TZDate } from "@date-fns/tz";
+import { isNull } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { requirePermission, type Actor } from "@/lib/session";
 import { eraseClient, listInvitations, listMembers, updateOrganisation } from "@/lib/db/queries";
@@ -201,7 +202,12 @@ async function handle(action: StoreAction, actor: Actor, scope: Scope): Promise<
         await audit(scope, actor, what, "provider", p.id, p.name, { days: existing.weeklyHours.map((r) => r.day).join(","), closures: existing.exceptions.length }, { days: (p.weeklyHours ?? existing.weeklyHours).map((r) => r.day).join(","), closures: (p.exceptions ?? existing.exceptions).length });
         return { ok: true, id: p.id };
       }
-      const created = await scope.insert(provider, { ...values, weeklyHours: p.weeklyHours ?? [1, 2, 3, 4, 5, 6].map((day) => ({ day, from: actor.org.openFrom, to: actor.org.openTo })), exceptions: p.exceptions ?? [] });
+      // A "whole clinic" closure lives on every provider's row. Someone added
+      // later inherits the dates every current provider shares, so a fiesta
+      // entered last month still closes the new vet's column.
+      const others = await scope.list(provider, isNull(provider.archivedAt));
+      const shared = others.length ? others[0].exceptions.filter((e) => others.every((o) => o.exceptions.some((x) => x.date === e.date))) : [];
+      const created = await scope.insert(provider, { ...values, weeklyHours: p.weeklyHours ?? [1, 2, 3, 4, 5, 6].map((day) => ({ day, from: actor.org.openFrom, to: actor.org.openTo })), exceptions: p.exceptions ?? shared });
       await audit(scope, actor, "Added to the schedule", "provider", created.id, `${p.name}, ${p.title}`);
       return { ok: true, id: created.id };
     }

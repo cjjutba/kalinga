@@ -52,10 +52,17 @@ function SettingsFrame({ title, lead, actions, children }: { title: string; lead
   );
 }
 
+// The live region stays mounted so the announcement fires when the text
+// appears; the text itself is only there while it is true, so a screen reader
+// is not told "Saved" on a page nobody has touched.
 function Saved({ show }: { show: boolean }) {
   return (
-    <span role="status" className={cn("flex items-center gap-1 text-label text-text-2 transition-opacity duration-150", show ? "opacity-100" : "opacity-0")}>
-      <Check className="size-3.5" strokeWidth={2} aria-hidden /> Saved
+    <span role="status" aria-live="polite" className={cn("flex min-h-5 items-center gap-1 text-label text-text-2 transition-opacity duration-150", show ? "opacity-100" : "opacity-0")}>
+      {show ? (
+        <>
+          <Check className="size-3.5" strokeWidth={2} aria-hidden /> Saved
+        </>
+      ) : null}
     </span>
   );
 }
@@ -145,7 +152,7 @@ function ServiceDialog({ service, open, onOpenChange }: { service: Service | nul
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.12)]">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-md rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.12)]">
         <DialogHeader className="text-left">
           <DialogTitle className="text-heading font-medium">{existing ? `Edit ${existing.name}` : "New service"}</DialogTitle>
         </DialogHeader>

@@ -87,7 +87,7 @@ export function SlotPicker({
         <button type="button" onClick={() => setOffset((o) => Math.max(0, o - DAYS))} disabled={offset === 0} aria-label="Earlier days" className="grid size-9 shrink-0 place-items-center rounded-full text-text-2 hover:bg-field disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
           <ChevronLeft className="size-5" strokeWidth={1.5} />
         </button>
-        <div role="radiogroup" aria-label="Day" className="flex flex-1 gap-1.5 overflow-x-auto py-1 [scrollbar-width:none]">
+        <div role="radiogroup" aria-label="Day" className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto py-1 [scrollbar-width:none]">
           {strip.map((d) => {
             const selected = isSameDay(d, day);
             const open = slotsFor(d).length > 0;
