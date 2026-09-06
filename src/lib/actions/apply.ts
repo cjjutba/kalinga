@@ -256,7 +256,7 @@ async function handle(action: StoreAction, actor: Actor, scope: Scope): Promise<
       if (!o?.email) return { ok: false, error: "This client has no email on file. Copy the message instead." };
       if (!emailIsConfigured()) return { ok: false, error: "Email is not connected yet. Copy the message and send it yourself." };
       try {
-        await sendReminderEmail({ to: o.email, subject: `${p?.name ?? "Your pet"}: ${reminderTitles[r.kind].toLowerCase()}, ${actor.org.name}`, text: r.message, bookingUrl: `https://kalinga.cjjutba.dev/${actor.org.slug}` });
+        await sendReminderEmail({ to: o.email, subject: `${p?.name ?? "Your pet"}: ${reminderTitles[r.kind].toLowerCase()}, ${actor.org.name}`, text: r.message, bookingUrl: `https://kalinga.cjjutba.dev/${actor.org.slug}`, clinicName: actor.org.name });
       } catch (e) {
         return { ok: false, error: e instanceof Error ? e.message : "The email did not go out. Nothing was marked." };
       }

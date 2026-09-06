@@ -31,8 +31,14 @@ export async function notifyOwnerOfBooking(scope: Scope, org: Row.Organisation, 
   const text = kind === "confirmed" ? renderBookingConfirmation(ctx) : renderBookingChanged(ctx, kind);
   const subject =
     kind === "confirmed" ? `${ctx.petName} is booked at ${org.name}, ${ctx.when}` : kind === "rescheduled" ? `${ctx.petName}'s appointment at ${org.name} has moved` : `${ctx.petName}'s appointment at ${org.name} is cancelled`;
+  // A cancelled booking has nothing left to manage, so its button offers the
+  // clinic's page instead of the reference.
+  const action =
+    kind === "cancelled"
+      ? { url: `https://kalinga.cjjutba.dev/${org.slug}`, label: "Book another time" }
+      : { url: `https://${ctx.manageUrl}`, label: "Change or cancel this booking" };
   try {
-    const r = await sendBookingEmail({ to: o.email, subject, text, manageUrl: `https://${ctx.manageUrl}` });
+    const r = await sendBookingEmail({ to: o.email, subject, text, manageUrl: action.url, actionLabel: action.label, clinicName: org.name });
     return r.sent;
   } catch (e) {
     console.error(`[booking email failed] to=${o.email} reference=${appt.reference}`, e instanceof Error ? e.message : e);
