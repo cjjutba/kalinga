@@ -662,6 +662,55 @@ carry a List-Unsubscribe header pointing at that address.
 say what happened, and make the person mean it before it is written. The fifth
 is that authentication passing is not deliverability.
 
+## Booking at every width, and asking before removing
+
+**Date.** 7 September 2026.
+
+**Decided.** Six changes, from a session spent on the parts a pet owner and a
+new clinic owner touch first.
+
+**Booking has a shape at every width.** The five steps were built for a phone
+and then stretched: a thin progress bar, one narrow column, buttons stuck to
+the bottom of the window. It is one panel now with two shapes, following the
+pattern Polar uses for onboarding. On a laptop the steps stand in a rail down
+the left carrying their own state, and a step already passed can be clicked to
+go back to it. On a phone and a tablet the rail lies down as segments across
+the top and does the same job. The buttons sit under the content they belong
+to.
+
+**Email is required with the mobile number.** It was optional, which left the
+clinic with a name and no way to reach it. The confirmation, every change and
+every recall reminder go to that address, and the reminder queue is the part
+of this product anyone would pay for. Both the form and the server schema say
+so now.
+
+**Removing anything asks first.** Five things were removed on the first click:
+a service, a member, an invitation, a vet's place on the schedule, a closure.
+They go through one dialog now, with the consequence in words rather than a
+warning that it cannot be undone.
+
+**A second clinic is made from inside the first.** Create another clinic used
+to open the setup page, which is written for someone who has no clinic at all.
+It is a dialog in the switcher, and the only thing that changes when it lands
+is the clinic in the bar. The setup page keeps its own shape for a first
+clinic, where the preview of the booking address earns its column.
+
+**Creating a record leaves you where you were.** Adding a client from the list
+jumped to that client's page, hiding the row it had just made. The dialog
+closes onto the list, and the row is there.
+
+**The mail carries the mark on a white ground.** The word Kalinga stood in for
+a logo and the card sat on grey, which reads like a template. The mark goes at
+the top as a PNG, alt text the name, one hairline round the card, nothing else.
+
+**Two questions answered without code.** A booking still takes one service.
+Several would mean summing durations and prices, finding one contiguous block
+in the engine, and deciding which recall date a mixed visit sets, which is
+three new failure modes for a case the desk already handles by adding what
+happened at the visit. And the vet step showing one name when the clinic has
+two people is the rule working: groomers take grooming, vets take everything
+else. It now says so on the step rather than leaving it to be guessed.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a

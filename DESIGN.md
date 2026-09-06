@@ -246,6 +246,19 @@ its reason underneath, and both take themselves away, an error more slowly
 because it is read twice. Nothing important is only in a toast, so there is
 nothing to dismiss. A field that can say why beside itself still does.
 
+**Removing anything asks first.** One dialog, one shape, everywhere: what is
+being removed in the title, what actually happens underneath, a grey button
+that keeps it and a red one that does it. It says the consequence rather than
+warning that the act cannot be undone, because most of these can be undone and
+the ones that cannot say so in their own words.
+
+**A flow with steps carries them on a rail.** On a laptop the steps stand down
+the left with their state on them, done, current and not yet, and any step
+already passed can be clicked to return to it. Below that width the rail lies
+down as segments across the top and behaves the same. The buttons belong under
+the content, never stuck to the bottom of the window, because a person on a
+laptop should not have to look at two ends of the screen to finish a step.
+
 **Creating a record is a dialog. The record is a page.** A new client or a new
 pet is four or eight fields typed while a phone is ringing, so it opens over
 the list it was started from. Reading, editing and everything with a link worth
