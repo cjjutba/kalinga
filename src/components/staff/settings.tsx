@@ -358,10 +358,10 @@ function ProviderHours({ provider }: { provider: Provider }) {
                 {d}
               </label>
               {rule ? (
-                <div className="flex items-center gap-2 text-small tabular">
-                  <input type="time" value={rule.from} onChange={(e) => update(rules.map((r) => (r.day === day ? { ...r, from: e.target.value } : r)))} className="h-9 rounded-tag bg-field px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus" aria-label={`${d} opens`} />
+                <div className="flex min-w-0 items-center gap-2 text-small tabular">
+                  <input type="time" value={rule.from} onChange={(e) => update(rules.map((r) => (r.day === day ? { ...r, from: e.target.value } : r)))} className="h-9 w-full min-w-0 rounded-tag bg-field px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus" aria-label={`${d} opens`} />
                   <span className="text-text-2">to</span>
-                  <input type="time" value={rule.to} onChange={(e) => update(rules.map((r) => (r.day === day ? { ...r, to: e.target.value } : r)))} className="h-9 rounded-tag bg-field px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus" aria-label={`${d} closes`} />
+                  <input type="time" value={rule.to} onChange={(e) => update(rules.map((r) => (r.day === day ? { ...r, to: e.target.value } : r)))} className="h-9 w-full min-w-0 rounded-tag bg-field px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus" aria-label={`${d} closes`} />
                 </div>
               ) : (
                 <span className="text-small text-text-2">Off</span>
