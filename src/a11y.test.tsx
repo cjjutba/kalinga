@@ -4,6 +4,7 @@ import type { ReactElement, ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import axe from "axe-core";
 import { addDays, addHours, formatISO, startOfDay, subDays } from "date-fns";
+import { TZDate } from "@date-fns/tz";
 
 // The accessibility gate AGENTS.md promises: every screen rendered with
 // realistic data and checked by axe against WCAG 2 A and AA, failing the
@@ -76,8 +77,14 @@ import { PortalSignIn, PortalAppointments, PortalAppointment, PortalPets, Portal
 
 const now = new Date();
 const iso = (d: Date) => d.toISOString();
-const day = (offset: number, hour: number) => iso(addHours(startOfDay(addDays(now, offset)), hour));
-const date = (offset: number) => formatISO(addDays(now, offset), { representation: "date" });
+// Fixture days are built in the clinic's zone, never the runner's. A build
+// machine on UTC starting after four in the afternoon is already tomorrow in
+// Manila, and the day view groups by clinic time, so plain local arithmetic
+// here moved today's appointments to yesterday and the screens under test
+// rendered a different day.
+const clinicDay = (offset: number) => startOfDay(addDays(new TZDate(now, "Asia/Manila"), offset));
+const day = (offset: number, hour: number) => iso(addHours(clinicDay(offset), hour));
+const date = (offset: number) => formatISO(clinicDay(offset), { representation: "date" });
 const ORG = "org-lunhaw";
 
 const snapshot: OrgSnapshot = {
