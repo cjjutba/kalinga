@@ -739,6 +739,28 @@ recall note read down the right.
 **Why.** A pet owner books on a phone and a clinic owner evaluates on a laptop.
 The old flow was built for the first and left the second looking unfinished.
 
+## The ground is white now
+
+**Date.** 7 September 2026.
+
+**Decided.** Light mode ran the other way round: a grey page with white cards
+on it, so every screen read as a grey window rather than a white product. The
+ground is `#FFFFFF` now, what sits on it is `#F5F5F7`, and what sits on that is
+`#EBEBEE`. The token names did not move, only their values, so the whole
+product turned over at once. Dark mode was already in this order and did not
+change.
+
+The booking panel keeps a fixed height. A long step scrolls inside it and the
+buttons sit under the scroll area rather than in it, so the shell never grows
+or shrinks between steps and the way forward is always on screen. The review
+step and the confirmation page were rebuilt to match: one label column, values
+beside it rather than ragged against the right edge, and the confirmation now
+sits in the same panel the flow ends in, without the rail.
+
+**Why.** Two of these are taste and one is not. The fixed panel is the one that
+matters: a layout that changes size as you answer questions makes the product
+feel unsteady at the moment it most needs to feel certain.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a

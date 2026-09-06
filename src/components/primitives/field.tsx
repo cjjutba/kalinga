@@ -20,7 +20,7 @@ const surfaceFill: Record<Surface, string> = {
   sheet: "bg-field",
   page: "bg-sheet",
   auto: "bg-field lg:bg-sheet",
-  shell: "bg-sheet lg:bg-field",
+  shell: "bg-page lg:bg-field",
 };
 
 interface FieldFrameProps {

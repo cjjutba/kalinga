@@ -48,7 +48,7 @@ export function SlotPicker({
 }) {
   // A tile has to be one step of tone away from whatever is behind it, and
   // what is behind it changes with the width on the booking flow.
-  const tile = on === "shell" ? "bg-sheet lg:bg-field" : "bg-field";
+  const tile = on === "shell" ? "bg-page lg:bg-field" : "bg-field";
   const today = useMemo(() => startOfDay(startDay ? new TZDate(startDay, tz) : clinicNow(tz)) as TZDate, [startDay, tz]);
   const [offset, setOffset] = useState(0);
   const [day, setDay] = useState<TZDate>(() => (value ? (startOfDay(new TZDate(new Date(value.startsAt), tz)) as TZDate) : today));
@@ -147,10 +147,6 @@ export function SlotPicker({
           className={cn(
             "grid gap-2",
             compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3",
-            // Inside the booking panel a full day of slots would push the
-            // button off the screen, so the times scroll and the panel keeps
-            // its shape.
-            on === "shell" && "lg:max-h-[19rem] lg:overflow-y-auto lg:pr-1",
           )}
         >
           {slots.map((s) => {

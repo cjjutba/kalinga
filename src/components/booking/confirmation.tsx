@@ -86,8 +86,11 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
   }
 
   return (
-    <>
-      <main className="mx-auto w-full max-w-xl px-5 py-8">
+    // The same panel the booking flow ends in, without the rail, so the last
+    // screen belongs to the same product as the five before it.
+    <div className="flex min-h-dvh flex-col bg-page">
+      <div className="flex flex-1 justify-center px-4 py-8 md:items-center md:px-6 md:py-10">
+      <main className="w-full max-w-md md:rounded-card md:border md:border-divider md:p-8">
       <div className="flex items-start justify-between gap-3">
         <div>
           <span className="grid size-12 place-items-center rounded-full bg-action text-on-action" aria-hidden>
@@ -103,35 +106,27 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
       </div>
 
       <Card className="mt-6 p-5">
-        <dl className="flex flex-col gap-3 text-body">
-          <div className="flex justify-between gap-4">
-            <dt className="text-text-2">When</dt>
-            <dd className="text-right tabular">
-              {formatLongDate(appt.startsAt, tz)}
-              <br />
-              {formatTimeWithZone(appt.startsAt, tz)}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-text-2">What</dt>
-            <dd className="text-right">
-              {service?.name ?? "Visit"}
-              {service ? `, ${formatPeso(service.pricePhp)}` : ""}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-text-2">With</dt>
-            <dd className="text-right">{provider?.name}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-text-2">For</dt>
-            <dd className="text-right">{pet?.name}</dd>
-          </div>
+        <dl className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 gap-y-3 text-small">
+          <dt className="text-text-2">When</dt>
+          <dd className="tabular">
+            {formatLongDate(appt.startsAt, tz)}
+            <br />
+            {formatTimeWithZone(appt.startsAt, tz)}
+          </dd>
+          <dt className="text-text-2">What</dt>
+          <dd>
+            {service?.name ?? "Visit"}
+            {service ? `, ${formatPeso(service.pricePhp)}` : ""}
+          </dd>
+          <dt className="text-text-2">With</dt>
+          <dd>{provider?.name}</dd>
+          <dt className="text-text-2">For</dt>
+          <dd>{pet?.name}</dd>
           {org.address ? (
-            <div className="flex justify-between gap-4">
+            <>
               <dt className="text-text-2">Where</dt>
-              <dd className="text-right">{org.address}</dd>
-            </div>
+              <dd>{org.address}</dd>
+            </>
           ) : null}
         </dl>
       </Card>
@@ -140,7 +135,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
         <h2 id="msg" className="text-label font-medium text-text-2">
           Your confirmation
         </h2>
-        <blockquote className="mt-2 rounded-guide bg-sheet p-4 text-small leading-[1.5]">{message}</blockquote>
+        <blockquote className="mt-2 rounded-guide bg-sheet p-4 text-small leading-[1.5] md:bg-field">{message}</blockquote>
         <Pill
           size="sm"
           variant="secondary"
@@ -229,7 +224,8 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
         </DialogContent>
       </Dialog>
     </main>
+      </div>
       <PublicFooter />
-    </>
+    </div>
   );
 }
