@@ -63,6 +63,16 @@ export async function requirePagePermission(orgSlug: string, permission: Permiss
   return actor;
 }
 
+/**
+ * Whether this account may open another clinic. The same rule the auth plugin
+ * enforces: owners can, staff at someone else's clinic cannot, and an account
+ * with no clinic yet has to be able to make its first.
+ */
+export async function mayCreateOrganisation(): Promise<boolean> {
+  const rows = await listMemberships();
+  return rows.length === 0 || rows.some((r) => r.member.role === "owner");
+}
+
 /** The organisations the signed in user belongs to, for choose clinic and the switcher. */
 export async function listMemberships() {
   const session = await requireSession();

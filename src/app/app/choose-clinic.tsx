@@ -10,7 +10,7 @@ import { authClient } from "@/lib/auth-client";
 import { roleLabel } from "@/lib/roles";
 import type { Membership } from "@/lib/org-data";
 
-export function ChooseClinic({ memberships }: { memberships: Membership[] }) {
+export function ChooseClinic({ memberships, mayCreate }: { memberships: Membership[]; /** Only an owner opens another clinic. */ mayCreate: boolean }) {
   const router = useRouter();
 
   async function signOut() {
@@ -46,11 +46,13 @@ export function ChooseClinic({ memberships }: { memberships: Membership[] }) {
           </li>
         ))}
       </ul>
-      <p className="text-center">
-        <Link href="/new" className="text-small font-medium text-text hover:underline">
-          Create another clinic
-        </Link>
-      </p>
+      {mayCreate ? (
+        <p className="text-center">
+          <Link href="/new" className="text-small font-medium text-text hover:underline">
+            Create another clinic
+          </Link>
+        </p>
+      ) : null}
       <p className="text-center">
         <button type="button" onClick={signOut} className="text-small font-medium text-text-2 hover:text-text">
           Sign out

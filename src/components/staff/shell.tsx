@@ -39,6 +39,9 @@ export function StaffShell({ userName, children }: { userName: string; children:
   const [menuOpen, setMenuOpen] = useState(false);
 
   const base = `/app/${org.slug}`;
+  // Opening another clinic is an owner's act, and the server refuses it for
+  // anyone else, so the way in is not offered either.
+  const mayCreateClinic = memberships.some((m) => m.role === "owner");
   const visible = nav.filter((n) => can(role, n.permission));
   const isActive = (segment: string) => (segment === "" ? pathname === base : pathname.startsWith(`${base}/${segment}`));
 
@@ -73,12 +76,16 @@ export function StaffShell({ userName, children }: { userName: string; children:
             {m.organisation.id === org.id ? <Check className="size-4 shrink-0" strokeWidth={1.5} aria-label="Current" /> : null}
           </DropdownMenuItem>
         ))}
-        <DropdownMenuSeparator className="my-1.5 bg-divider" />
-        <DropdownMenuItem asChild className={menuItem} onSelect={() => setMenuOpen(false)}>
-          <Link href="/new" className="flex items-center gap-2">
-            <Plus className="size-4" strokeWidth={1.5} aria-hidden /> Create another clinic
-          </Link>
-        </DropdownMenuItem>
+        {mayCreateClinic ? (
+          <>
+            <DropdownMenuSeparator className="my-1.5 bg-divider" />
+            <DropdownMenuItem asChild className={menuItem} onSelect={() => setMenuOpen(false)}>
+              <Link href="/new" className="flex items-center gap-2">
+                <Plus className="size-4" strokeWidth={1.5} aria-hidden /> Create another clinic
+              </Link>
+            </DropdownMenuItem>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

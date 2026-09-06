@@ -178,7 +178,7 @@ const screens: [string, () => ReactElement, boolean?][] = [
   ["create clinic", () => <NewClinicForm />, true],
   ["accept invitation", () => <AuthShell><InviteForm invitation={invitation} signedInAs={null} /></AuthShell>, true],
   ["expired invitation", () => <AuthShell><InviteForm invitation={{ ...invitation, expired: true }} signedInAs="jess@lunhaw.test" /></AuthShell>, true],
-  ["choose clinic", () => <ChooseClinic memberships={[{ organisation: snapshot.organisation, role: "owner" }, { organisation: { ...snapshot.organisation, id: "org-2", slug: "amihan", name: "Amihan Veterinary Clinic", city: "Iligan" }, role: "vet" }]} />],
+  ["choose clinic", () => <ChooseClinic mayCreate memberships={[{ organisation: snapshot.organisation, role: "owner" }, { organisation: { ...snapshot.organisation, id: "org-2", slug: "amihan", name: "Amihan Veterinary Clinic", city: "Iligan" }, role: "vet" }]} />],
   ["forbidden", () => <Forbidden />],
   // Staff shell and day.
   ["staff shell with day view", () => <Staff><StaffShell userName="Dr. Ana Reyes"><DayView orgSlug="lunhaw" /></StaffShell></Staff>, true],

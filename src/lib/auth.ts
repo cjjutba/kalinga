@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { eq } from "drizzle-orm";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { magicLink, organization } from "better-auth/plugins";
@@ -36,13 +37,20 @@ export const auth = betterAuth({
       ac,
       roles,
       creatorRole: "owner",
-      allowUserToCreateOrganization: true,
+      // Opening a clinic is an owner's act. Someone who works the desk at
+      // another clinic does not get to create one from inside it, and an
+      // account with no clinic yet has to be able to make its first.
+      allowUserToCreateOrganization: async (user) => {
+        const rows = await db.select({ role: schema.member.role }).from(schema.member).where(eq(schema.member.userId, user.id));
+        return rows.length === 0 || rows.some((r) => r.role === "owner");
+      },
       organizationLimit: 5,
       invitationExpiresIn: 60 * 60 * 24 * 7,
       sendInvitationEmail: async (data) => {
         await sendInvitationEmail({
           to: data.email,
           inviter: data.inviter.user.name,
+          inviterEmail: data.inviter.user.email,
           organisation: data.organization.name,
           role: data.role,
           url: `${process.env.BETTER_AUTH_URL}/invite/${data.id}`,
