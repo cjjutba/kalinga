@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
@@ -86,15 +87,15 @@ export function ClinicSettings() {
     <SettingsFrame title="Settings" lead="The clinic as pet owners see it.">
       <form onSubmit={submit} noValidate className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Card className="flex flex-col gap-5 p-6">
-          <InputField label="Clinic name" value={form.name} onChange={set("name")} />
-          <InputField label="Address" value={form.address} onChange={set("address")} placeholder="Door 3, Velez corner Capistrano" />
+          <InputField label="Clinic name" placeholder={placeholder.clinicName} value={form.name} onChange={set("name")} />
+          <InputField label="Address" value={form.address} onChange={set("address")} placeholder={placeholder.address} />
           <div className="grid gap-4 sm:grid-cols-2">
-            <InputField label="City" value={form.city} onChange={set("city")} placeholder="Cagayan de Oro" />
+            <InputField label="City" value={form.city} onChange={set("city")} placeholder={placeholder.city} />
             <SelectField label="Time zone" value={form.timezone} onChange={(v) => setForm((f) => ({ ...f, timezone: v }))} options={[{ value: "Asia/Manila", label: "Asia/Manila" }]} helper="Appointments show in this zone, labelled." />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <InputField label="Mobile" value={form.mobile} onChange={set("mobile")} inputMode="tel" placeholder="0917 555 0142" />
-            <InputField label="Email" type="email" value={form.email} onChange={set("email")} />
+            <InputField label="Mobile" value={form.mobile} onChange={set("mobile")} inputMode="tel" placeholder={placeholder.mobile} />
+            <InputField label="Email" type="email" placeholder={placeholder.contactEmail} value={form.email} onChange={set("email")} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <InputField label="Opens" type="time" value={form.openFrom} onChange={set("openFrom")} helper="Shown on your public page. Per vet hours are under Hours." />
@@ -159,11 +160,11 @@ function ServiceDialog({ service, open, onOpenChange }: { service: Service | nul
           <DialogTitle className="text-heading font-medium">{existing ? `Edit ${existing.name}` : "New service"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={save} noValidate className="mt-4 flex flex-col gap-4">
-          <InputField label="Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} error={error} placeholder="Vaccination" />
+          <InputField label="Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} error={error} placeholder={placeholder.serviceName} />
           <div className="grid grid-cols-3 gap-3">
-            <InputField label="Minutes" inputMode="numeric" value={form.durationMin} onChange={(e) => setForm((f) => ({ ...f, durationMin: e.target.value }))} />
-            <InputField label="Buffer" inputMode="numeric" value={form.bufferMin} onChange={(e) => setForm((f) => ({ ...f, bufferMin: e.target.value }))} helper="Minutes after" />
-            <InputField label="Price, ₱" inputMode="numeric" value={form.pricePhp} onChange={(e) => setForm((f) => ({ ...f, pricePhp: e.target.value }))} />
+            <InputField label="Minutes" inputMode="numeric" placeholder={placeholder.minutes} value={form.durationMin} onChange={(e) => setForm((f) => ({ ...f, durationMin: e.target.value }))} />
+            <InputField label="Buffer" inputMode="numeric" placeholder={placeholder.buffer} value={form.bufferMin} onChange={(e) => setForm((f) => ({ ...f, bufferMin: e.target.value }))} helper="Minutes after" />
+            <InputField label="Price, ₱" inputMode="numeric" placeholder={placeholder.price} value={form.pricePhp} onChange={(e) => setForm((f) => ({ ...f, pricePhp: e.target.value }))} />
           </div>
           <SelectField label="Sets a recall date" value={form.recallKind} onChange={(v) => setForm((f) => ({ ...f, recallKind: v }))} options={[{ value: "", label: "No" }, { value: "vaccination", label: "Vaccination, due yearly" }, { value: "deworming", label: "Deworming, due quarterly" }, { value: "grooming", label: "Grooming, on the clinic interval" }]} />
           <label className="flex items-center gap-2 text-small">
@@ -306,7 +307,7 @@ export function StaffSettings() {
         </div>
         <form onSubmit={invite} noValidate className="flex flex-col gap-4 self-start rounded-card bg-sheet p-6">
           <h2 className="text-heading font-medium">Invite someone</h2>
-          <InputField label="Email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} error={error} placeholder="maria@clinic.com" />
+          <InputField label="Email" type="email" placeholder={placeholder.contactEmail} value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} error={error} />
           <SelectField label="Role" value={form.role} onChange={(v) => setForm((f) => ({ ...f, role: v as Role }))} options={staffRoles.map((r) => ({ value: r, label: roleLabel[r] }))} helper={roleDescription[form.role]} />
           <Pill type="submit" size="sm" loading={busy} loadingLabel="Inviting">
             Send invitation
@@ -402,7 +403,7 @@ export function HoursSettings() {
         </div>
         <form onSubmit={add} noValidate className="flex flex-col gap-4 self-start rounded-card bg-sheet p-6">
           <h2 className="text-heading font-medium">Add to the schedule</h2>
-          <InputField label="Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} error={error} placeholder="Dr. Ana Reyes" />
+          <InputField label="Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} error={error} placeholder={placeholder.personName} />
           <SelectField label="Role on the schedule" value={form.title} onChange={(v) => setForm((f) => ({ ...f, title: v as Provider["title"] }))} options={[{ value: "Vet", label: "Vet" }, { value: "Groomer", label: "Groomer" }]} helper="Groomers only take grooming bookings." />
           <SelectField
             label="Signs in as"
@@ -466,7 +467,7 @@ export function ClosuresSettings() {
         <form onSubmit={add} noValidate className="flex flex-col gap-4 self-start rounded-card bg-sheet p-6">
           <h2 className="text-heading font-medium">Add a closure</h2>
           <InputField label="Date" type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} error={error} />
-          <InputField label="Reason" hint="Optional" value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} placeholder="Fiesta, clinic closed" />
+          <InputField label="Reason" hint="Optional" value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} placeholder={placeholder.closureReason} />
           <SelectField label="Who" value={form.who} onChange={(v) => setForm((f) => ({ ...f, who: v }))} options={[{ value: "all", label: "Whole clinic" }, ...providers.map((p) => ({ value: p.id, label: p.name }))]} />
           <Pill type="submit" size="sm" disabled={providers.length === 0}>
             Add closure
@@ -515,7 +516,7 @@ export function RecallSettings() {
               <dd>Every three months</dd>
             </div>
           </dl>
-          <InputField label="Grooming, every" inputMode="numeric" value={weeks} onChange={(e) => setWeeks(e.target.value)} helper="Weeks. Four to six is usual." />
+          <InputField label="Grooming, every" inputMode="numeric" placeholder={placeholder.weeks} value={weeks} onChange={(e) => setWeeks(e.target.value)} helper="Weeks. Four to six is usual." />
           <div className="flex items-center justify-end gap-3">
             <Saved show={saved} />
             <Pill type="submit" size="sm">

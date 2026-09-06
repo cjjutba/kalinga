@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarClock, Clock, ListChecks, UserPlus } from "lucide-react";
@@ -111,12 +112,12 @@ export function ClinicForm({ inDialog, onDone, onBusyChange }: { inDialog?: bool
           {formError}
         </p>
       ) : null}
-      <InputField label="Clinic name" name="clinic" placeholder="Lunhaw Animal Clinic" value={name} onChange={(e) => onName(e.target.value)} error={nameError} disabled={loading} autoFocus />
+      <InputField label="Clinic name" name="clinic" placeholder={placeholder.clinicName} value={name} onChange={(e) => onName(e.target.value)} error={nameError} disabled={loading} autoFocus />
       <InputField
         label="Booking address"
         name="slug"
         prefix="kalinga.cjjutba.dev/"
-        placeholder="lunhaw"
+        placeholder={placeholder.bookingAddress}
         value={slug}
         onChange={(e) => {
           setSlugTouched(true);
@@ -129,7 +130,7 @@ export function ClinicForm({ inDialog, onDone, onBusyChange }: { inDialog?: bool
         spellCheck={false}
       />
       <div className="grid gap-5 sm:grid-cols-2">
-        <InputField label="City" hint="Optional" name="city" placeholder="Cagayan de Oro" value={city} onChange={(e) => setCity(e.target.value)} disabled={loading} />
+        <InputField label="City" hint="Optional" name="city" placeholder={placeholder.city} value={city} onChange={(e) => setCity(e.target.value)} disabled={loading} />
         <SelectField label="Time zone" value={tz} onChange={setTz} options={zones} helper={now ? `It is ${now} there right now.` : "Appointments show in this zone, labelled."} disabled={loading} />
       </div>
     </>

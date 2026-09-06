@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -109,7 +110,7 @@ export function VisitForm({ orgSlug, petId }: { orgSlug: string; petId: string }
           <p className="rounded-guide bg-field p-4 text-small text-text-2">{pet.name} has no open appointment. Book one or add a walk-in from the day view, then come back.</p>
         )}
         <SelectField label="Seen by" value={providerId} onChange={setProviderId} options={providers.map((p) => ({ value: p.id, label: p.name }))} />
-        <InputField label="Weight, kg" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} helper={pet.weightKg ? `Last recorded ${pet.weightKg} kg.` : "First weight on record."} />
+        <InputField label="Weight, kg" inputMode="decimal" placeholder={placeholder.weightKg} value={weight} onChange={(e) => setWeight(e.target.value)} helper={pet.weightKg ? `Last recorded ${pet.weightKg} kg.` : "First weight on record."} />
         <fieldset>
           <legend className="text-label font-medium">Administered</legend>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -131,12 +132,12 @@ export function VisitForm({ orgSlug, petId }: { orgSlug: string; petId: string }
               );
             })}
           </div>
-          <InputField label="Anything else" hint="Optional" value={extra} onChange={(e) => setExtra(e.target.value)} wrapperClassName="mt-3" placeholder="Antihistamine, 10 mg" />
+          <InputField label="Anything else" hint="Optional" value={extra} onChange={(e) => setExtra(e.target.value)} wrapperClassName="mt-3" placeholder={placeholder.visitAdministered} />
         </fieldset>
-        <TextareaField label="Notes" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} error={error} placeholder="Bright and alert. Mild tartar on upper molars, advised dental scaling within six months." />
+        <TextareaField label="Notes" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} error={error} placeholder={placeholder.vetNotes} />
         <div className="grid gap-4 sm:grid-cols-2">
           <SelectField label="Paid by" hint="Optional" value={method} onChange={(v) => setMethod(v as "cash" | "gcash" | "")} options={[{ value: "", label: "Not yet" }, { value: "cash", label: "Cash" }, { value: "gcash", label: "GCash" }]} />
-          <InputField label="Reference" hint="Optional" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="GC1234567" disabled={method !== "gcash"} />
+          <InputField label="Reference" hint="Optional" value={ref} onChange={(e) => setRef(e.target.value)} placeholder={placeholder.paymentRef} disabled={method !== "gcash"} />
         </div>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Pill asChild size="sm" variant="secondary">

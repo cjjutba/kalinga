@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ChevronRight } from "lucide-react";
@@ -48,7 +49,7 @@ export function AuditTrail({ orgSlug }: { orgSlug: string }) {
     <>
       <PageHeader title="Audit trail" lead={`${audit.length} events, newest first. Nothing here can be edited or deleted.`} />
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
-        <InputField on="page" label="Search" type="search" placeholder="Cancelled, Kiko, Grooming" value={q} onChange={(e) => setQ(e.target.value)} />
+        <InputField on="page" label="Search" type="search" placeholder={placeholder.searchAudit} value={q} onChange={(e) => setQ(e.target.value)} />
         <SelectField on="page" label="Who" value={actor} onChange={setActor} options={[{ value: "all", label: "Anyone" }, ...members.map((m) => ({ value: m.id, label: m.name }))]} />
         <SelectField on="page" label="What" value={entity} onChange={setEntity} options={[{ value: "all", label: "Everything" }, ...Object.entries(entityLabel).map(([v, l]) => ({ value: v, label: l }))]} />
       </div>

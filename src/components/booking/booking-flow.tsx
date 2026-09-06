@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -307,14 +308,14 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                 <>
                   <Title heading="Who is coming?" lead="So the clinic can confirm this and remind you when your pet is due again." />
                   <div className="flex flex-col gap-5">
-                    <InputField on="shell" label="Your name" autoComplete="name" value={details.name} onChange={(e) => setDetails((d) => ({ ...d, name: e.target.value }))} error={errors.name} />
-                    <InputField on="shell" label="Mobile" inputMode="tel" autoComplete="tel" placeholder="0917 555 0142" value={details.mobile} onChange={(e) => setDetails((d) => ({ ...d, mobile: e.target.value }))} error={errors.mobile} helper="The clinic confirms and reminds you here." />
-                    <InputField on="shell" label="Email" type="email" autoComplete="email" placeholder="you@example.com" value={details.email} onChange={(e) => setDetails((d) => ({ ...d, email: e.target.value }))} error={errors.email} helper="Your confirmation arrives here." />
+                    <InputField on="shell" label="Your name" placeholder={placeholder.personName} autoComplete="name" value={details.name} onChange={(e) => setDetails((d) => ({ ...d, name: e.target.value }))} error={errors.name} />
+                    <InputField on="shell" label="Mobile" inputMode="tel" autoComplete="tel" placeholder={placeholder.mobile} value={details.mobile} onChange={(e) => setDetails((d) => ({ ...d, mobile: e.target.value }))} error={errors.mobile} helper="The clinic confirms and reminds you here." />
+                    <InputField on="shell" label="Email" type="email" autoComplete="email" placeholder={placeholder.email} value={details.email} onChange={(e) => setDetails((d) => ({ ...d, email: e.target.value }))} error={errors.email} helper="Your confirmation arrives here." />
                     <div className="grid grid-cols-[1fr_auto] gap-3">
-                      <InputField on="shell" label="Pet's name" value={details.petName} onChange={(e) => setDetails((d) => ({ ...d, petName: e.target.value }))} error={errors.petName} />
+                      <InputField on="shell" label="Pet's name" placeholder={placeholder.petName} value={details.petName} onChange={(e) => setDetails((d) => ({ ...d, petName: e.target.value }))} error={errors.petName} />
                       <SelectField on="shell" label="Species" value={details.species} onChange={(v) => setDetails((d) => ({ ...d, species: v }))} options={[{ value: "dog", label: "Dog" }, { value: "cat", label: "Cat" }]} className="w-32" />
                     </div>
-                    <TextareaField on="shell" label="Anything the vet should know" hint="Optional" rows={3} value={details.notes} onChange={(e) => setDetails((d) => ({ ...d, notes: e.target.value }))} />
+                    <TextareaField on="shell" label="Anything the vet should know" hint="Optional" placeholder={placeholder.appointmentNote} rows={3} value={details.notes} onChange={(e) => setDetails((d) => ({ ...d, notes: e.target.value }))} />
                     <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden>
                       <label>
                         Website <input tabIndex={-1} autoComplete="off" value={details.website} onChange={(e) => setDetails((d) => ({ ...d, website: e.target.value }))} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -38,14 +39,14 @@ export function SignInForm() {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       <AuthTitle>Sign in</AuthTitle>
-      <InputField on="auth" label="Email" type="email" name="email" autoComplete="email" inputMode="email" placeholder="you@clinic.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} />
+      <InputField on="auth" label="Email" type="email" name="email" autoComplete="email" inputMode="email" placeholder={placeholder.email} value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} />
       <InputField
         on="auth"
         label="Password"
         type="password"
         name="password"
         autoComplete="current-password"
-        placeholder="Enter your password"
+        placeholder={placeholder.password}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         error={error}

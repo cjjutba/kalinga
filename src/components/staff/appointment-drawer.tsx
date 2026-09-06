@@ -1,5 +1,6 @@
 "use client";
 
+import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
 import { useState } from "react";
 import { Sheet as Drawer, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -160,7 +161,7 @@ function Body({
             </div>
           ) : null}
 
-          <TextareaField label="Note" hint="Optional" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Anything the vet should know before this one." />
+          <TextareaField label="Note" hint="Optional" rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder={placeholder.appointmentNote} />
 
           <div className="flex flex-wrap items-center gap-2">
             <Pill size="sm" onClick={save} disabled={!dirty} loading={saving} loadingLabel="Saving">
