@@ -1,7 +1,8 @@
 "use client";
 
 import { forwardRef, useId, useState, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Check, ChevronDown, Eye, EyeOff } from "lucide-react";
+import { Select as SelectPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 // A field owns its label, control, helper line and error together, so no
@@ -27,18 +28,22 @@ interface FieldFrameProps {
   on?: Surface;
   /** Text shown after the label, e.g. "Optional". */
   hint?: string;
+  /** A control on the label row, right aligned. A link, never a second input. */
+  labelAction?: ReactNode;
   className?: string;
   id: string;
   children: ReactNode;
 }
 
-function FieldFrame({ label, helper, error, hint, className, id, children }: FieldFrameProps) {
+function FieldFrame({ label, helper, error, hint, labelAction, className, id, children }: FieldFrameProps) {
   return (
     <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
-      <label htmlFor={id} className="flex items-baseline justify-between text-[13px] font-medium text-text">
-        <span>{label}</span>
-        {hint ? <span className="font-normal text-text-2">{hint}</span> : null}
-      </label>
+      <div className="flex items-baseline justify-between gap-3">
+        <label id={`${id}-label`} htmlFor={id} className="text-[13px] font-medium text-text">
+          {label}
+        </label>
+        {labelAction ?? (hint ? <span className="text-[13px] text-text-2">{hint}</span> : null)}
+      </div>
       {children}
       {error ? (
         <p id={`${id}-error`} role="alert" className="text-[13px] text-error">
@@ -68,6 +73,7 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
   helper?: ReactNode;
   error?: string;
   hint?: string;
+  labelAction?: ReactNode;
   on?: Surface;
   /** A fixed prefix inside the control, e.g. a URL stem. */
   prefix?: string;
@@ -76,7 +82,7 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
 }
 
 export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function InputField(
-  { label, helper, error, hint, on = "sheet", prefix, className, wrapperClassName, id: givenId, type, ...props },
+  { label, helper, error, hint, labelAction, on = "sheet", prefix, className, wrapperClassName, id: givenId, type, ...props },
   ref,
 ) {
   const auto = useId();
@@ -98,7 +104,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function
   );
 
   return (
-    <FieldFrame label={label} helper={helper} error={error} hint={hint} on={on} id={id} className={wrapperClassName}>
+    <FieldFrame label={label} helper={helper} error={error} hint={hint} labelAction={labelAction} on={on} id={id} className={wrapperClassName}>
       {prefix || isPassword ? (
         <div className={cn("relative flex items-stretch rounded-input", error && "ring-2 ring-error", surfaceFill[on])}>
           {prefix ? (
@@ -183,27 +189,77 @@ export interface SelectFieldProps {
   options: { value: string; label: string }[];
   className?: string;
   disabled?: boolean;
+  /** Shown when nothing is chosen yet. */
+  placeholder?: string;
 }
 
-export function SelectField({ label, helper, error, hint, on = "sheet", id: givenId, value, onChange, options, className, disabled }: SelectFieldProps) {
+const EMPTY = "__none__";
+
+// One dropdown for the whole product. The native control cannot be styled to
+// the design system and looks like the operating system rather than Kalinga,
+// so this is the Radix listbox: same tone, same corners and same focus ring as
+// an input, a check against the current choice, keyboard and screen reader
+// behaviour handled by the primitive. The label points at the trigger, which
+// is a button and so takes a label like any other control.
+export function SelectField({ label, helper, error, hint, on = "sheet", id: givenId, value, onChange, options, className, disabled, placeholder }: SelectFieldProps) {
   const auto = useId();
   const id = givenId ?? auto;
+  const describedBy = error ? `${id}-error` : helper ? `${id}-helper` : undefined;
+  // The primitive refuses an empty value, because empty means "nothing chosen"
+  // to it. Several fields here have a real option that means none, so it
+  // travels under a sentinel and comes back out empty.
+  const encode = (v: string) => (v === "" ? EMPTY : v);
   return (
     <FieldFrame label={label} helper={helper} error={error} hint={hint} on={on} id={id} className={className}>
-      <select
-        id={id}
-        value={value}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
-        aria-invalid={error ? true : undefined}
-        className={cn(controlClass(on, !!error, "h-12 min-w-0 appearance-none pr-10"), "bg-[url('data:image/svg+xml;utf8,<svg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2216%22%20height=%2216%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23656569%22%20stroke-width=%221.5%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22><path%20d=%22m6%209%206%206%206-6%22/></svg>')] bg-[length:16px_16px] bg-[right_16px_center] bg-no-repeat")}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+      <SelectPrimitive.Root value={encode(value)} onValueChange={(v) => onChange(v === EMPTY ? "" : v)} disabled={disabled}>
+        <SelectPrimitive.Trigger
+          id={id}
+          aria-labelledby={`${id}-label ${id}`}
+          aria-describedby={describedBy}
+          aria-invalid={error ? true : undefined}
+          className={cn(
+            controlClass(on, !!error, "flex h-12 min-w-0 items-center justify-between gap-2 pr-3 text-left"),
+            "data-[placeholder]:text-text-3",
+          )}
+        >
+          <span className="min-w-0 truncate">
+            <SelectPrimitive.Value placeholder={placeholder ?? "Choose one"} />
+          </span>
+          <SelectPrimitive.Icon asChild>
+            <ChevronDown className="size-4 shrink-0 text-text-2" strokeWidth={1.5} aria-hidden />
+          </SelectPrimitive.Icon>
+        </SelectPrimitive.Trigger>
+        <SelectPrimitive.Portal>
+          <SelectPrimitive.Content
+            position="popper"
+            sideOffset={6}
+            collisionPadding={12}
+            className={cn(
+              "z-50 max-h-[min(20rem,var(--radix-select-content-available-height))] w-[var(--radix-select-trigger-width)] min-w-40 overflow-hidden",
+              "rounded-input bg-sheet p-1.5 text-text ring-1 ring-divider shadow-[0_12px_32px_rgba(0,0,0,0.14)]",
+              "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 motion-reduce:animate-none",
+            )}
+          >
+            <SelectPrimitive.Viewport className="max-h-[inherit] overflow-y-auto">
+              {options.map((o) => (
+                <SelectPrimitive.Item
+                  key={o.value}
+                  value={encode(o.value)}
+                  className={cn(
+                    "relative flex cursor-default select-none items-center justify-between gap-3 rounded-tag py-2.5 pl-3 pr-2.5 text-[15px] outline-none",
+                    "data-highlighted:bg-field data-[state=checked]:font-medium",
+                  )}
+                >
+                  <SelectPrimitive.ItemText>{o.label}</SelectPrimitive.ItemText>
+                  <SelectPrimitive.ItemIndicator>
+                    <Check className="size-4 shrink-0 text-text-2" strokeWidth={1.5} aria-hidden />
+                  </SelectPrimitive.ItemIndicator>
+                </SelectPrimitive.Item>
+              ))}
+            </SelectPrimitive.Viewport>
+          </SelectPrimitive.Content>
+        </SelectPrimitive.Portal>
+      </SelectPrimitive.Root>
     </FieldFrame>
   );
 }
