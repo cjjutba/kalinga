@@ -5,7 +5,8 @@ import { useMemo, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronRight, Plus } from "lucide-react";
 import { PageHeader, EmptyState, NotForRole } from "./page-header";
-import { NewAppointmentDialog } from "./dialogs";
+import { Frame, NewAppointmentDialog } from "./dialogs";
+import { useToast } from "@/components/primitives/toast";
 import { InputField, SelectField, TextareaField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
 import { Card } from "@/components/primitives/surfaces";
@@ -32,6 +33,7 @@ export function PetsList({ orgSlug }: { orgSlug: string }) {
   const { org, pets, owners, role } = useOrg(orgSlug);
   const ui = useUiState<"empty" | "loading">();
   const [q, setQ] = useState("");
+  const [newOpen, setNewOpen] = useState(false);
   const rows = useMemo(() => {
     if (ui === "empty") return [];
     const s = q.trim().toLowerCase();
@@ -48,14 +50,13 @@ export function PetsList({ orgSlug }: { orgSlug: string }) {
         lead={`${pets.length} on file`}
         actions={
           can(role, "edit_clients") ? (
-            <Pill asChild size="sm">
-              <Link href={`/app/${org.slug}/pets/new`}>
-                <Plus className="size-4" strokeWidth={1.5} aria-hidden /> New pet
-              </Link>
+            <Pill size="sm" onClick={() => setNewOpen(true)}>
+              <Plus className="size-4" strokeWidth={1.5} aria-hidden /> New pet
             </Pill>
           ) : null
         }
       />
+      <NewPetDialog orgSlug={orgSlug} open={newOpen} onOpenChange={setNewOpen} />
       <div className="mb-4 max-w-md">
         <InputField on="page" label="Search" placeholder="Pet, breed or owner" value={q} onChange={(e) => setQ(e.target.value)} type="search" />
       </div>
@@ -300,12 +301,12 @@ export function VisitDetail({ orgSlug, petId, visitId }: { orgSlug: string; petI
   );
 }
 
-export function PetForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
+export function PetForm({ orgSlug, id, owner, inDialog, onDone }: { orgSlug: string; id?: string; /** Preselected owner, when the form is opened from a client. */ owner?: string; /** Rendered inside a dialog: no page header, and the footer closes instead of navigating. */ inDialog?: boolean; onDone?: (id: string | null) => void }) {
   const router = useRouter();
   const params = useSearchParams();
   const { org, pets, owners, role, dispatch } = useOrg(orgSlug);
   const existing = id ? resolvePet(id, pets) : undefined;
-  const [ownerId, setOwnerId] = useState(existing?.ownerId ?? params.get("owner") ?? owners[0]?.id ?? "");
+  const [ownerId, setOwnerId] = useState(existing?.ownerId ?? owner ?? params.get("owner") ?? owners[0]?.id ?? "");
   const [name, setName] = useState(existing?.name ?? "");
   const [species, setSpecies] = useState<"dog" | "cat">(existing?.species ?? "dog");
   const [breed, setBreed] = useState(existing?.breed ?? "");
@@ -334,14 +335,14 @@ export function PetForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
     });
     setBusy(false);
     if (!r.ok) return setError(r.error);
-    router.push(`/app/${org.slug}/pets/${r.id ?? existing?.id}`);
+    const savedId = r.id ?? existing?.id ?? null;
+    if (inDialog) return onDone?.(savedId);
+    router.push(`/app/${org.slug}/pets/${savedId}`);
   }
 
-  return (
-    <form onSubmit={submit} noValidate className="mx-auto max-w-lg">
-      <PageHeader title={existing ? `Edit ${existing.name}` : "New pet"} />
-      <Card className="flex flex-col gap-5 p-6">
-        <SelectField label="Owner" value={ownerId} onChange={setOwnerId} options={owners.map((o) => ({ value: o.id, label: o.name }))} />
+  const fields = (
+    <>
+      <SelectField label="Owner" value={ownerId} onChange={setOwnerId} options={owners.map((o) => ({ value: o.id, label: o.name }))} />
         <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} error={error} placeholder="Kiko" />
         <div className="grid gap-4 sm:grid-cols-2">
           <SelectField label="Species" value={species} onChange={(v) => setSpecies(v as "dog" | "cat")} options={[{ value: "dog", label: "Dog" }, { value: "cat", label: "Cat" }]} />
@@ -352,7 +353,31 @@ export function PetForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
           <InputField label="Birth date" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} hint="Or a best guess" />
           <InputField label="Weight, kg" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} hint="Optional" placeholder="8.5" />
         </div>
-        <TextareaField label="Notes" hint="Optional" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Nervous with clippers. Likes the groomer to go slow." />
+      <TextareaField label="Notes" hint="Optional" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Nervous with clippers. Likes the groomer to go slow." />
+    </>
+  );
+
+  if (inDialog) {
+    return (
+      <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+        {fields}
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Pill type="button" size="sm" variant="secondary" onClick={() => onDone?.(null)}>
+            Cancel
+          </Pill>
+          <Pill type="submit" size="sm" loading={busy} loadingLabel="Saving">
+            {existing ? "Save changes" : "Add pet"}
+          </Pill>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} noValidate className="mx-auto max-w-lg">
+      <PageHeader title={existing ? `Edit ${existing.name}` : "New pet"} />
+      <Card className="flex flex-col gap-5 p-6">
+        {fields}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Pill asChild size="sm" variant="secondary">
             <Link href={existing ? `/app/${org.slug}/pets/${existing.id}` : `/app/${org.slug}/pets`}>Cancel</Link>
@@ -363,5 +388,28 @@ export function PetForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
         </div>
       </Card>
     </form>
+  );
+}
+
+/** The same form over the list it was opened from. The route stays for anyone
+ *  who lands on it directly. */
+export function NewPetDialog({ orgSlug, owner, open, onOpenChange }: { orgSlug: string; owner?: string; open: boolean; onOpenChange: (o: boolean) => void }) {
+  const router = useRouter();
+  const { org } = useOrg(orgSlug);
+  const toast = useToast();
+  return (
+    <Frame open={open} onOpenChange={onOpenChange} title="New pet" description="Breed can be a best guess. Aspin and puspin are breeds here.">
+      <PetForm
+        orgSlug={orgSlug}
+        owner={owner}
+        inDialog
+        onDone={(id) => {
+          onOpenChange(false);
+          if (!id) return;
+          toast({ title: "Pet added", detail: "Recall dates start from the first visit." });
+          router.push(`/app/${org.slug}/pets/${id}`);
+        }}
+      />
+    </Frame>
   );
 }

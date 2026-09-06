@@ -5,6 +5,8 @@ import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Plus } from "lucide-react";
 import { Frame } from "./dialogs";
+import { NewPetDialog } from "./pets";
+import { useToast } from "@/components/primitives/toast";
 import { SelectField } from "@/components/primitives/field";
 import { PageHeader, EmptyState, NotForRole } from "./page-header";
 import { InputField, TextareaField } from "@/components/primitives/field";
@@ -31,6 +33,7 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
   const { org, owners, pets, role } = useOrg(orgSlug);
   const ui = useUiState<"empty" | "loading">();
   const [q, setQ] = useState("");
+  const [newOpen, setNewOpen] = useState(false);
   const rows = useMemo(() => {
     if (ui === "empty") return [];
     const s = q.trim().toLowerCase();
@@ -47,14 +50,13 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
         lead={`${owners.length} on file`}
         actions={
           can(role, "edit_clients") ? (
-            <Pill asChild size="sm">
-              <Link href={`/app/${org.slug}/clients/new`}>
-                <Plus className="size-4" strokeWidth={1.5} aria-hidden /> New client
-              </Link>
+            <Pill size="sm" onClick={() => setNewOpen(true)}>
+              <Plus className="size-4" strokeWidth={1.5} aria-hidden /> New client
             </Pill>
           ) : null
         }
       />
+      <NewClientDialog orgSlug={orgSlug} open={newOpen} onOpenChange={setNewOpen} />
       <div className="mb-4 max-w-md">
         <InputField on="page" label="Search" placeholder="Name, mobile or email" value={q} onChange={(e) => setQ(e.target.value)} type="search" />
       </div>
@@ -103,6 +105,7 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
 
 export function ClientDetail({ orgSlug, id }: { orgSlug: string; id: string }) {
   const { org, owners, pets, appointments, services, providers, role } = useOrg(orgSlug);
+  const [petOpen, setPetOpen] = useState(false);
   const owner = resolveId(id, owners);
   if (!can(role, "view_clients")) return <NotForRole role={roleLabel[role]} page="Clients" />;
   if (!owner) return <EmptyState title="That client is not on file" lead="They may have been removed, or the link is old." action={<Pill asChild size="sm" variant="secondary"><Link href={`/app/${org.slug}/clients`}>Back to clients</Link></Pill>} />;
@@ -123,15 +126,14 @@ export function ClientDetail({ orgSlug, id }: { orgSlug: string; id: string }) {
               <Pill asChild size="sm" variant="secondary">
                 <Link href={`/app/${org.slug}/clients/${owner.id}/edit`}>Edit</Link>
               </Pill>
-              <Pill asChild size="sm">
-                <Link href={`/app/${org.slug}/pets/new?owner=${owner.id}`}>
-                  <Plus className="size-4" strokeWidth={1.5} aria-hidden /> Add pet
-                </Link>
+              <Pill size="sm" onClick={() => setPetOpen(true)}>
+                <Plus className="size-4" strokeWidth={1.5} aria-hidden /> Add pet
               </Pill>
             </>
           ) : null
         }
       />
+      <NewPetDialog orgSlug={orgSlug} owner={owner.id} open={petOpen} onOpenChange={setPetOpen} />
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <div className="flex flex-col gap-4">
           <Card className="p-5">
@@ -274,7 +276,7 @@ function PrivacyCard({ orgSlug, owner, petCount, appointmentCount }: { orgSlug: 
   );
 }
 
-export function ClientForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
+export function ClientForm({ orgSlug, id, inDialog, onDone }: { orgSlug: string; id?: string; /** Rendered inside a dialog: no page header, and the footer closes instead of navigating. */ inDialog?: boolean; onDone?: (id: string | null) => void }) {
   const router = useRouter();
   const { org, owners, role, dispatch } = useOrg(orgSlug);
   const existing = id ? resolveId(id, owners) : undefined;
@@ -296,17 +298,41 @@ export function ClientForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
     const r = await dispatch({ type: "owner/upsert", owner: { id: existing?.id, name: name.trim(), mobile: mobile.trim() || undefined, email: email.trim() || undefined, notes: notes.trim() || undefined } });
     setBusy(false);
     if (!r.ok) return setError(r.error);
-    router.push(`/app/${org.slug}/clients/${r.id ?? existing?.id}`);
+    const savedId = r.id ?? existing?.id ?? null;
+    if (inDialog) return onDone?.(savedId);
+    router.push(`/app/${org.slug}/clients/${savedId}`);
+  }
+
+  const fields = (
+    <>
+      <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} error={error} autoComplete="off" placeholder="Maria Santos" />
+      <InputField label="Mobile" hint="Optional" value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="tel" placeholder="0917 555 0142" helper="Reminders are sent to this number by the desk." />
+      <InputField label="Email" hint="Optional" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
+      <TextareaField label="Notes" hint="Optional" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Prefers Messenger. Usually comes in on Saturdays." />
+    </>
+  );
+
+  if (inDialog) {
+    return (
+      <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+        {fields}
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Pill type="button" size="sm" variant="secondary" onClick={() => onDone?.(null)}>
+            Cancel
+          </Pill>
+          <Pill type="submit" size="sm" loading={busy} loadingLabel="Saving">
+            {existing ? "Save changes" : "Add client"}
+          </Pill>
+        </div>
+      </form>
+    );
   }
 
   return (
     <form onSubmit={submit} noValidate className="mx-auto max-w-lg">
       <PageHeader title={existing ? `Edit ${existing.name}` : "New client"} lead={existing ? undefined : "Name is enough to start. Mobile is how reminders reach them."} />
       <Card className="flex flex-col gap-5 p-6">
-        <InputField label="Name" value={name} onChange={(e) => setName(e.target.value)} error={error} autoComplete="off" placeholder="Maria Santos" />
-        <InputField label="Mobile" hint="Optional" value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="tel" placeholder="0917 555 0142" helper="Reminders are sent to this number by the desk." />
-        <InputField label="Email" hint="Optional" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
-        <TextareaField label="Notes" hint="Optional" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Prefers Messenger. Usually comes in on Saturdays." />
+        {fields}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Pill asChild size="sm" variant="secondary">
             <Link href={existing ? `/app/${org.slug}/clients/${existing.id}` : `/app/${org.slug}/clients`}>Cancel</Link>
@@ -317,5 +343,28 @@ export function ClientForm({ orgSlug, id }: { orgSlug: string; id?: string }) {
         </div>
       </Card>
     </form>
+  );
+}
+
+/** Adding a client is four fields and happens while a phone is ringing, so it
+ *  is a dialog over the list rather than a page of its own. The route stays for
+ *  anyone who lands on it directly. */
+export function NewClientDialog({ orgSlug, open, onOpenChange }: { orgSlug: string; open: boolean; onOpenChange: (o: boolean) => void }) {
+  const router = useRouter();
+  const { org } = useOrg(orgSlug);
+  const toast = useToast();
+  return (
+    <Frame open={open} onOpenChange={onOpenChange} title="New client" description="Name is enough to start. Mobile is how reminders reach them.">
+      <ClientForm
+        orgSlug={orgSlug}
+        inDialog
+        onDone={(id) => {
+          onOpenChange(false);
+          if (!id) return;
+          toast({ title: "Client added", detail: "Add their pet next." });
+          router.push(`/app/${org.slug}/clients/${id}`);
+        }}
+      />
+    </Frame>
   );
 }
