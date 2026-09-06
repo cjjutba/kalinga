@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { z } from "zod";
 import { bookingInput, manageInput } from "./schemas";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { allowRate, getOrganisationBySlug } from "@/lib/db/queries";
 import { scoped } from "@/lib/db/scoped";
 import { appointment, auditEvent, owner, pet, provider, service } from "@/lib/db/schema";
@@ -57,10 +57,15 @@ export async function bookAppointment(raw: unknown): Promise<BookingResult> {
       if (!isFree({ id: prov.id, weeklyHours: prov.weeklyHours, exceptions: prov.exceptions }, startsAt, svc.durationMin, svc.bufferMin, busy, orgRow.timezone)) {
         throw new Error("appointment_no_overlap");
       }
-      // One owner per mobile per clinic. Returning clients are matched, not duplicated.
-      const existing = input.mobile ? await sc.one(owner, eq(owner.mobile, input.mobile)) : undefined;
+      // One owner per mobile per clinic, compared on digits so spacing does not
+      // split a person in two. One pet per owner per name, so a returning client
+      // booking Kiko again gets Kiko's record, not a second Kiko.
+      const digits = input.mobile.replace(/\D/g, "");
+      const existing = digits ? await sc.one(owner, sql`regexp_replace(coalesce(${owner.mobile}, ''), '\\D', '', 'g') = ${digits}`) : undefined;
       const ownerRow = existing ?? (await sc.insert(owner, { name: input.name, mobile: input.mobile, email: input.email || undefined }));
-      const petRow = await sc.insert(pet, { ownerId: ownerRow.id, name: input.petName, species: input.species, breed: input.species === "dog" ? "Aspin" : "Puspin", sex: "male" });
+      if (existing && input.email && !existing.email) await sc.update(owner, existing.id, { email: input.email });
+      const knownPet = await sc.one(pet, eq(pet.ownerId, ownerRow.id), sql`lower(${pet.name}) = lower(${input.petName})`);
+      const petRow = knownPet ?? (await sc.insert(pet, { ownerId: ownerRow.id, name: input.petName, species: input.species, breed: input.species === "dog" ? "Aspin" : "Puspin", sex: "male" }));
       let appt: typeof appointment.$inferSelect | undefined;
       for (let attempt = 0; attempt < 5 && !appt; attempt++) {
         try {
