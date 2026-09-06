@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Lockup } from "@/components/primitives/lockup";
 import { Pill } from "@/components/primitives/pill";
-import { mayCreateOrganisation } from "@/lib/session";
+import { getSession, mayCreateOrganisation } from "@/lib/session";
 import { NewClinicForm } from "./new-clinic-form";
 
 export const metadata: Metadata = { title: "Set up your clinic" };
@@ -14,6 +15,9 @@ export const metadata: Metadata = { title: "Set up your clinic" };
 // updating as the name and the address are typed.
 
 export default async function NewClinicPage() {
+  // Signed out, this page has nothing to offer, and coming back to it after
+  // signing in is the whole point of getting sent away.
+  if (!(await getSession())) redirect("/sign-in?next=/new");
   // The same rule the auth plugin enforces, so the page says it in words
   // rather than letting the button fail.
   const allowed = await mayCreateOrganisation();
