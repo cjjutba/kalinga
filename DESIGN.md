@@ -221,8 +221,29 @@ speculative.
 Pill, in primary, secondary and text variants. Field, which owns the label,
 the input, the helper line and the error state together. Sheet. Card. Guide
 card, the note from a colleague used on onboarding steps. Status pill. Mark
-and Lockup. Skeleton, for the Neon cold start. The floating product card is
-marketing only and does not belong in primitives.
+and Lockup. Skeleton, for the Neon cold start. Data table, the list surface for
+records. The floating product card is marketing only and does not belong in
+primitives.
+
+**No native select anywhere.** The operating system draws its own control and
+it cannot take the tokens, so a dropdown built on a listbox primitive stands in
+for it: the trigger is an input in every respect, the same height, tone,
+corners and focus ring, and the panel is a sheet with a check against the
+current choice. It is one component, `SelectField`, so there is nothing to keep
+in step.
+
+**Records go in a table, not a stack of cards.** One row per thing, columns
+that line up, hairlines inside a single card doing the separating, and the
+whole row is one link. Columns that do not fit a phone are dropped, and the
+first column carries what they said on a second line. A timeline, such as the
+audit trail, stays a list, because its grouping by day matters more than its
+columns.
+
+**The staff sidebar belongs to the clinic.** Its top is the clinic name and its
+switcher, not the product name, because the person working here knows what they
+opened. A hairline separates it from the day. The account sits at the bottom
+and opens upward: appearance, the booking page, privacy, sign out. On a phone
+the same sidebar slides in from the left.
 
 ## Motion
 

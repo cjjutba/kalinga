@@ -570,6 +570,45 @@ later, a status announced to screen readers before anything was saved.
 was found by using the product as a clinic would, which is the argument for
 doing that before each release rather than trusting the suite alone.
 
+## The interface pass after the v1 test
+
+**Date.** 6 September 2026.
+
+**Decided.** The product works, so this pass was about how it feels to use.
+Seven changes, all of them things a clinic owner would notice in the first
+minute.
+
+The native select is gone from the whole product. It could not take the design
+tokens and drew the operating system's control instead of Kalinga's, which was
+the loudest cheap note in the interface. `SelectField` now wraps a listbox
+primitive and every dropdown in the codebase came with it, because there was
+only ever one call site to change. An option that means "none" carries an empty
+value in this codebase and the primitive refuses one, so it travels under a
+sentinel and comes back out empty.
+
+Clients and pets are tables. A record per row, columns that line up, hairlines
+inside one card, the whole row a single link. On a phone the columns that do
+not fit are dropped and the first column carries them on a second line. The
+audit trail stayed a list, because grouping by day beats columns there.
+
+The staff sidebar is the clinic's, not the product's. The Kalinga lockup came
+off the top and the clinic name and switcher took its place, it is wider at
+272px, and a hairline separates it from the day. The theme switch left the
+sidebar for an account menu at the bottom that opens upward, beside the booking
+page and privacy. On a phone the whole sidebar is a sheet from the left rather
+than a list pushed under the header.
+
+Creating a clinic is no longer an auth screen. It has its own page with the
+form on the left and, on the right, what the booking address will look like to
+a pet owner as it is typed. First run is a rail with the state of each step on
+it: what is done carries a check, what is next carries the only filled button.
+Sign in puts "Forgot password?" on the password label row and the way to a new
+account is a quiet ghost button, not a second solid one.
+
+**Why.** The audience order in `AGENTS.md` puts a clinic owner deciding whether
+to pay ahead of everyone else. Nothing above changes what the product does. All
+of it changes whether the product looks like something worth paying for.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a
