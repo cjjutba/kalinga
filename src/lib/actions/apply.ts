@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { TZDate } from "@date-fns/tz";
 import { auth } from "@/lib/auth";
 import { requirePermission, type Actor } from "@/lib/session";
-import { updateOrganisation } from "@/lib/db/queries";
+import { eraseClient, updateOrganisation } from "@/lib/db/queries";
 import { appointment, auditEvent, owner, pet, provider, reminder, service, visit } from "@/lib/db/schema";
 import type { Scope } from "@/lib/db/scoped";
 import { actionSchema, type ActionResult, type StoreAction } from "./types";
@@ -138,6 +138,14 @@ async function handle(action: StoreAction, actor: Actor, scope: Scope): Promise<
       const created = await scope.insert(owner, { name: o.name, mobile: o.mobile, email: o.email, notes: o.notes });
       await audit(scope, actor, "Added client", "owner", created.id, o.name, undefined, { name: o.name, mobile: o.mobile });
       return { ok: true, id: created.id };
+    }
+    case "owner/delete": {
+      const o = await scope.byId(owner, action.id);
+      if (!o) return { ok: false, error: "That client is not on file" };
+      const removed = await eraseClient(scope, o.id);
+      // The event names nothing about the person. Counts and the reason only.
+      await audit(scope, actor, "Deleted client record", "owner", o.id, "Client record", undefined, { ...removed, reason: action.reason ?? "Deletion request from the client" });
+      return { ok: true, id: o.id };
     }
     case "pet/upsert": {
       const p = action.pet;

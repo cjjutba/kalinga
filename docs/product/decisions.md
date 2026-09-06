@@ -427,6 +427,30 @@ broke clinic creation in F1. Plain modules can be unit tested without pulling in
 Next or the database, so the honeypot, the mobile format and the per role
 refusals are covered directly.
 
+## 2026-09-06, F9 privacy requests
+
+### The owner answers data requests from the client's page
+
+A `privacy_requests` permission, granted to the owner alone, gates a printable
+export of everything held about a client and a deletion that removes the
+client with their pets, appointments, visits and reminders. The deletion runs in
+one transaction and relies on the foreign key cascades already in the schema.
+
+**Why.** The privacy notice promised both within fifteen days and the product
+could do neither, which left the promise resting on someone opening a database
+console. Roles.md already said the owner is the only role that removes data.
+
+### The audit trail is scrubbed, not trimmed
+
+Deleting a client rewrites the audit events that pointed at them: labels become
+"Deleted record", before and after states are cleared, and events the person
+performed themselves are attributed to "Deleted client". The events stay. The
+deletion itself is recorded with counts and a reason and no name.
+
+**Why.** An append only trail and a right to erasure pull against each other.
+Keeping the shape of what happened while removing who it happened to satisfies
+both, and the owner can still see that a deletion took place and why.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a

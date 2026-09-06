@@ -20,7 +20,7 @@ export const privacy = {
     },
     {
       title: "How long we keep it",
-      body: "Bookings and records are kept until the clinic deletes them or you ask us to. Sign in links and password reset links expire within an hour.",
+      body: "Bookings and records are kept until the clinic deletes them or you ask us to. A clinic owner can hand you a copy of your record and can delete it, with every pet, appointment and visit under it, from your page in their system. Sign in links and password reset links expire within an hour.",
     },
     {
       title: "Where it lives",

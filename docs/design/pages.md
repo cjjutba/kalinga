@@ -81,6 +81,7 @@ regardless.
 | Clients | `/app/[org]/clients` | all staff | Search by name or mobile. A missing mobile is a real state. |
 | Client detail | `/app/[org]/clients/[id]` | all staff | Contact, pets, appointments. Read only for a vet. |
 | New or edit client | form | front desk, owner | |
+| Client export | `/app/[org]/clients/[id]/export` | owner | Everything held about one client, printable. Reached from the data requests card on the client page. |
 | Pets | `/app/[org]/pets` | all staff | Search. A vet's main way in. |
 | Pet record | `/app/[org]/pets/[id]` | all staff | Identity, recall dates, weight, visit history. Front desk sees dates and appointments, not visit notes. |
 | New or edit pet | form | front desk, owner | |

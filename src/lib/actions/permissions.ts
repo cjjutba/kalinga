@@ -12,6 +12,7 @@ export const permissionFor: Record<StoreAction["type"], Permission> = {
   "appointment/note": "manage_appointments",
   "visit/add": "add_visit",
   "owner/upsert": "edit_clients",
+  "owner/delete": "privacy_requests",
   "pet/upsert": "edit_clients",
   "service/upsert": "view_settings",
   "service/archive": "view_settings",

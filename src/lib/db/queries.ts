@@ -235,6 +235,27 @@ export async function getPortalData(email: string) {
   };
 }
 
+/**
+ * Removes a client and everything under them: pets, appointments, visits and
+ * reminders go with the owner row through the cascades. The audit trail is
+ * scrubbed rather than deleted, so the shape of what happened survives and
+ * the person does not. Returns the counts for the event that records it.
+ */
+export async function eraseClient(outer: Scope, ownerId: string): Promise<{ pets: number; appointments: number; visits: number; reminders: number }> {
+  return outer.transaction(async (scope) => {
+    const pets = await scope.list(pet, eq(pet.ownerId, ownerId));
+    const petIds = pets.map((p) => p.id);
+    const appts = await scope.list(appointment, eq(appointment.ownerId, ownerId));
+    const visits = petIds.length ? await scope.list(visit, inArray(visit.petId, petIds)) : [];
+    const rems = petIds.length ? await scope.list(reminder, inArray(reminder.petId, petIds)) : [];
+    const ids = [ownerId, ...petIds, ...appts.map((a) => a.id), ...visits.map((v) => v.id)];
+    await scope.raw.update(auditEvent).set({ entityLabel: "Deleted record", before: null, after: null }).where(scope.where(auditEvent, inArray(auditEvent.entityId, ids)));
+    await scope.raw.update(auditEvent).set({ actorName: "Deleted client" }).where(scope.where(auditEvent, inArray(auditEvent.entityId, ids), isNull(auditEvent.actorMemberId)));
+    await scope.delete(owner, ownerId);
+    return { pets: pets.length, appointments: appts.length, visits: visits.length, reminders: rems.length };
+  });
+}
+
 /** What an invitee sees before signing in: enough to decide, nothing more. */
 export async function getInvitationPublic(id: string) {
   const [row] = await db

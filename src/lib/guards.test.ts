@@ -28,6 +28,7 @@ const staffRoutes: Record<string, Permission> = {
   "app/[org]/clients/[id]": "view_clients",
   "app/[org]/clients/new": "edit_clients",
   "app/[org]/clients/[id]/edit": "edit_clients",
+  "app/[org]/clients/[id]/export": "privacy_requests",
   "app/[org]/pets": "view_clients",
   "app/[org]/pets/[id]": "view_clients",
   "app/[org]/pets/new": "edit_clients",

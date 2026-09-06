@@ -1,7 +1,7 @@
 # Features
 
-Eight features. The order is chosen so that whenever you stop, what exists is
-still shippable. That property matters more than any individual feature.
+Eight features, and a ninth added once real data made it necessary. The order is
+chosen so that whenever you stop, what exists is still shippable. That property matters more than any individual feature.
 
 Each one is deployed before the next one starts. See `../workflow.md`.
 
@@ -177,6 +177,26 @@ Covers appointment changes, record edits, permission changes and cancellations.
 **Done when** the clinic owner can answer who cancelled an appointment and when.
 
 **Review: normal.**
+
+---
+
+## F9 Privacy requests
+
+**Shipped 2026-09-06.** The privacy notice promises a copy of a person's data
+and deletion within fifteen days. Until now nothing in the product could do
+either.
+
+Owner role only, behind a new `privacy_requests` permission. From a client's
+page: export a copy, a printable page of everything held about that client and
+their animals, and delete the client, which removes the pets, appointments,
+visits and reminders through the database cascades and scrubs the person's name
+and details from the audit trail while keeping the events. The deletion itself is
+recorded with counts and a reason, never a name.
+
+**Done when** an owner can answer both kinds of request from the client's page
+without touching the database, and a front desk account cannot reach either.
+
+**Review: deep.** It deletes real data and edits the audit trail.
 
 ---
 

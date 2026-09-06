@@ -106,7 +106,7 @@ export function StaffShell({ userName, children }: { userName: string; children:
     <div className="min-h-dvh bg-page">
       {pending ? <div className="fixed inset-x-0 top-0 z-50 h-0.5 bg-action/60 motion-reduce:hidden" aria-hidden /> : null}
       <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)]">
-        <aside className="sticky top-0 hidden h-dvh flex-col gap-6 px-4 py-6 lg:flex">
+        <aside className="sticky top-0 hidden h-dvh flex-col gap-6 px-4 py-6 lg:flex print:hidden">
           <div className="px-3">
             <Lockup href={base} size="sm" />
           </div>
@@ -125,7 +125,7 @@ export function StaffShell({ userName, children }: { userName: string; children:
         </aside>
 
         <div className="min-w-0">
-          <header className="sticky top-0 z-20 flex h-14 items-center gap-2 bg-page/95 px-3 backdrop-blur lg:hidden">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-2 bg-page/95 px-3 backdrop-blur lg:hidden print:hidden">
             <button type="button" onClick={() => setMenuOpen((v) => !v)} aria-expanded={menuOpen} aria-controls="staff-menu" aria-label={menuOpen ? "Close menu" : "Open menu"} className="grid size-10 place-items-center rounded-full hover:bg-pill-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
               {menuOpen ? <X className="size-5" strokeWidth={1.5} /> : <Menu className="size-5" strokeWidth={1.5} />}
             </button>
@@ -146,7 +146,7 @@ export function StaffShell({ userName, children }: { userName: string; children:
               </div>
             </nav>
           ) : null}
-          <main className="mx-auto w-full max-w-[1200px] px-4 pb-24 pt-4 md:px-6 lg:px-8 lg:pt-8">{children}</main>
+          <main className="mx-auto w-full max-w-[1200px] px-4 pb-24 pt-4 md:px-6 lg:px-8 lg:pt-8 print:max-w-none print:p-0">{children}</main>
         </div>
       </div>
     </div>

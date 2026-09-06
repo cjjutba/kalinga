@@ -14,7 +14,7 @@ import { clinicNow, formatShortDate, formatTimeWithZone } from "@/lib/time";
 // applies, then closes. Slots come from the server through the same engine
 // the public page uses.
 
-function Frame({ open, onOpenChange, title, description, children }: { open: boolean; onOpenChange: (o: boolean) => void; title: string; description?: string; children: ReactNode }) {
+export function Frame({ open, onOpenChange, title, description, children }: { open: boolean; onOpenChange: (o: boolean) => void; title: string; description?: string; children: ReactNode }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.12)] sm:p-7">

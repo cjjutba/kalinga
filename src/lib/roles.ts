@@ -16,10 +16,12 @@ export type Permission =
   | "add_visit"
   | "view_recall"
   | "view_settings"
-  | "view_audit";
+  | "view_audit"
+  /** Export a client's record and delete it. The owner alone removes data. */
+  | "privacy_requests";
 
 const grants: Record<Role, Permission[]> = {
-  owner: ["day_view", "manage_appointments", "view_clients", "edit_clients", "view_visit_notes", "add_visit", "view_recall", "view_settings", "view_audit"],
+  owner: ["day_view", "manage_appointments", "view_clients", "edit_clients", "view_visit_notes", "add_visit", "view_recall", "view_settings", "view_audit", "privacy_requests"],
   vet: ["day_view", "view_clients", "view_visit_notes", "add_visit"],
   front_desk: ["day_view", "manage_appointments", "view_clients", "edit_clients", "view_recall"],
 };
@@ -39,7 +41,7 @@ export const roleLabel: Record<Role, string> = {
 };
 
 export const roleDescription: Record<Role, string> = {
-  owner: "Runs the business. Sees everything the clinic holds.",
+  owner: "Runs the business. Sees everything the clinic holds and is the only role that removes data.",
   vet: "Sees their own day and the animals in it. Adds visit notes, weight and vaccination dates.",
   front_desk: "Runs the day. Books, reschedules, checks pets in and works the recall queue.",
 };

@@ -6,16 +6,16 @@ import { permissionFor } from "./actions/permissions";
 // requires. The matrix is written out in full so a change to a grant has to
 // be made twice, once in roles.ts and once here, on purpose.
 
-const allPermissions: Permission[] = ["day_view", "manage_appointments", "view_clients", "edit_clients", "view_visit_notes", "add_visit", "view_recall", "view_settings", "view_audit"];
+const allPermissions: Permission[] = ["day_view", "manage_appointments", "view_clients", "edit_clients", "view_visit_notes", "add_visit", "view_recall", "view_settings", "view_audit", "privacy_requests"];
 
 const cannot: Record<Role, Permission[]> = {
   owner: [],
   // Sees their own day and the animals in it. Cannot change staff, prices or
   // hours, cannot see the audit trail, and does not run the desk.
-  vet: ["manage_appointments", "edit_clients", "view_recall", "view_settings", "view_audit"],
+  vet: ["manage_appointments", "edit_clients", "view_recall", "view_settings", "view_audit", "privacy_requests"],
   // Runs the day. Cannot see or edit visit notes, cannot change staff or
   // prices, cannot see the audit trail.
-  front_desk: ["view_visit_notes", "add_visit", "view_settings", "view_audit"],
+  front_desk: ["view_visit_notes", "add_visit", "view_settings", "view_audit", "privacy_requests"],
 };
 
 describe("what each role cannot reach", () => {
@@ -45,11 +45,11 @@ describe("what each role cannot do through applyAction", () => {
   });
 
   it("front desk cannot record visits or change the clinic", () => {
-    expect(refused("front_desk")).toEqual(["invitation/cancel", "member/invite", "member/remove", "member/role", "org/update", "provider/archive", "provider/upsert", "service/archive", "service/upsert", "visit/add"]);
+    expect(refused("front_desk")).toEqual(["invitation/cancel", "member/invite", "member/remove", "member/role", "org/update", "owner/delete", "provider/archive", "provider/upsert", "service/archive", "service/upsert", "visit/add"]);
   });
 
   it("a vet cannot run the desk or change the clinic", () => {
-    expect(refused("vet")).toEqual(["appointment/create", "appointment/note", "appointment/reschedule", "appointment/status", "invitation/cancel", "member/invite", "member/remove", "member/role", "org/update", "owner/upsert", "pet/upsert", "provider/archive", "provider/upsert", "reminder/sent", "reminder/unsend", "service/archive", "service/upsert"]);
+    expect(refused("vet")).toEqual(["appointment/create", "appointment/note", "appointment/reschedule", "appointment/status", "invitation/cancel", "member/invite", "member/remove", "member/role", "org/update", "owner/delete", "owner/upsert", "pet/upsert", "provider/archive", "provider/upsert", "reminder/sent", "reminder/unsend", "service/archive", "service/upsert"]);
   });
 
   it("the owner is refused nothing", () => {

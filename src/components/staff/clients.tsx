@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Plus } from "lucide-react";
+import { Frame } from "./dialogs";
+import { SelectField } from "@/components/primitives/field";
 import { PageHeader, EmptyState, NotForRole } from "./page-header";
 import { InputField, TextareaField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
@@ -137,6 +139,7 @@ export function ClientDetail({ orgSlug, id }: { orgSlug: string; id: string }) {
             </dl>
             {owner.notes ? <p className="mt-3 text-small text-text-2">{owner.notes}</p> : null}
           </Card>
+          {can(role, "privacy_requests") ? <PrivacyCard orgSlug={org.slug} owner={owner} petCount={ps.length} appointmentCount={appts.length} /> : null}
           <Card className="p-5">
             <h2 className="text-label font-medium text-text-2">Pets</h2>
             {ps.length ? (
@@ -203,6 +206,62 @@ export function ClientDetail({ orgSlug, id }: { orgSlug: string; id: string }) {
         </div>
       </div>
     </>
+  );
+}
+
+const deleteReasons = ["Deletion request from the client", "Duplicate record", "Entered by mistake", "Other"];
+
+// The owner's side of a data request. A copy of everything held, printable,
+// and a deletion that takes the pets, appointments and visits with it and
+// scrubs the person from the audit trail. Owner role only, and the server
+// checks that too.
+function PrivacyCard({ orgSlug, owner, petCount, appointmentCount }: { orgSlug: string; owner: Owner; petCount: number; appointmentCount: number }) {
+  const router = useRouter();
+  const { dispatch } = useOrg();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState(deleteReasons[0]);
+  const [other, setOther] = useState("");
+  const [busy, setBusy] = useState(false);
+  const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+  return (
+    <Card className="p-5">
+      <h2 className="text-label font-medium text-text-2">Data requests</h2>
+      <p className="mt-2 text-small text-text-2">When a client asks what you hold or asks to be forgotten. Both are yours to answer within fifteen days.</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Pill asChild size="sm" variant="secondary">
+          <Link href={`/app/${orgSlug}/clients/${owner.id}/export`}>Export a copy</Link>
+        </Pill>
+        <Pill size="sm" variant="danger" onClick={() => setOpen(true)}>
+          Delete this client
+        </Pill>
+      </div>
+      <Frame open={open} onOpenChange={setOpen} title={`Delete ${owner.name}`} description={`Removes the client, ${plural(petCount, "pet")} and ${plural(appointmentCount, "appointment")} with their visits and reminders. Their name comes off the audit trail. This cannot be undone.`}>
+        <SelectField label="Reason" value={reason} onChange={setReason} options={deleteReasons.map((r) => ({ value: r, label: r }))} />
+        {reason === "Other" ? <TextareaField label="What happened" rows={3} value={other} onChange={(e) => setOther(e.target.value)} /> : null}
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Pill variant="secondary" size="sm" onClick={() => setOpen(false)}>
+            Keep the record
+          </Pill>
+          <Pill
+            variant="danger"
+            size="sm"
+            loading={busy}
+            loadingLabel="Deleting"
+            onClick={async () => {
+              setBusy(true);
+              const r = await dispatch({ type: "owner/delete", id: owner.id, reason: reason === "Other" ? other || "Other" : reason });
+              setBusy(false);
+              if (r.ok) {
+                setOpen(false);
+                router.push(`/app/${orgSlug}/clients`);
+              }
+            }}
+          >
+            Delete client
+          </Pill>
+        </div>
+      </Frame>
+    </Card>
   );
 }
 
