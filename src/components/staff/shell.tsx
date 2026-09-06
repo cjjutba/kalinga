@@ -5,6 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, CalendarDays, Check, ChevronsUpDown, ClipboardList, ExternalLink, LogOut, Menu, MoreHorizontal, PawPrint, Plus, Settings, Shield, Users } from "lucide-react";
 import { ThemeMenuRow } from "@/components/theme-toggle";
+import { ClinicForm } from "@/components/clinic/clinic-form";
+import { useToast } from "@/components/primitives/toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useOrg } from "@/lib/org-data";
@@ -36,7 +39,9 @@ export function StaffShell({ userName, children }: { userName: string; children:
   const { org, role, memberships, pending } = useOrg();
   const pathname = usePathname();
   const router = useRouter();
+  const toast = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [newClinicOpen, setNewClinicOpen] = useState(false);
 
   const base = `/app/${org.slug}`;
   // Opening another clinic is an owner's act, and the server refuses it for
@@ -79,10 +84,14 @@ export function StaffShell({ userName, children }: { userName: string; children:
         {mayCreateClinic ? (
           <>
             <DropdownMenuSeparator className="my-1.5 bg-divider" />
-            <DropdownMenuItem asChild className={menuItem} onSelect={() => setMenuOpen(false)}>
-              <Link href="/new" className="flex items-center gap-2">
-                <Plus className="size-4" strokeWidth={1.5} aria-hidden /> Create another clinic
-              </Link>
+            <DropdownMenuItem
+              className={cn(menuItem, "flex items-center gap-2")}
+              onSelect={() => {
+                setMenuOpen(false);
+                setNewClinicOpen(true);
+              }}
+            >
+              <Plus className="size-4" strokeWidth={1.5} aria-hidden /> Create another clinic
             </DropdownMenuItem>
           </>
         ) : null}
@@ -181,6 +190,29 @@ export function StaffShell({ userName, children }: { userName: string; children:
               <span className="min-w-0 truncate text-small font-medium">{org.name}</span>
             </Link>
           </header>
+
+          {/* A second clinic is made from inside the first, not on a page of
+              its own. Only the address in the bar changes when it lands. */}
+          <Dialog open={newClinicOpen} onOpenChange={setNewClinicOpen}>
+            <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.14)] sm:max-w-lg sm:p-7">
+              <DialogHeader className="text-left">
+                <DialogTitle className="text-heading font-medium">Create another clinic</DialogTitle>
+                <DialogDescription className="text-small text-text-2">You own this one too. Services, hours and staff come next, inside it.</DialogDescription>
+              </DialogHeader>
+              <div className="mt-4">
+                <ClinicForm
+                  inDialog
+                  onDone={(slug) => {
+                    setNewClinicOpen(false);
+                    if (!slug) return;
+                    toast({ title: "Clinic created", detail: "You are in it now. Add a service to take a booking." });
+                    router.push(`/app/${slug}`);
+                    router.refresh();
+                  }}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetContent

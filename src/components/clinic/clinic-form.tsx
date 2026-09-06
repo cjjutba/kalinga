@@ -11,6 +11,11 @@ import { clinicNow, formatTime } from "@/lib/time";
 
 // Three fields and the clinic exists. The slug is the link the clinic shares,
 // so the taken state matters more than usual and is checked as you type.
+//
+// Two shapes, one form. A first clinic gets the whole page at /new, with the
+// preview of what pet owners will see. A second one is a dialog inside the
+// staff shell, because by then the person has a clinic open and does not need
+// taking out of it.
 
 const reserved = new Set(["app", "me", "api", "design", "sign-in", "sign-up", "reset", "new", "invite", "privacy", "demo", "kalinga", "admin", "www"]);
 
@@ -28,7 +33,7 @@ const zones = [
   { value: "Asia/Tokyo", label: "Asia/Tokyo" },
 ];
 
-export function NewClinicForm() {
+export function ClinicForm({ inDialog, onDone }: { inDialog?: boolean; onDone?: (slug: string | null) => void } = {}) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -88,6 +93,7 @@ export function NewClinicForm() {
     }
     await authClient.organization.setActive({ organizationId: data.id });
     await applyAction(data.slug, { type: "org/update", changes: { timezone: tz, city: city.trim() || undefined } });
+    if (inDialog) return onDone?.(data.slug);
     router.push(`/app/${data.slug}`);
     router.refresh();
   }
@@ -96,6 +102,53 @@ export function NewClinicForm() {
   const previewCity = city.trim() || "Your city";
   const previewSlug = slug || "your-clinic";
 
+  const fields = (
+    <>
+      {formError ? (
+        <p role="alert" className="text-small text-error">
+          {formError}
+        </p>
+      ) : null}
+      <InputField label="Clinic name" name="clinic" placeholder="Lunhaw Animal Clinic" value={name} onChange={(e) => onName(e.target.value)} error={nameError} disabled={loading} autoFocus />
+      <InputField
+        label="Booking address"
+        name="slug"
+        prefix="kalinga.cjjutba.dev/"
+        placeholder="lunhaw"
+        value={slug}
+        onChange={(e) => {
+          setSlugTouched(true);
+          setSlug(slugify(e.target.value));
+        }}
+        helper="This is the link you share with pet owners. It cannot be changed later."
+        error={slugError}
+        disabled={loading}
+        autoCapitalize="off"
+        spellCheck={false}
+      />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <InputField label="City" hint="Optional" name="city" placeholder="Cagayan de Oro" value={city} onChange={(e) => setCity(e.target.value)} disabled={loading} />
+        <SelectField label="Time zone" value={tz} onChange={setTz} options={zones} helper={now ? `It is ${now} there right now.` : "Appointments show in this zone, labelled."} disabled={loading} />
+      </div>
+    </>
+  );
+
+  if (inDialog) {
+    return (
+      <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+        {fields}
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Pill type="button" size="sm" variant="secondary" onClick={() => onDone?.(null)} disabled={loading}>
+            Cancel
+          </Pill>
+          <Pill type="submit" size="sm" loading={loading} loadingLabel="Creating">
+            Create clinic
+          </Pill>
+        </div>
+      </form>
+    );
+  }
+
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12">
       <div className="min-w-0">
@@ -103,32 +156,7 @@ export function NewClinicForm() {
         <p className="mt-2 max-w-md text-small text-text-2">Three fields and you can take a booking. Services, hours and staff come next, inside.</p>
 
         <form onSubmit={submit} noValidate className="mt-6 flex flex-col gap-5 rounded-card bg-sheet p-5 md:p-6">
-          {formError ? (
-            <p role="alert" className="text-small text-error">
-              {formError}
-            </p>
-          ) : null}
-          <InputField label="Clinic name" name="clinic" placeholder="Lunhaw Animal Clinic" value={name} onChange={(e) => onName(e.target.value)} error={nameError} disabled={loading} autoFocus />
-          <InputField
-            label="Booking address"
-            name="slug"
-            prefix="kalinga.cjjutba.dev/"
-            placeholder="lunhaw"
-            value={slug}
-            onChange={(e) => {
-              setSlugTouched(true);
-              setSlug(slugify(e.target.value));
-            }}
-            helper="This is the link you share with pet owners. It cannot be changed later."
-            error={slugError}
-            disabled={loading}
-            autoCapitalize="off"
-            spellCheck={false}
-          />
-          <div className="grid gap-5 sm:grid-cols-2">
-            <InputField label="City" hint="Optional" name="city" placeholder="Cagayan de Oro" value={city} onChange={(e) => setCity(e.target.value)} disabled={loading} />
-            <SelectField label="Time zone" value={tz} onChange={setTz} options={zones} helper={now ? `It is ${now} there right now.` : "Appointments show in this zone, labelled."} disabled={loading} />
-          </div>
+          {fields}
           <Pill type="submit" block loading={loading} loadingLabel="Creating clinic">
             Create clinic
           </Pill>

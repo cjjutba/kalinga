@@ -46,7 +46,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { SignInForm } from "@/app/sign-in/sign-in-form";
 import { SignUpForm } from "@/app/sign-up/sign-up-form";
 import { ResetFlow } from "@/app/reset/reset-flow";
-import { NewClinicForm } from "@/app/new/new-clinic-form";
+import { ClinicForm } from "@/components/clinic/clinic-form";
 import { InviteForm } from "@/app/invite/[token]/invite-form";
 import { ChooseClinic } from "@/app/app/choose-clinic";
 import Forbidden from "@/app/app/[org]/forbidden";
@@ -182,7 +182,7 @@ const screens: [string, () => ReactElement, boolean?][] = [
   ["sign in", () => <AuthShell><SignInForm /></AuthShell>, true],
   ["sign up", () => <AuthShell><SignUpForm /></AuthShell>, true],
   ["reset password", () => <AuthShell><ResetFlow /></AuthShell>, true],
-  ["create clinic", () => <NewClinicForm />, true],
+  ["create clinic", () => <ClinicForm />, true],
   ["accept invitation", () => <AuthShell><InviteForm invitation={invitation} signedInAs={null} /></AuthShell>, true],
   ["expired invitation", () => <AuthShell><InviteForm invitation={{ ...invitation, expired: true }} signedInAs="jess@lunhaw.test" /></AuthShell>, true],
   ["choose clinic", () => <ChooseClinic mayCreate memberships={[{ organisation: snapshot.organisation, role: "owner" }, { organisation: { ...snapshot.organisation, id: "org-2", slug: "amihan", name: "Amihan Veterinary Clinic", city: "Iligan" }, role: "vet" }]} />],

@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { Lockup } from "@/components/primitives/lockup";
 import { Pill } from "@/components/primitives/pill";
 import { getSession, mayCreateOrganisation } from "@/lib/session";
-import { NewClinicForm } from "./new-clinic-form";
+import { ClinicForm } from "@/components/clinic/clinic-form";
 
 export const metadata: Metadata = { title: "Set up your clinic" };
 
@@ -32,7 +32,7 @@ export default async function NewClinicPage() {
       <main className="mx-auto w-full max-w-[1040px] px-5 pb-24 md:px-8">
         {allowed ? (
           <Suspense fallback={null}>
-            <NewClinicForm />
+            <ClinicForm />
           </Suspense>
         ) : (
           <div className="mx-auto max-w-lg rounded-card bg-sheet p-6 text-center">
