@@ -165,7 +165,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
             {slotError ? (
               <div role="alert" className="mt-4 rounded-guide bg-field p-4">
                 <p className="text-body font-medium">That slot was just taken</p>
-                <p className="mt-1 text-small text-text-2">{slotError} Nothing was saved. Pick another time.</p>
+                <p className="mt-1 text-small text-text-2">{slotError} Nothing was saved.</p>
               </div>
             ) : null}
             {service ? (
