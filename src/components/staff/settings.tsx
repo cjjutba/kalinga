@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { InputField, SelectField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
 import { Card } from "@/components/primitives/surfaces";
+import { useConfirm } from "@/components/primitives/confirm";
 import { useOrg } from "@/lib/org-data";
 import { can, roleDescription, roleLabel, staffRoles, type Role } from "@/lib/roles";
 import type { Provider, Service, WeeklyRule } from "@/lib/domain/types";
@@ -136,6 +137,7 @@ export function ClinicSettings() {
 }
 
 function ServiceDialog({ service, open, onOpenChange }: { service: Service | null | "new"; open: boolean; onOpenChange: (o: boolean) => void }) {
+  const confirm = useConfirm();
   const { dispatch } = useOrg();
   const existing = service && service !== "new" ? service : null;
   const [form, setForm] = useState({ name: existing?.name ?? "", durationMin: String(existing?.durationMin ?? 30), bufferMin: String(existing?.bufferMin ?? 0), pricePhp: String(existing?.pricePhp ?? 500), publiclyBookable: existing?.publiclyBookable ?? true, recallKind: existing?.recallKind ?? "" });
@@ -170,7 +172,7 @@ function ServiceDialog({ service, open, onOpenChange }: { service: Service | nul
           </label>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
             {existing ? (
-              <Pill type="button" size="sm" variant="text" onClick={async () => { const r = await dispatch({ type: "service/archive", id: existing.id }); if (r.ok) onOpenChange(false); }}>
+              <Pill type="button" size="sm" variant="text" onClick={async () => { if (!(await confirm({ title: `Remove ${existing.name}?`, description: "It stops being bookable, online and at the desk. Visits that already used it keep it.", confirmLabel: "Remove" }))) return; const r = await dispatch({ type: "service/archive", id: existing.id }); if (r.ok) onOpenChange(false); }}>
                 Archive
               </Pill>
             ) : <span />}
@@ -235,6 +237,7 @@ export function ServicesSettings() {
 }
 
 export function StaffSettings() {
+  const confirm = useConfirm();
   const { members, invitations, providers, actorMemberId, dispatch } = useOrg();
   const [form, setForm] = useState({ email: "", role: "front_desk" as Role });
   const [error, setError] = useState<string | undefined>();
@@ -272,7 +275,7 @@ export function StaffSettings() {
                       </p>
                     </div>
                     <SelectField label="Role" value={m.role} onChange={(v) => dispatch({ type: "member/role", id: m.id, role: v as Role })} options={staffRoles.map((r) => ({ value: r, label: roleLabel[r] }))} className="w-40" disabled={isYou} />
-                    <button type="button" onClick={() => dispatch({ type: "member/remove", id: m.id })} disabled={isYou} aria-label={`Remove ${m.name}`} className="grid size-10 place-items-center self-end rounded-full text-text-2 hover:bg-field hover:text-text disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+                    <button type="button" onClick={async () => { if (!(await confirm({ title: `Remove ${m.name}?`, description: "They lose access on their next click. Their name stays on everything they did.", confirmLabel: "Remove" }))) return; dispatch({ type: "member/remove", id: m.id }); }} disabled={isYou} aria-label={`Remove ${m.name}`} className="grid size-10 place-items-center self-end rounded-full text-text-2 hover:bg-field hover:text-text disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
                       <Trash2 className="size-5" strokeWidth={1.5} />
                     </button>
                   </li>
@@ -292,7 +295,7 @@ export function StaffSettings() {
                         {roleLabel[i.role]}, invited {formatDate(i.createdAt)}, expires {formatDate(i.expiresAt)}
                       </p>
                     </div>
-                    <button type="button" onClick={() => dispatch({ type: "invitation/cancel", id: i.id })} aria-label={`Cancel invitation to ${i.email}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+                    <button type="button" onClick={async () => { if (!(await confirm({ title: `Cancel the invitation to ${i.email}?`, description: "The link stops working. You can invite them again any time.", confirmLabel: "Cancel it", cancelLabel: "Keep it" }))) return; dispatch({ type: "invitation/cancel", id: i.id }); }} aria-label={`Cancel invitation to ${i.email}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
                       <Trash2 className="size-5" strokeWidth={1.5} />
                     </button>
                   </li>
@@ -324,6 +327,7 @@ export function StaffSettings() {
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function ProviderHours({ provider }: { provider: Provider }) {
+  const confirm = useConfirm();
   const { dispatch } = useOrg();
   const [saved, setSaved] = useState(false);
   const rules = provider.weeklyHours;
@@ -343,7 +347,7 @@ function ProviderHours({ provider }: { provider: Provider }) {
         </div>
         <div className="flex items-center gap-2">
           <Saved show={saved} />
-          <button type="button" onClick={() => dispatch({ type: "provider/archive", id: provider.id })} aria-label={`Remove ${provider.name} from the schedule`} className="grid size-9 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+          <button type="button" onClick={async () => { if (!(await confirm({ title: `Remove ${provider.name} from the schedule?`, description: "Their hours stop being offered to pet owners. Appointments already booked with them stay where they are.", confirmLabel: "Remove" }))) return; dispatch({ type: "provider/archive", id: provider.id }); }} aria-label={`Remove ${provider.name} from the schedule`} className="grid size-9 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
             <Trash2 className="size-4" strokeWidth={1.5} />
           </button>
         </div>
@@ -419,6 +423,7 @@ export function HoursSettings() {
 }
 
 export function ClosuresSettings() {
+  const confirm = useConfirm();
   const { org, providers, dispatch } = useOrg();
   const [form, setForm] = useState({ date: "", reason: "", who: "all" });
   const [error, setError] = useState<string | undefined>();
@@ -448,7 +453,7 @@ export function ClosuresSettings() {
                       {x.reason}, {x.provider.name}
                     </p>
                   </div>
-                  <button type="button" onClick={() => dispatch({ type: "provider/upsert", provider: { id: x.provider.id, name: x.provider.name, title: x.provider.title, memberId: x.provider.memberId ?? null, exceptions: x.provider.exceptions.filter((e) => e.date !== x.date) } })} aria-label={`Remove closure on ${x.date} for ${x.provider.name}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+                  <button type="button" onClick={async () => { if (!(await confirm({ title: "Remove this closure?", description: `${formatDate(x.date, org.timezone)} opens for booking again for ${x.provider.name}.`, confirmLabel: "Remove" }))) return; dispatch({ type: "provider/upsert", provider: { id: x.provider.id, name: x.provider.name, title: x.provider.title, memberId: x.provider.memberId ?? null, exceptions: x.provider.exceptions.filter((e) => e.date !== x.date) } }); }} aria-label={`Remove closure on ${x.date} for ${x.provider.name}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
                     <Trash2 className="size-5" strokeWidth={1.5} />
                   </button>
                 </li>

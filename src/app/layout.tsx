@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/primitives/toast";
+import { ConfirmProvider } from "@/components/primitives/confirm";
 import "./globals.css";
 
 const inter = Inter({
@@ -44,7 +45,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en-PH" suppressHydrationWarning className={inter.variable}>
       <body className="min-h-dvh bg-page text-text">
         <ThemeProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <ConfirmProvider>{children}</ConfirmProvider>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>
