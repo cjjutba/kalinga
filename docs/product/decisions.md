@@ -475,6 +475,25 @@ confirmation page says "a copy has gone to" only when it did.
 **Why.** The appointment is the thing of value. A mail provider hiccup must not
 turn a successful booking into an error screen for someone on a phone.
 
+## 2026-09-06, design tokens
+
+### Two light tokens darkened for AA contrast
+
+Light `--text-2` moves from `#6B6B70` to `#656569` and light `--error` from
+`#D92D20` to `#C4281C`. Neither change is visible to the eye.
+
+Found while proving starter-kit, which carries this design system. axe
+measured secondary text on the secondary pill at 4.45 to 1 and the error red
+on the same pill at 4.06, both under the AA line of 4.5 for small text. The
+theme toggle uses the first pair on every page. The error red was also 4.4
+on the page, where helper text sits under every page surface field.
+
+The new values put text-2 at 5.8 on the sheet and 4.9 on the pill, and the
+error red at 5.7 on the sheet, 5.3 on the page and 4.8 on the pill. Dark
+values were already clear and do not change. The chevron in the select
+field, drawn as an inline SVG, takes the same grey so it keeps matching
+secondary text.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a

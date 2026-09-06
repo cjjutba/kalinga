@@ -45,7 +45,7 @@ the same tokens with the second column of values.
 | `--sheet` | Sheets, cards, inputs on the page | `#FFFFFF` | `#161618` |
 | `--field` | Inputs and guide cards on a sheet | `#F2F2F4` | `#1F1F22` |
 | `--text` | Primary text, icons, links | `#0A0A0A` | `#F5F5F7` |
-| `--text-2` | Secondary text | `#6B6B70` | `#9A9AA1` |
+| `--text-2` | Secondary text | `#656569` | `#9A9AA1` |
 | `--text-3` | Placeholder only, never content | `#A0A0A6` | `#6B6B70` |
 | `--divider` | Rare. Table rows in dense views | `#E5E5EA` | `#26262A` |
 | `--action` | Primary pill background | `#0A0A0A` | `#F5F5F7` |
@@ -53,7 +53,7 @@ the same tokens with the second column of values.
 | `--action-pressed` | Primary pill pressed | `#262626` | `#D9D9DE` |
 | `--pill-2` | Secondary pill background | `#EBEBEE` | `#26262A` |
 | `--tint` | Featured content cards only | `#D9E5F5` | `#1B2A40` |
-| `--error` | Field ring and helper text only | `#D92D20` | `#F97066` |
+| `--error` | Field ring and helper text only | `#C4281C` | `#F97066` |
 | `--focus` | Focus ring | `#0A0A0A` | `#F5F5F7` |
 | `--photo` | The photograph placeholder only, until real photographs land | `#55555B` | `#3A3A40` |
 
@@ -255,9 +255,11 @@ set:
 | Pair | Ratio |
 | --- | --- |
 | `--text` on `--page`, light | 18:1 |
-| `--text-2` on `--sheet`, light | 5.3:1 |
+| `--text-2` on `--sheet`, light | 5.8:1 |
+| `--text-2` on `--pill-2`, light | 4.9:1 |
 | `--text-2` on `--sheet`, dark | 6.6:1 |
-| `--error` on `--sheet`, light | 4.8:1 |
+| `--error` on `--sheet`, light | 5.7:1 |
+| `--error` on `--page`, light | 5.3:1 |
 | `--error` on `--sheet`, dark | 6.6:1 |
 | No-show text on its background | 5.6:1 |
 | Overdue text on its background | 5.3:1 |

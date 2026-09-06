@@ -16,7 +16,7 @@
   --sheet: #ffffff;
   --field: #f2f2f4;
   --text: #0a0a0a;
-  --text-2: #6b6b70;
+  --text-2: #656569;
   --text-3: #a0a0a6;
   --divider: #e5e5ea;
   --action: #0a0a0a;
@@ -24,7 +24,7 @@
   --action-pressed: #262626;
   --pill-2: #ebebee;
   --tint: #d9e5f5;
-  --error: #d92d20;
+  --error: #c4281c;
   --focus: #0a0a0a;
   /* The photograph placeholder. Dark enough that the white lockup over it passes AA. Goes when real photographs land. */
   --photo: #55555b;
