@@ -152,12 +152,14 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
     );
 
   return (
-    <div className="min-h-dvh bg-page p-2">
-      {/* Rail and panel are one group: capped, centred in the window, and
-          sharing a top and a bottom edge. Left to fill the width they read as
-          a sidebar and a wall rather than a card someone is filling in. */}
-      <div className="mx-auto w-full max-w-[1240px] lg:flex lg:min-h-[calc(100dvh-1rem)] lg:items-center">
-        <div className="w-full lg:flex lg:min-h-[44rem]">
+    // Three grounds, one inside the next. The window is the sheet tone, the
+    // shell holding the rail and the panel is a step down from it, and the
+    // panel itself comes back up to the sheet tone, so it reads as cut out of
+    // the shell with a hairline round it and an even edge on every side. No
+    // shadows anywhere: the tones do the separating, as everywhere else.
+    <div className="min-h-dvh bg-sheet lg:flex lg:items-center lg:justify-center lg:p-6">
+      <div className="min-h-dvh w-full bg-page p-2 lg:min-h-0 lg:max-w-[1240px] lg:rounded-sheet">
+        <div className="lg:flex lg:min-h-[44rem]">
           <aside className="hidden w-[320px] shrink-0 flex-col p-8 lg:flex print:hidden">
           <div>
             <p className="text-body font-medium">{org.name}</p>
@@ -211,7 +213,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
 
           {/* Below the rail's width there is no panel either: the step sits on
               the page. From the rail up it becomes the card the rail points at. */}
-          <main className="flex justify-center px-3 py-6 lg:flex-1 lg:items-center lg:rounded-sheet lg:border lg:border-divider lg:bg-sheet lg:px-4 lg:py-12">
+          <main className="flex justify-center px-3 py-6 lg:flex-1 lg:items-center lg:rounded-card lg:border lg:border-divider lg:bg-sheet lg:px-4 lg:py-12">
           <div className="flex w-full max-w-md flex-col gap-8">
             <div className="flex flex-col gap-4 lg:hidden">
               <button
