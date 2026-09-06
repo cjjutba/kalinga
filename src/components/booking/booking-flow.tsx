@@ -153,9 +153,12 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
 
   return (
     <div className="min-h-dvh bg-page p-2">
-      <div className="lg:flex lg:min-h-[calc(100dvh-1rem)]">
-        {/* The rail stands on the ground itself, no panel of its own. */}
-        <aside className="hidden w-[320px] shrink-0 flex-col p-8 lg:flex print:hidden">
+      {/* Rail and panel are one group: capped, centred in the window, and
+          sharing a top and a bottom edge. Left to fill the width they read as
+          a sidebar and a wall rather than a card someone is filling in. */}
+      <div className="mx-auto w-full max-w-[1240px] lg:flex lg:min-h-[calc(100dvh-1rem)] lg:items-center">
+        <div className="w-full lg:flex lg:min-h-[44rem]">
+          <aside className="hidden w-[320px] shrink-0 flex-col p-8 lg:flex print:hidden">
           <div>
             <p className="text-body font-medium">{org.name}</p>
             {org.city ? <p className="mt-0.5 text-label text-text-2">{org.city}</p> : null}
@@ -206,9 +209,9 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
           </div>
         </aside>
 
-        {/* Below the rail's width there is no panel either: the step sits on
-            the page. From the rail up it becomes the card the rail points at. */}
-        <main className="flex flex-1 justify-center px-3 py-6 lg:my-auto lg:min-h-[44rem] lg:items-center lg:rounded-sheet lg:border lg:border-divider lg:bg-sheet lg:px-4 lg:py-12">
+          {/* Below the rail's width there is no panel either: the step sits on
+              the page. From the rail up it becomes the card the rail points at. */}
+          <main className="flex justify-center px-3 py-6 lg:flex-1 lg:items-center lg:rounded-sheet lg:border lg:border-divider lg:bg-sheet lg:px-4 lg:py-12">
           <div className="flex w-full max-w-md flex-col gap-8">
             <div className="flex flex-col gap-4 lg:hidden">
               <button
@@ -376,7 +379,8 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
               </div>
             </div>
           </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
