@@ -212,8 +212,11 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
         </aside>
 
           {/* Below the rail's width there is no panel either: the step sits on
-              the page. From the rail up it becomes the card the rail points at. */}
-          <main className="flex justify-center px-3 py-6 lg:flex-1 lg:items-center lg:rounded-card lg:border lg:border-divider lg:bg-sheet lg:px-4 lg:py-12">
+              the page. From the rail up it becomes the card the rail points at.
+              Content starts at the top of it, never centred, so a step with
+              two choices and a step with a form begin on the same line and
+              nothing jumps between them. */}
+          <main className="flex justify-center px-3 py-6 lg:flex-1 lg:rounded-card lg:border lg:border-divider lg:bg-sheet lg:px-4 lg:py-12">
           <div className="flex w-full max-w-md flex-col gap-8">
             <div className="flex flex-col gap-4 lg:hidden">
               <button
