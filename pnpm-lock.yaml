@@ -14,6 +14,9 @@ dependencies:
   better-auth:
     specifier: 1.7.2
     version: 1.7.2(drizzle-kit@0.31.10)(drizzle-orm@0.45.2)(next@16.3.4)(pg@8.23.0)(react-dom@19.2.8)(react@19.2.8)(vitest@5.0.0)
+  canvas-confetti:
+    specifier: ^1.9.4
+    version: 1.9.4
   class-variance-authority:
     specifier: ^0.7.1
     version: 0.7.1
@@ -73,6 +76,9 @@ devDependencies:
   '@tailwindcss/postcss':
     specifier: ^4
     version: 4.3.3
+  '@types/canvas-confetti':
+    specifier: ^1.9.0
+    version: 1.9.0
   '@types/node':
     specifier: ^20
     version: 20.19.43
@@ -3479,6 +3485,10 @@ packages:
     dev: true
     optional: true
 
+  /@types/canvas-confetti@1.9.0:
+    resolution: {integrity: sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==}
+    dev: true
+
   /@types/chai@5.2.3:
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
     dependencies:
@@ -4352,6 +4362,10 @@ packages:
 
   /caniuse-lite@1.0.30001810:
     resolution: {integrity: sha512-TITQPUkaz+aVk5GL6NhOdwk1aEaNTSDPsGFWrTuhKGtjTF70jL/Oht2W4c6rXUe5fu7Ie19VIahAXHIIiWWNeg==}
+
+  /canvas-confetti@1.9.4:
+    resolution: {integrity: sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==}
+    dev: false
 
   /chai@6.2.2:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}

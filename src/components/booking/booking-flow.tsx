@@ -126,7 +126,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
       go(2);
       return;
     }
-    router.push(`/${org.slug}/b/${result.reference}${result.emailed ? "?emailed=1" : ""}`);
+    router.push(`/${org.slug}/b/${result.reference}?booked=1${result.emailed ? "&emailed=1" : ""}`);
   };
 
   if (limited) {

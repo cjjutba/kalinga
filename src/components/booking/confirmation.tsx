@@ -7,6 +7,7 @@ import { Check, Copy, X } from "lucide-react";
 import { SlotPicker, type Slot } from "./slot-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pill } from "@/components/primitives/pill";
+import { Celebrate } from "./celebrate";
 import { PublicFooter } from "./public-footer";
 import { Card } from "@/components/primitives/surfaces";
 import { StatusPill } from "@/components/primitives/status-pill";
@@ -25,7 +26,7 @@ type Booking = NonNullable<Awaited<ReturnType<typeof getBookingByReference>>>;
 // copy, and the owner can move or cancel their own booking. The reference is
 // the key: it is long enough to guess badly and short enough to read aloud.
 
-export function BookingConfirmation({ data, emailedOnBooking = false }: { data: Booking; emailedOnBooking?: boolean }) {
+export function BookingConfirmation({ data, emailedOnBooking = false, justBooked = false }: { data: Booking; emailedOnBooking?: boolean; /** Arrived here straight from booking, rather than through the link later. */ justBooked?: boolean }) {
   const router = useRouter();
   const { organisation: org, appointment: appt, pet, owner, service, provider } = data;
   const tz = org.timezone;
@@ -100,6 +101,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
     // hairline between each: that it worked, what was booked with the day and
     // time leading, and how to change it.
     <div className="flex min-h-dvh flex-col bg-page">
+      <Celebrate active={justBooked && !cancelled} />
       <div className="flex flex-1 justify-center px-4 py-8 md:items-center md:px-6 md:py-10">
         <main className="w-full max-w-step md:rounded-card md:border md:border-divider md:p-8">
           <div className="flex items-start justify-between gap-3">

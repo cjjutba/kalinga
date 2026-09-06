@@ -291,6 +291,13 @@ Almost none. State changes ease over 150 ms. The auth sheet rises over 250 ms
 on first paint. Nothing animates on entry inside the staff application. Every
 transition is removed under `prefers-reduced-motion`.
 
+One exception, once: confetti falls from the top corners when a pet owner's
+booking lands. It takes the tokens for its colours so it adds none of its own,
+it stays out of the middle of the page where the words are, and it does not
+run for anyone who asked for less motion. It fires on arrival from the flow
+and never again, because the flag that triggers it is taken out of the address
+as soon as it is used.
+
 ## The states nobody designs
 
 Every screen gets these before it is considered done. They are where real
