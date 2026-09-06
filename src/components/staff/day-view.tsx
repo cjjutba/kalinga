@@ -32,7 +32,9 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
   const ui = useUiState<"empty" | "loading" | "first-run">();
   const tz = org.timezone;
   const mounted = useMounted();
-  const [day, setDay] = useState<TZDate>(() => defaultDay(appointments, tz));
+  // A vet lands on their own next day with work, not on the clinic's.
+  const ownProviderId = role === "vet" ? members.find((m) => m.id === actorMemberId)?.providerId : undefined;
+  const [day, setDay] = useState<TZDate>(() => defaultDay(ownProviderId ? appointments.filter((a) => a.providerId === ownProviderId) : appointments, tz));
   const [filter, setFilter] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [cancelId, setCancelId] = useState<string | null>(null);
