@@ -761,6 +761,26 @@ sits in the same panel the flow ends in, without the rail.
 matters: a layout that changes size as you answer questions makes the product
 feel unsteady at the moment it most needs to feel certain.
 
+## The rendered message left the pet owner's page
+
+**Date.** 7 September 2026.
+
+**Decided.** The confirmation page showed the message the clinic would have
+sent by hand, in a box, with a copy button. That was written for a product
+that sent nothing: the desk copied the text into Messenger because there was
+no other channel. It is gone from the pet owner's page. The recall queue still
+has it, because copying is genuinely how the desk works there.
+
+A pet owner reading their own booking has the booking in front of them and, on
+a clinic with email connected, a copy in their inbox. The block was a third
+copy of the same facts and the largest thing on a page whose job is to say one
+thing.
+
+**Also.** One destructive look, filled, never a link, always behind the
+confirmation dialog. And a button says one to three words, naming the act and
+never repeating what is on the screen beside it. A test fails the build on a
+label written as a sentence.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a

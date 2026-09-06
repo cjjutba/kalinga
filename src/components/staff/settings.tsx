@@ -413,7 +413,7 @@ export function HoursSettings() {
             helper="Linking a member lets a vet see their own column."
           />
           <Pill type="submit" size="sm" loading={busy} loadingLabel="Adding">
-            Add
+            Add to schedule
           </Pill>
           <p className="text-label text-text-2">Default hours are Monday to Saturday at the clinic&apos;s opening times. Adjust per day on the left.</p>
         </form>

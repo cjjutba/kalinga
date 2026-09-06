@@ -189,7 +189,7 @@ export function SlotPicker({
                 }}
                 className="mt-3 h-10 rounded-full bg-action px-4 text-small font-medium text-on-action focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2"
               >
-                Take it
+                Take this slot
               </button>
             </>
           ) : (
