@@ -10,8 +10,8 @@ import { PageHeader, EmptyState, NotForRole } from "./page-header";
 import { InputField, TextareaField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
 import { Card, Row } from "@/components/primitives/surfaces";
+import { DataTable, TableSkeleton } from "@/components/primitives/data-table";
 import { StatusPill } from "@/components/primitives/status-pill";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useOrg } from "@/lib/org-data";
 import { can, roleLabel } from "@/lib/roles";
 import { formatDate, formatShortDate, formatTime } from "@/lib/time";
@@ -59,34 +59,43 @@ export function ClientsList({ orgSlug }: { orgSlug: string }) {
         <InputField on="page" label="Search" placeholder="Name, mobile or email" value={q} onChange={(e) => setQ(e.target.value)} type="search" />
       </div>
       {ui === "loading" ? (
-        <ul className="flex flex-col gap-2" aria-busy>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <li key={i} className="rounded-guide bg-sheet p-4">
-              <Skeleton className="h-5 w-1/3 rounded-tag bg-field" />
-              <Skeleton className="mt-2 h-4 w-1/4 rounded-tag bg-field" />
-            </li>
-          ))}
-        </ul>
+        <TableSkeleton />
       ) : rows.length === 0 ? (
         <EmptyState title={q ? `No client matches "${q}"` : "No clients yet"} lead={q ? "Try the mobile number, part of the name, or the pet's name." : "Clients appear here the first time they book or when the desk adds them."} />
       ) : (
-        <ul className="flex flex-col gap-2">
-          {rows.map(({ owner, pets: ps }) => (
-            <li key={owner.id}>
-              <Row
-                href={`/app/${org.slug}/clients/${owner.id}`}
-                title={owner.name}
-                secondary={
-                  <>
-                    {owner.mobile ? <span className="tabular">{owner.mobile}</span> : <span className="text-text-2">No mobile on file</span>}
-                    {ps.length ? <span>, {ps.map((p) => p.name).join(", ")}</span> : <span>, no pets on file</span>}
-                  </>
-                }
-                trailing={<ChevronRight className="size-5 text-text-2" strokeWidth={1.5} />}
-              />
-            </li>
-          ))}
-        </ul>
+        <DataTable
+          rows={rows}
+          rowKey={({ owner }) => owner.id}
+          rowHref={({ owner }) => `/app/${org.slug}/clients/${owner.id}`}
+          rowLabel={({ owner }) => owner.name}
+          columns={[
+            {
+              key: "name",
+              header: "Client",
+              cell: ({ owner, pets: ps }) => (
+                <>
+                  <span className="block truncate text-body">{owner.name}</span>
+                  <span className="mt-0.5 block truncate text-label text-text-2 sm:hidden">
+                    {owner.mobile ?? "No mobile on file"}
+                    {ps.length ? `, ${ps.map((p) => p.name).join(", ")}` : ""}
+                  </span>
+                </>
+              ),
+            },
+            {
+              key: "mobile",
+              header: "Mobile",
+              className: "hidden sm:table-cell",
+              cell: ({ owner }) => (owner.mobile ? <span className="tabular text-text-2">{owner.mobile}</span> : <span className="text-text-3">Not on file</span>),
+            },
+            {
+              key: "pets",
+              header: "Pets",
+              className: "hidden md:table-cell",
+              cell: ({ pets: ps }) => (ps.length ? <span className="text-text-2">{ps.map((p) => p.name).join(", ")}</span> : <span className="text-text-3">None on file</span>),
+            },
+          ]}
+        />
       )}
     </>
   );

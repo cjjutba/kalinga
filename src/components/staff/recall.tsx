@@ -250,7 +250,7 @@ export function ReminderLog({ orgSlug }: { orgSlug: string }) {
           <div className="overflow-x-auto">
             <table className="w-full text-small">
               <thead>
-                <tr className="text-left text-label text-text-2">
+                <tr className="border-b border-divider text-left text-label text-text-2">
                   <th className="px-4 py-3 font-medium">Generated</th>
                   <th className="px-4 py-3 font-medium">Pet</th>
                   <th className="px-4 py-3 font-medium">Kind</th>

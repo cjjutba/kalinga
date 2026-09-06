@@ -8,9 +8,9 @@ import { PageHeader, EmptyState, NotForRole } from "./page-header";
 import { NewAppointmentDialog } from "./dialogs";
 import { InputField, SelectField, TextareaField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
-import { Card, Row } from "@/components/primitives/surfaces";
+import { Card } from "@/components/primitives/surfaces";
+import { DataTable, TableSkeleton } from "@/components/primitives/data-table";
 import { StatusPill } from "@/components/primitives/status-pill";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useOrg } from "@/lib/org-data";
 import { dueItems, recallLabel, soonest } from "@/lib/domain/recall";
 import { ageLabel, speciesLabel } from "@/lib/domain/selectors";
@@ -60,39 +60,58 @@ export function PetsList({ orgSlug }: { orgSlug: string }) {
         <InputField on="page" label="Search" placeholder="Pet, breed or owner" value={q} onChange={(e) => setQ(e.target.value)} type="search" />
       </div>
       {ui === "loading" ? (
-        <ul className="flex flex-col gap-2" aria-busy>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <li key={i} className="rounded-guide bg-sheet p-4">
-              <Skeleton className="h-5 w-1/4 rounded-tag bg-field" />
-              <Skeleton className="mt-2 h-4 w-1/3 rounded-tag bg-field" />
-            </li>
-          ))}
-        </ul>
+        <TableSkeleton />
       ) : rows.length === 0 ? (
         <EmptyState title={q ? `No pet matches "${q}"` : "No pets on file"} lead={q ? "Try the owner's name." : "Pets are added when a client books, or from their client page."} />
       ) : (
-        <ul className="flex flex-col gap-2">
-          {rows.map(({ pet, owner, due }) => (
-            <li key={pet.id}>
-              <Row
-                href={`/app/${org.slug}/pets/${pet.id}`}
-                title={
-                  <>
-                    {pet.name}
-                    <span className="text-text-2">, {pet.breed}</span>
-                  </>
-                }
-                secondary={owner?.name}
-                trailing={
-                  <>
-                    {due && due.state !== "upcoming" ? <StatusPill status={due.state === "overdue" ? "overdue" : "due"} size="sm" /> : null}
-                    <ChevronRight className="size-5 text-text-2" strokeWidth={1.5} />
-                  </>
-                }
-              />
-            </li>
-          ))}
-        </ul>
+        <DataTable
+          rows={rows}
+          rowKey={({ pet }) => pet.id}
+          rowHref={({ pet }) => `/app/${org.slug}/pets/${pet.id}`}
+          rowLabel={({ pet, owner }) => `${pet.name}, ${owner?.name ?? "no owner on file"}`}
+          columns={[
+            {
+              key: "pet",
+              header: "Pet",
+              cell: ({ pet, owner }) => (
+                <>
+                  <span className="block truncate text-body">{pet.name}</span>
+                  <span className="mt-0.5 block truncate text-label text-text-2 md:hidden">
+                    {pet.breed}
+                    {owner ? `, ${owner.name}` : ""}
+                  </span>
+                </>
+              ),
+            },
+            {
+              key: "breed",
+              header: "Breed",
+              className: "hidden md:table-cell",
+              cell: ({ pet }) => <span className="text-text-2">{pet.breed}</span>,
+            },
+            {
+              key: "owner",
+              header: "Owner",
+              className: "hidden md:table-cell",
+              cell: ({ owner }) => (owner ? <span className="text-text-2">{owner.name}</span> : <span className="text-text-3">Not on file</span>),
+            },
+            {
+              key: "due",
+              header: "Due next",
+              align: "right",
+              cell: ({ due }) =>
+                due ? (
+                  due.state === "upcoming" ? (
+                    <span className="text-text-2">{recallLabel[due.kind]}</span>
+                  ) : (
+                    <StatusPill status={due.state === "overdue" ? "overdue" : "due"} size="sm" />
+                  )
+                ) : (
+                  <span className="text-text-3">Nothing</span>
+                ),
+            },
+          ]}
+        />
       )}
     </>
   );
