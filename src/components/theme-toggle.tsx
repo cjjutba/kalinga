@@ -2,6 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { Moon, Sun, Monitor } from "lucide-react";
+import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { useMounted } from "@/lib/use-mounted";
 
@@ -44,5 +45,39 @@ export function ThemeToggle({ className, compact = false }: { className?: string
         );
       })}
     </div>
+  );
+}
+
+// The same switch as a row inside an account menu: the word on the left, the
+// three icons on the right. Choosing one keeps the menu open, because people
+// compare light against dark before they settle.
+export function ThemeMenuRow() {
+  const { theme, setTheme } = useTheme();
+  const mounted = useMounted();
+  return (
+    <DropdownMenuPrimitive.RadioGroup
+      value={mounted ? (theme ?? "system") : "system"}
+      onValueChange={setTheme}
+      aria-label="Colour theme"
+      className="flex items-center justify-between gap-3 rounded-tag py-1.5 pl-3 pr-1.5"
+    >
+      <span className="text-[15px] text-text">Appearance</span>
+      <span className="flex items-center gap-0.5 rounded-full bg-pill-2 p-0.5">
+        {options.map(({ value, label, Icon }) => (
+          <DropdownMenuPrimitive.RadioItem
+            key={value}
+            value={value}
+            aria-label={label}
+            onSelect={(e) => e.preventDefault()}
+            className={cn(
+              "grid size-7 cursor-pointer place-items-center rounded-full text-text-2 outline-none",
+              "data-highlighted:text-text data-[state=checked]:bg-sheet data-[state=checked]:text-text",
+            )}
+          >
+            <Icon className="size-4" strokeWidth={1.5} aria-hidden />
+          </DropdownMenuPrimitive.RadioItem>
+        ))}
+      </span>
+    </DropdownMenuPrimitive.RadioGroup>
   );
 }
