@@ -23,6 +23,26 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
+// A button says what it does in a word or two. The screen around it carries
+// the detail, so a label never repeats the date, the pet or the clinic that
+// are already on the page beside it. Labels built from an expression are left
+// alone: this catches the ones written as plain text, which is where the
+// sentences creep in.
+const LABEL = /(?:<Pill\b[^>]*>|<button\b[^>]*>)\s*\n?\s*([A-Za-z][^<>{}\n]{24,})\n?\s*(?:<\/Pill>|<\/button>)/g;
+
+describe("a button label is a word or two", () => {
+  it("has no button carrying a sentence", () => {
+    const offenders = walk("src")
+      .filter((path) => path.endsWith(".tsx"))
+      .flatMap((path) => {
+        const source = readFileSync(path, "utf8");
+        return [...source.matchAll(LABEL)].map((m) => `${relative(process.cwd(), path)} "${m[1].trim()}"`);
+      });
+
+    expect(offenders, "put the detail on the screen, not in the button").toEqual([]);
+  });
+});
+
 describe("colour lives in the tokens, nowhere else", () => {
   it("has no colour value outside globals.css and the palette", () => {
     const offenders = walk("src")

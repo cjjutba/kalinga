@@ -113,7 +113,7 @@ export function DesignSheet() {
           <Card className="flex flex-col gap-6 p-6">
             <div className="flex flex-wrap items-center gap-3">
               <Pill>Sign in</Pill>
-              <Pill variant="secondary">New clinic? Create your account</Pill>
+              <Pill variant="secondary">Create an account</Pill>
               <Pill variant="text">Forgot password?</Pill>
               <Pill loading loadingLabel="Signing in">
                 Sign in

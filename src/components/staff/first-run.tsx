@@ -134,7 +134,7 @@ export function FirstRun({ orgSlug, clinicName }: { orgSlug: string; clinicName:
           </Pill>
         ) : (
           <Link href={`/app/${orgSlug}`} className="rounded-tag text-small font-medium text-text-2 hover:text-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page">
-            Skip for now and go to today
+            Go to today
           </Link>
         )}
       </div>

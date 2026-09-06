@@ -60,7 +60,7 @@ export function SignInForm() {
         Sign in
       </Pill>
       <Pill asChild block variant="text">
-        <Link href="/sign-up">New clinic? Create your account</Link>
+        <Link href="/sign-up">Create an account</Link>
       </Pill>
       <PrivacyFooter />
     </form>

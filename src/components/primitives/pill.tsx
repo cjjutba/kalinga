@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 // a grey secondary, plain text tertiary. Loading is a spinner inside the pill,
 // never a disabled grey. Focus is a 2 px ring with a 2 px offset.
 //
-// Two destructive variants, because removing something should look like it:
-// "danger" when it is the action of the screen, "dangerText" when it sits
-// beside a heavier one. Neither ever acts without asking first.
+// One destructive look, "danger", and it is a filled button like any other:
+// something that removes should not read as a link. It never acts on the first
+// click, because every use of it goes through the confirmation dialog.
 
 const pill = cva(
   [
@@ -27,10 +27,7 @@ const pill = cva(
         primary: "bg-action text-on-action hover:bg-action-pressed active:bg-action-pressed",
         secondary: "bg-pill-2 text-text hover:bg-divider active:bg-divider",
         text: "bg-transparent text-text hover:bg-pill-2/60 active:bg-pill-2",
-        danger: "bg-status-noshow text-status-noshow-fg hover:opacity-90",
-        /** The quiet form of danger: for an action that removes something but
-         *  is not the main thing on the screen. It still asks before it acts. */
-        dangerText: "bg-transparent text-error hover:bg-status-noshow/60 active:bg-status-noshow",
+        danger: "bg-status-noshow text-status-noshow-fg hover:opacity-90 active:opacity-90",
       },
       size: {
         md: "h-[52px] px-6 text-[17px] md:h-12",

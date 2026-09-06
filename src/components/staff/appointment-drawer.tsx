@@ -183,7 +183,7 @@ function Body({
               </Pill>
             ) : null}
             {appt.status !== "cancelled" && appt.status !== "completed" ? (
-              <Pill size="sm" variant="dangerText" onClick={() => onCancel(appt.id)}>
+              <Pill size="sm" variant="danger" onClick={() => onCancel(appt.id)}>
                 Cancel appointment
               </Pill>
             ) : null}

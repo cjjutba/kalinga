@@ -189,7 +189,7 @@ export function NewAppointmentDialog({ open, onOpenChange, day, defaultPetId, on
           Close
         </Pill>
         <Pill size="sm" disabled={!pet || !slot} loading={busy} loadingLabel="Booking" onClick={book}>
-          {pet && slot ? `Book ${pet.name}, ${formatShortDate(slot.startsAt, org.timezone)} ${formatTimeWithZone(slot.startsAt, org.timezone)}` : "Pick a pet and a time"}
+          Book
         </Pill>
       </div>
     </Frame>
@@ -249,7 +249,7 @@ export function WalkInDialog({ open, onOpenChange, onDone }: { orgSlug?: string;
           Close
         </Pill>
         <Pill size="sm" disabled={!pet || !providerId} loading={busy} loadingLabel="Checking in" onClick={add}>
-          {pet ? `Check in ${pet.name}` : "Pick a pet"}
+          {pet ? "Check in" : "Pick a pet"}
         </Pill>
       </div>
     </Frame>
