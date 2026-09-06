@@ -383,7 +383,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                 ) : null}
                 {step < 4 ? (
                   <Pill onClick={next} disabled={(step === 0 && !serviceId) || (step === 2 && !slot)}>
-                    {step === 2 && slot ? `Book ${formatTimeWithZone(slot.startsAt, tz)}` : "Continue"}
+                    Continue
                   </Pill>
                 ) : (
                   <Pill onClick={confirm} loading={submitting} loadingLabel="Booking">

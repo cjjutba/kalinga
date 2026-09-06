@@ -98,7 +98,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
   const cancelled = changed === "cancelled" || appt.status === "cancelled";
   const heading = cancelled ? "This booking is cancelled" : changed === "rescheduled" ? "Your booking has moved" : appt.status === "completed" ? "This visit has happened" : "You're booked";
   const lead = cancelled
-    ? "The slot is open again. Book another time whenever you are ready."
+    ? "The slot is open again. Book again whenever you are ready."
     : emailed && owner?.email
       ? `A copy has gone to ${owner.email}. Keep this page, it is how you change or cancel.`
       : "Keep this page, it is how you change or cancel.";
@@ -163,14 +163,14 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
               <Pill size="sm" variant="secondary" onClick={() => setMoving(true)}>
                 Change the time
               </Pill>
-              <Pill size="sm" variant="dangerText" onClick={cancel} loading={cancelling} loadingLabel="Cancelling">
+              <Pill size="sm" variant="danger" onClick={cancel} loading={cancelling} loadingLabel="Cancelling">
                 Cancel this booking
               </Pill>
             </div>
           ) : cancelled ? (
             <div className="mt-6 border-t border-divider pt-6">
               <Pill asChild size="sm">
-                <Link href={`/${org.slug}/book`}>Book another time</Link>
+                <Link href={`/${org.slug}/book`}>Book again</Link>
               </Pill>
             </div>
           ) : null}
@@ -231,7 +231,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
               Keep my time
             </Pill>
             <Pill size="sm" disabled={!slot} loading={busy} loadingLabel="Moving" onClick={move}>
-              {slot ? `Move to ${formatShortDate(slot.startsAt, tz)}, ${formatTimeWithZone(slot.startsAt, tz)}` : "Pick a time"}
+              {slot ? "Move" : "Pick a time"}
             </Pill>
           </div>
         </DialogContent>

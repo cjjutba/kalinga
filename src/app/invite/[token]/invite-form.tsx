@@ -89,7 +89,7 @@ export function InviteForm({ invitation, signedInAs }: { invitation: Invitation 
         <>
           <Row tone="auto" title={`Signed in as ${signedInAs}`} trailing={<span className="grid size-8 place-items-center rounded-full bg-sheet text-label font-medium lg:bg-field">{signedInAs[0]?.toUpperCase()}</span>} />
           <Pill type="button" block loading={loading} loadingLabel="Joining" onClick={join}>
-            Join as {roleLabel[role].toLowerCase()}
+            Join
           </Pill>
         </>
       ) : signedInAs ? (

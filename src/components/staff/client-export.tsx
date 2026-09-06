@@ -66,7 +66,7 @@ export function ClientExport({ orgSlug, id }: { orgSlug: string; id: string }) {
               <Link href={`/app/${orgSlug}/clients/${owner.id}`}>Back to client</Link>
             </Pill>
             <Pill size="sm" onClick={() => window.print()}>
-              <Printer className="size-4" strokeWidth={1.5} aria-hidden /> Print or save as PDF
+              <Printer className="size-4" strokeWidth={1.5} aria-hidden /> Print
             </Pill>
           </div>
         }
