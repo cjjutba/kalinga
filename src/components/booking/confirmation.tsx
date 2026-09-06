@@ -14,6 +14,7 @@ import { getPublicSlots } from "@/lib/actions/slots";
 import { cancelBooking, rescheduleBooking } from "@/lib/actions/public";
 import { renderBookingChanged, renderBookingConfirmation } from "@/content/templates";
 import { formatLongDate, formatPeso, formatShortDate, formatTimeWithZone } from "@/lib/time";
+import { firstName } from "@/lib/domain/selectors";
 
 type Booking = NonNullable<Awaited<ReturnType<typeof getBookingByReference>>>;
 
@@ -22,7 +23,7 @@ type Booking = NonNullable<Awaited<ReturnType<typeof getBookingByReference>>>;
 // copy, and the owner can move or cancel their own booking. The reference is
 // the key: it is long enough to guess badly and short enough to read aloud.
 
-export function BookingConfirmation({ data }: { data: Booking }) {
+export function BookingConfirmation({ data, emailedOnBooking = false }: { data: Booking; emailedOnBooking?: boolean }) {
   const router = useRouter();
   const { organisation: org, appointment: appt, pet, owner, service, provider } = data;
   const tz = org.timezone;
@@ -33,12 +34,13 @@ export function BookingConfirmation({ data }: { data: Booking }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [changed, setChanged] = useState<"cancelled" | "rescheduled" | null>(null);
+  const [emailed, setEmailed] = useState(emailedOnBooking);
 
   const load = useCallback((from: Date, days: number) => getPublicSlots({ orgSlug: org.slug, serviceId: appt.serviceId ?? "", providerId: appt.providerId, from: from.toISOString(), days, excludeAppointmentId: appt.id }), [org.slug, appt.serviceId, appt.providerId, appt.id]);
 
   const ctx = {
     petName: pet?.name ?? "your pet",
-    ownerName: owner?.name.split(" ")[0] ?? "there",
+    ownerName: owner ? firstName(owner.name) : "there",
     clinicName: org.name,
     serviceName: service?.name ?? "your visit",
     when: `${formatShortDate(appt.startsAt, tz)}, ${formatTimeWithZone(appt.startsAt, tz)}`,
@@ -61,6 +63,7 @@ export function BookingConfirmation({ data }: { data: Booking }) {
       return;
     }
     setChanged("rescheduled");
+    setEmailed(Boolean(r.emailed));
     setMoving(false);
     setSlot(null);
     router.refresh();
@@ -76,6 +79,7 @@ export function BookingConfirmation({ data }: { data: Booking }) {
       return;
     }
     setChanged("cancelled");
+    setEmailed(Boolean(r.emailed));
     setCancelling(false);
     router.refresh();
   }
@@ -90,6 +94,7 @@ export function BookingConfirmation({ data }: { data: Booking }) {
           <h1 className="mt-4 text-title font-medium text-balance">{changed === "cancelled" || appt.status === "cancelled" ? "This booking is cancelled" : changed === "rescheduled" ? "Moved" : appt.status === "completed" ? "This visit has happened" : "You're booked"}</h1>
           <p className="mt-1 text-small text-text-2">
             Reference <span className="tabular font-medium text-text">{appt.reference}</span>. Keep this page, it is how you change or cancel.
+            {emailed && owner?.email ? <> A copy has gone to {owner.email}.</> : null}
           </p>
         </div>
         <StatusPill status={appt.status} />

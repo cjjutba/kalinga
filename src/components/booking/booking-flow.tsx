@@ -85,7 +85,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
       setStep(2);
       return;
     }
-    router.push(`/${org.slug}/b/${result.reference}`);
+    router.push(`/${org.slug}/b/${result.reference}${result.emailed ? "?emailed=1" : ""}`);
   };
 
   if (limited) {

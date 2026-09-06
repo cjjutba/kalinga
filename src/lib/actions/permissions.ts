@@ -23,6 +23,7 @@ export const permissionFor: Record<StoreAction["type"], Permission> = {
   "member/remove": "view_settings",
   "invitation/cancel": "view_settings",
   "reminder/sent": "view_recall",
+  "reminder/email": "view_recall",
   "reminder/unsend": "view_recall",
   "org/update": "view_settings",
 };

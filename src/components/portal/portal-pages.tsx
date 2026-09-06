@@ -10,7 +10,7 @@ import { StatusPill } from "@/components/primitives/status-pill";
 import { EmptyState } from "@/components/staff/page-header";
 import { authClient } from "@/lib/auth-client";
 import { dueItems, recallLabel } from "@/lib/domain/recall";
-import { ageLabel, speciesLabel } from "@/lib/domain/selectors";
+import { ageLabel, speciesLabel, firstName } from "@/lib/domain/selectors";
 import type { getPortalData } from "@/lib/db/queries";
 import { dueLabel, formatDate, formatLongDate, formatShortDate, formatTime, formatTimeWithZone } from "@/lib/time";
 
@@ -107,7 +107,7 @@ export function PortalAppointments({ data, name }: { data: PortalData; name: str
   return (
     <div className="flex flex-col gap-8">
       <section>
-        <h1 className="text-title font-medium">{name ? `Hi ${name.split(" ")[0]}` : "Your appointments"}</h1>
+        <h1 className="text-title font-medium">{name ? `Hi ${firstName(name)}` : "Your appointments"}</h1>
         {data.owners.length === 0 ? (
           <div className="mt-5">
             <EmptyState title="Nothing on file for this email yet" lead="When you book with a clinic on Kalinga using this email, your pets and appointments appear here." />

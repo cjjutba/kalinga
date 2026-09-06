@@ -12,6 +12,7 @@ import { visibleSnapshot } from "@/lib/domain/visibility";
 import { renderReminder } from "@/content/templates";
 import { openSlots, type Busy, type Slot } from "@/lib/availability";
 import { can, isRole, type Role } from "@/lib/roles";
+import { firstName } from "@/lib/domain/selectors";
 
 // Every read the screens need, in one place, returning view models. Tenant
 // tables are only ever touched through a Scope. The organisation, member and
@@ -44,7 +45,7 @@ const toOwner = (o: Row.Owner): View.Owner => ({ id: o.id, organisationId: o.org
 const toPet = (p: Row.Pet): View.Pet => ({ id: p.id, organisationId: p.organisationId, ownerId: p.ownerId, name: p.name, species: p.species, breed: p.breed, sex: p.sex, birthDate: p.birthDate ?? "", weightKg: num(p.weightKg), lastVaccination: nn(p.lastVaccination), lastDeworming: nn(p.lastDeworming), lastGroom: nn(p.lastGroom), notes: nn(p.notes) });
 const toAppointment = (a: Row.Appointment): View.Appointment => ({ id: a.id, organisationId: a.organisationId, reference: a.reference, ownerId: a.ownerId, petId: a.petId, serviceId: a.serviceId, providerId: a.providerId, startsAt: a.startsAt.toISOString(), endsAt: a.endsAt.toISOString(), status: a.status, source: a.source, note: nn(a.note), cancelReason: nn(a.cancelReason), createdAt: a.createdAt.toISOString() });
 const toVisit = (v: Row.Visit): View.Visit => ({ id: v.id, organisationId: v.organisationId, appointmentId: v.appointmentId, petId: v.petId, providerId: v.providerId, at: v.at.toISOString(), weightKg: num(v.weightKg), notes: v.notes, administered: v.administered, paymentMethod: nn(v.paymentMethod), paymentRef: nn(v.paymentRef) });
-const toReminder = (r: Row.Reminder): View.Reminder => ({ id: r.id, organisationId: r.organisationId, petId: r.petId, kind: r.kind, dueOn: r.dueOn, message: r.message, generatedAt: r.generatedAt.toISOString(), sentAt: iso(r.sentAt), sentByMemberId: nn(r.sentByMemberId) });
+const toReminder = (r: Row.Reminder): View.Reminder => ({ id: r.id, organisationId: r.organisationId, petId: r.petId, kind: r.kind, dueOn: r.dueOn, message: r.message, generatedAt: r.generatedAt.toISOString(), sentAt: iso(r.sentAt), sentByMemberId: nn(r.sentByMemberId), sentVia: nn(r.sentVia) });
 const toAudit = (e: Row.AuditEvent): View.AuditEvent => ({ id: e.id, organisationId: e.organisationId, actorMemberId: e.actorMemberId ?? "", actorName: e.actorName, action: e.action, entityType: e.entityType, entityId: e.entityId, entityLabel: e.entityLabel, before: nn(e.before), after: nn(e.after), at: e.at.toISOString() });
 
 export async function getOrganisationBySlug(slug: string): Promise<Row.Organisation | undefined> {
@@ -106,7 +107,7 @@ export async function ensureReminders(scope: Scope, org: View.Organisation): Pro
         petId: p.id,
         kind: d.kind,
         dueOn: d.dueOn,
-        message: renderReminder(d.kind, { petName: p.name, ownerName: (o?.name ?? "there").split(" ")[0], clinicName: org.name, dueOn: d.dueOn, bookingUrl: `kalinga.cjjutba.dev/${org.slug}` }),
+        message: renderReminder(d.kind, { petName: p.name, ownerName: firstName(o?.name ?? "there"), clinicName: org.name, dueOn: d.dueOn, bookingUrl: `kalinga.cjjutba.dev/${org.slug}` }),
       });
     }
   }

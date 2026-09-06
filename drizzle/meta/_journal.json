@@ -15,6 +15,13 @@
       "when": 1788629427498,
       "tag": "0001_peaceful_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788654975063,
+      "tag": "0002_wet_clea",
+      "breakpoints": true
     }
   ]
 }

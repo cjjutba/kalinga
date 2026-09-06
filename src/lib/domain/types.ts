@@ -155,6 +155,7 @@ export interface Reminder {
   generatedAt: string;
   sentAt?: string;
   sentByMemberId?: string;
+  sentVia?: "copied" | "email";
 }
 
 export interface AuditEvent {

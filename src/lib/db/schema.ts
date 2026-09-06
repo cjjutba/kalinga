@@ -30,6 +30,7 @@ export const appointmentStatus = pgEnum("appointment_status", ["booked", "confir
 export const appointmentSource = pgEnum("appointment_source", ["online", "staff", "walk_in"]);
 export const recallKind = pgEnum("recall_kind", ["vaccination", "deworming", "grooming"]);
 export const paymentMethod = pgEnum("payment_method", ["cash", "gcash"]);
+export const reminderChannel = pgEnum("reminder_channel", ["copied", "email"]);
 export const auditEntity = pgEnum("audit_entity", ["appointment", "pet", "owner", "visit", "member", "service", "provider", "reminder", "organisation"]);
 
 export interface WeeklyRule {
@@ -198,6 +199,8 @@ export const reminder = pgTable(
     generatedAt: timestamp("generated_at", { withTimezone: true }).notNull().defaultNow(),
     sentAt: timestamp("sent_at", { withTimezone: true }),
     sentByMemberId: text("sent_by_member_id").references(() => member.id, { onDelete: "set null" }),
+    /** How it reached the client. Copied into another app by the desk, or emailed by Kalinga. */
+    sentVia: reminderChannel("sent_via"),
   },
   (t) => [index("reminder_org_due_idx").on(t.organisationId, t.dueOn), uniqueIndex("reminder_pet_kind_due_idx").on(t.petId, t.kind, t.dueOn)],
 );

@@ -157,9 +157,12 @@ Rules that decide what is due. Vaccination annually from the last dose, dewormin
 quarterly, grooming on a configurable interval. A queue showing what is due this
 week, rendered messages ready to send, and a log of what was generated.
 
-**It sends nothing in v1.** Staff copy the message and send it however they
-already talk to that client. That is honest, it costs nothing, and it is close to
-what clinics do today.
+**No SMS in v1.** Staff copy the message and send it however they already talk
+to that client. That is honest, it costs nothing, and it is close to what clinics
+do today. Since 2026-09-06 there is one exception that also costs nothing: when a
+client gave an email and Resend is connected, the queue offers "Email" beside
+"Copy", and the log records which channel carried each reminder. Booking
+confirmations, moves and cancellations go to the same address the same way.
 
 **Done when** a clinic can open one screen on a Monday and see every animal due
 that week, with the message written.

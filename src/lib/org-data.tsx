@@ -21,6 +21,8 @@ interface OrgDataValue {
   role: Role;
   actorMemberId: string;
   memberships: Membership[];
+  /** Whether Resend is connected, so screens can offer to email rather than only copy. */
+  emailConfigured: boolean;
   dispatch: (action: StoreAction) => Promise<ActionResult>;
   pending: boolean;
   lastError: string | null;
@@ -29,7 +31,7 @@ interface OrgDataValue {
 
 const OrgDataContext = createContext<OrgDataValue | null>(null);
 
-export function OrgDataProvider({ snapshot, role, actorMemberId, memberships, children }: { snapshot: OrgSnapshot; role: Role; actorMemberId: string; memberships: Membership[]; children: ReactNode }) {
+export function OrgDataProvider({ snapshot, role, actorMemberId, memberships, emailConfigured, children }: { snapshot: OrgSnapshot; role: Role; actorMemberId: string; memberships: Membership[]; emailConfigured: boolean; children: ReactNode }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [lastError, setLastError] = useState<string | null>(null);
@@ -44,7 +46,7 @@ export function OrgDataProvider({ snapshot, role, actorMemberId, memberships, ch
     [snapshot.organisation.slug, router],
   );
 
-  const value = useMemo<OrgDataValue>(() => ({ snapshot, role, actorMemberId, memberships, dispatch, pending, lastError, clearError: () => setLastError(null) }), [snapshot, role, actorMemberId, memberships, dispatch, pending, lastError]);
+  const value = useMemo<OrgDataValue>(() => ({ snapshot, role, actorMemberId, memberships, emailConfigured, dispatch, pending, lastError, clearError: () => setLastError(null) }), [snapshot, role, actorMemberId, memberships, emailConfigured, dispatch, pending, lastError]);
   return (
     <OrgDataContext.Provider value={value}>
       {children}
@@ -82,6 +84,7 @@ export function useOrg(orgSlug?: string) {
     role: ctx.role,
     actorMemberId: ctx.actorMemberId,
     memberships: ctx.memberships,
+    emailConfigured: ctx.emailConfigured,
     dispatch: ctx.dispatch,
     pending: ctx.pending,
   };

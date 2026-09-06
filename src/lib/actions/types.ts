@@ -98,6 +98,7 @@ export const actionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("invitation/cancel"), id }),
   z.object({ type: z.literal("owner/delete"), id, reason: z.string().trim().max(500).optional() }),
   z.object({ type: z.literal("reminder/sent"), id }),
+  z.object({ type: z.literal("reminder/email"), id }),
   z.object({ type: z.literal("reminder/unsend"), id }),
   z.object({
     type: z.literal("org/update"),

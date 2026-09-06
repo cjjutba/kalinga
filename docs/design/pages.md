@@ -87,7 +87,7 @@ regardless.
 | New or edit pet | form | front desk, owner | |
 | Add visit | `/app/[org]/pets/[id]/visit` | vet, owner | Weight, notes, what was administered, cash or GCash reference. Updates the recall dates. |
 | Visit detail | | vet, owner | Front desk sees that a visit happened, not its content. |
-| Recall queue | `/app/[org]/recall` | front desk, owner | Due this week grouped by vaccination, deworming and grooming. Message rendered, copy button, mark sent. Filters for overdue and next week. |
+| Recall queue | `/app/[org]/recall` | front desk, owner | Due this week grouped by vaccination, deworming and grooming. Message rendered, copy button, mark sent. Filters for overdue and next week. An Email button appears beside Copy when the client has an email and Resend is connected. |
 | Reminder log | `/app/[org]/recall/log` | front desk, owner | What was generated, when, and who marked it sent. |
 | Settings: clinic | `/app/[org]/settings` | owner | Name, slug, address, contact, time zone, public booking URL. |
 | Settings: services | `/app/[org]/settings/services` | owner | List and edit. Name, duration, buffer, price, publicly bookable. |

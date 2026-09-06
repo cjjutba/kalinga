@@ -451,6 +451,30 @@ deletion itself is recorded with counts and a reason and no name.
 Keeping the shape of what happened while removing who it happened to satisfies
 both, and the owner can still see that a deletion took place and why.
 
+## 2026-09-06, F10 delivery
+
+### Email is the one channel that costs nothing, so it is the first that sends
+
+Booking confirmations, moves and cancellations now go to the pet owner by email
+when they gave one and `RESEND_API_KEY` is set, from the public page and from the
+desk alike. The recall queue offers "Email" beside "Copy" under the same two
+conditions, and each reminder records the channel that carried it. Without the
+key nothing changes: the desk copies, and the confirmation page stays the record.
+
+**Why.** "It sends nothing" was a decision about SMS, which every Philippine
+gateway charges for. Resend's free tier carries three thousand messages a
+month, so refusing to email was leaving value on the table for no saving. The
+copy path stays because most clients here are on Messenger, not email.
+
+### A mail failure never fails the booking
+
+The email is sent after the transaction commits, and an error is logged and
+swallowed. The result carries only whether a message actually went out, and the
+confirmation page says "a copy has gone to" only when it did.
+
+**Why.** The appointment is the thing of value. A mail provider hiccup must not
+turn a successful booking into an error screen for someone on a phone.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a

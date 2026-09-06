@@ -10,6 +10,7 @@ import { appointment, auditEvent, owner, pet, provider, service } from "@/lib/db
 import { isFree } from "@/lib/availability";
 import { getBusy } from "@/lib/db/queries";
 import { subDays, addDays } from "date-fns";
+import { notifyOwnerOfBooking } from "./notify";
 
 // The unauthenticated write path. Rate limited per IP through a Postgres
 // table, a honeypot field that must stay empty, validation, and then the
@@ -17,7 +18,7 @@ import { subDays, addDays } from "date-fns";
 // the database exclusion constraint checks it again, so two people confirming
 // the same time cannot both succeed.
 
-export type BookingResult = { ok: true; reference: string } | { ok: false; error: string; code?: "taken" | "limited" };
+export type BookingResult = { ok: true; reference: string; emailed: boolean } | { ok: false; error: string; code?: "taken" | "limited" };
 
 function reference(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -72,7 +73,8 @@ export async function bookAppointment(raw: unknown): Promise<BookingResult> {
       await sc.insert(auditEvent, { actorMemberId: null, actorName: input.name, action: "Booked online", entityType: "appointment", entityId: appt.id, entityLabel: `${petRow.name}, ${svc.name}`, after: { status: "booked", startsAt: appt.startsAt.toISOString() } });
       return appt;
     });
-    return { ok: true, reference: created.reference };
+    const emailed = await notifyOwnerOfBooking(scope, orgRow, created, "confirmed");
+    return { ok: true, reference: created.reference, emailed };
   } catch (e) {
     const message = e instanceof Error ? e.message : "";
     if (/appointment_no_overlap/.test(message)) return { ok: false, error: "That slot was just taken. Pick another time.", code: "taken" };
@@ -81,7 +83,7 @@ export async function bookAppointment(raw: unknown): Promise<BookingResult> {
 }
 
 /** The pet owner cancels their own booking. The reference on their confirmation is the key. */
-export async function cancelBooking(raw: unknown): Promise<{ ok: boolean; error?: string }> {
+export async function cancelBooking(raw: unknown): Promise<{ ok: boolean; error?: string; emailed?: boolean }> {
   const p = manageInput.safeParse(raw);
   if (!p.success) return { ok: false, error: "That link is not right." };
   if (!(await allowRate(`manage:${await clientIp()}`, 20, 15 * 60))) return { ok: false, error: "Too many changes. Try again in a few minutes." };
@@ -94,10 +96,11 @@ export async function cancelBooking(raw: unknown): Promise<{ ok: boolean; error?
   const ownerRow = await scope.byId(owner, appt.ownerId);
   await scope.update(appointment, appt.id, { status: "cancelled", cancelReason: "Cancelled by the owner online" });
   await scope.insert(auditEvent, { actorMemberId: null, actorName: ownerRow?.name ?? "Pet owner", action: "Cancelled appointment", entityType: "appointment", entityId: appt.id, entityLabel: appt.reference, before: { status: appt.status }, after: { status: "cancelled", reason: "Cancelled by the owner online" } });
-  return { ok: true };
+  const emailed = await notifyOwnerOfBooking(scope, orgRow, { ...appt, status: "cancelled" }, "cancelled");
+  return { ok: true, emailed };
 }
 
-export async function rescheduleBooking(raw: unknown): Promise<{ ok: boolean; error?: string; code?: "taken" }> {
+export async function rescheduleBooking(raw: unknown): Promise<{ ok: boolean; error?: string; code?: "taken"; emailed?: boolean }> {
   const p = manageInput.extend({ startsAt: z.string().datetime({ offset: true }) }).safeParse(raw);
   if (!p.success) return { ok: false, error: "That link is not right." };
   if (!(await allowRate(`manage:${await clientIp()}`, 20, 15 * 60))) return { ok: false, error: "Too many changes. Try again in a few minutes." };
@@ -118,7 +121,8 @@ export async function rescheduleBooking(raw: unknown): Promise<{ ok: boolean; er
       await sc.update(appointment, appt.id, { startsAt, endsAt });
       await sc.insert(auditEvent, { actorMemberId: null, actorName: "Pet owner", action: "Rescheduled appointment", entityType: "appointment", entityId: appt.id, entityLabel: appt.reference, before: { startsAt: appt.startsAt.toISOString() }, after: { startsAt: startsAt.toISOString() } });
     });
-    return { ok: true };
+    const emailed = await notifyOwnerOfBooking(scope, orgRow, { ...appt, startsAt, endsAt }, "rescheduled");
+    return { ok: true, emailed };
   } catch (e) {
     if (e instanceof Error && /appointment_no_overlap/.test(e.message)) return { ok: false, error: "That slot was just taken. Pick another time.", code: "taken" };
     return { ok: false, error: "The change did not go through. Nothing was saved." };

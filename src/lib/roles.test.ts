@@ -49,7 +49,7 @@ describe("what each role cannot do through applyAction", () => {
   });
 
   it("a vet cannot run the desk or change the clinic", () => {
-    expect(refused("vet")).toEqual(["appointment/create", "appointment/note", "appointment/reschedule", "appointment/status", "invitation/cancel", "member/invite", "member/remove", "member/role", "org/update", "owner/delete", "owner/upsert", "pet/upsert", "provider/archive", "provider/upsert", "reminder/sent", "reminder/unsend", "service/archive", "service/upsert"]);
+    expect(refused("vet")).toEqual(["appointment/create", "appointment/note", "appointment/reschedule", "appointment/status", "invitation/cancel", "member/invite", "member/remove", "member/role", "org/update", "owner/delete", "owner/upsert", "pet/upsert", "provider/archive", "provider/upsert", "reminder/email", "reminder/sent", "reminder/unsend", "service/archive", "service/upsert"]);
   });
 
   it("the owner is refused nothing", () => {

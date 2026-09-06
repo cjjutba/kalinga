@@ -53,6 +53,11 @@ export function ageLabel(birthDate: string, tz: string): string {
   return `${Math.floor(days / 365.25)} yr`;
 }
 
+/** The name a message greets someone by. Skips "Dr." so a vet is not addressed as "Dr.". */
+export function firstName(name: string): string {
+  return name.replace(/^Dr\.\s*/, "").split(/\s+/)[0] || name;
+}
+
 export function initials(name: string): string {
   const parts = name.replace(/^Dr\.\s*/, "").split(/\s+/).filter(Boolean);
   return ((parts[0]?.[0] ?? "") + (parts[parts.length - 1]?.[0] ?? "")).toUpperCase();

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Check, Copy, Undo2 } from "lucide-react";
+import { Check, Copy, Mail, Undo2 } from "lucide-react";
 import { PageHeader, EmptyState, NotForRole } from "./page-header";
 import { Pill } from "@/components/primitives/pill";
 import { Card } from "@/components/primitives/surfaces";
@@ -15,6 +15,7 @@ import { can, roleLabel } from "@/lib/roles";
 import { dueLabel, formatDate, formatShortDate, formatTime, isOverdue } from "@/lib/time";
 import { useUiState } from "@/lib/use-ui-state";
 import { cn } from "@/lib/utils";
+import { firstName } from "@/lib/domain/selectors";
 
 // The revenue feature. One screen on a Monday shows every animal due that
 // week with the message already written. Nothing is sent from here. Staff
@@ -61,7 +62,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 export function RecallQueue({ orgSlug }: { orgSlug: string }) {
-  const { org, reminders, pets, owners, members, role, dispatch } = useOrg(orgSlug);
+  const { org, reminders, pets, owners, members, role, dispatch, emailConfigured } = useOrg(orgSlug);
   const ui = useUiState<"empty" | "loading">();
   const [range, setRange] = useState<Range>("week");
   const [showSent, setShowSent] = useState(false);
@@ -163,11 +164,22 @@ export function RecallQueue({ orgSlug }: { orgSlug: string }) {
                           </div>
                           <blockquote className="rounded-guide bg-field p-3.5 text-small leading-[1.5]">{r.message}</blockquote>
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <CopyButton text={r.message} />
+                            <div className="flex flex-wrap items-center gap-2">
+                              <CopyButton text={r.message} />
+                              {!r.sentAt && owner?.email ? (
+                                emailConfigured ? (
+                                  <Pill size="xs" variant="secondary" onClick={() => dispatch({ type: "reminder/email", id: r.id })}>
+                                    <Mail className="size-3.5" strokeWidth={1.5} aria-hidden /> Email {owner.email}
+                                  </Pill>
+                                ) : (
+                                  <span className="text-label text-text-2">Email not connected, copy instead</span>
+                                )
+                              ) : null}
+                            </div>
                             {r.sentAt ? (
                               <span className="flex items-center gap-2 text-label text-text-2">
-                                Sent {formatShortDate(r.sentAt, tz)}
-                                {sentBy ? ` by ${sentBy.split(" ")[0]}` : ""}
+                                {r.sentVia === "email" ? "Emailed" : "Sent"} {formatShortDate(r.sentAt, tz)}
+                                {sentBy ? ` by ${firstName(sentBy)}` : ""}
                                 <button type="button" onClick={() => dispatch({ type: "reminder/unsend", id: r.id })} className="inline-flex items-center gap-1 rounded-full px-2 py-1 font-medium text-text hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
                                   <Undo2 className="size-3.5" strokeWidth={1.5} aria-hidden /> Undo
                                 </button>
@@ -205,7 +217,7 @@ export function ReminderLog({ orgSlug }: { orgSlug: string }) {
     <>
       <PageHeader
         title="Reminder log"
-        lead="Every reminder generated, when, and who marked it sent. Nothing here was transmitted by Kalinga."
+        lead="Every reminder generated, when, how it went out, and who sent it. Kalinga emails only when Resend is connected. Everything else was copied by the desk and sent by hand."
         actions={
           <Pill asChild size="sm" variant="secondary">
             <Link href={`/app/${org.slug}/recall`}>Back to the queue</Link>
@@ -244,6 +256,7 @@ export function ReminderLog({ orgSlug }: { orgSlug: string }) {
                   <th className="px-4 py-3 font-medium">Kind</th>
                   <th className="px-4 py-3 font-medium">Due</th>
                   <th className="px-4 py-3 font-medium">Sent</th>
+                  <th className="px-4 py-3 font-medium">How</th>
                   <th className="px-4 py-3 font-medium">Message</th>
                 </tr>
               </thead>
@@ -259,7 +272,8 @@ export function ReminderLog({ orgSlug }: { orgSlug: string }) {
                       <td className="whitespace-nowrap px-4 py-3 font-medium">{pet?.name}</td>
                       <td className="whitespace-nowrap px-4 py-3">{recallLabel[r.kind]}</td>
                       <td className="whitespace-nowrap px-4 py-3 tabular">{formatDate(r.dueOn, tz)}</td>
-                      <td className="whitespace-nowrap px-4 py-3">{r.sentAt ? `${formatShortDate(r.sentAt, tz)}${by ? ", " + by.split(" ")[0] : ""}` : <span className="text-text-2">Not yet</span>}</td>
+                      <td className="whitespace-nowrap px-4 py-3">{r.sentAt ? `${formatShortDate(r.sentAt, tz)}${by ? ", " + firstName(by) : ""}` : <span className="text-text-2">Not yet</span>}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-text-2">{r.sentAt ? (r.sentVia === "email" ? "Email from Kalinga" : "Copied by the desk") : ""}</td>
                       <td className="max-w-md truncate px-4 py-3 text-text-2">{r.message}</td>
                     </tr>
                   );

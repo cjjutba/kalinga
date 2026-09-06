@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { firstName } from "@/lib/domain/selectors";
 
 // Every message the system sends goes through here. With RESEND_API_KEY set,
 // mail goes out from cjjutba.dev through Resend. Without it, nothing is sent
@@ -37,9 +38,19 @@ export async function sendResetPasswordEmail(p: { to: string; name: string; url:
   return deliver(
     p.to,
     "Reset your Kalinga password",
-    `Hi ${p.name.split(" ")[0]},\n\nSomeone asked to reset the password for this account. If that was you, use this link within the hour:\n${p.url}\n\nIf it was not you, ignore this and nothing changes.\n\nKalinga`,
+    `Hi ${firstName(p.name)},\n\nSomeone asked to reset the password for this account. If that was you, use this link within the hour:\n${p.url}\n\nIf it was not you, ignore this and nothing changes.\n\nKalinga`,
     p.url,
   );
+}
+
+/** A booking confirmation, change or cancellation, in the same words the confirmation page shows. */
+export async function sendBookingEmail(p: { to: string; subject: string; text: string; manageUrl: string }) {
+  return deliver(p.to, p.subject, `${p.text}\n\nKalinga, on behalf of the clinic`, p.manageUrl);
+}
+
+/** A recall reminder, the same text the desk would have copied. */
+export async function sendReminderEmail(p: { to: string; subject: string; text: string; bookingUrl: string }) {
+  return deliver(p.to, p.subject, `${p.text}\n\nKalinga, on behalf of the clinic`, p.bookingUrl);
 }
 
 export async function sendMagicLinkEmail(p: { to: string; url: string }) {

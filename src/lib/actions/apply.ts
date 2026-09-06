@@ -10,6 +10,9 @@ import { appointment, auditEvent, owner, pet, provider, reminder, service, visit
 import type { Scope } from "@/lib/db/scoped";
 import { actionSchema, type ActionResult, type StoreAction } from "./types";
 import { permissionFor } from "./permissions";
+import { notifyOwnerOfBooking } from "./notify";
+import { emailIsConfigured, sendReminderEmail } from "@/lib/email";
+import { reminderTitles } from "@/content/templates";
 
 // One server action, one command handler. The screens dispatch the same
 // discriminated union the prototype's reducer took. Here it is validated,
@@ -71,15 +74,17 @@ async function handle(action: StoreAction, actor: Actor, scope: Scope): Promise<
       const appt = await scope.byId(appointment, action.id);
       if (!appt) return { ok: false, error: "That appointment is not on file" };
       await scope.update(appointment, appt.id, { status: action.status, cancelReason: action.status === "cancelled" ? action.reason ?? null : appt.cancelReason });
-      await audit(scope, actor, statusVerbs[action.status], "appointment", appt.id, await labelFor(scope, appt), { status: appt.status }, { status: action.status, ...(action.reason ? { reason: action.reason } : {}) });
-      return { ok: true };
+      const emailed = action.status === "cancelled" ? await notifyOwnerOfBooking(scope, actor.org, { ...appt, status: "cancelled" }, "cancelled") : false;
+      await audit(scope, actor, statusVerbs[action.status], "appointment", appt.id, await labelFor(scope, appt), { status: appt.status }, { status: action.status, ...(action.reason ? { reason: action.reason } : {}), ...(emailed ? { emailed: true } : {}) });
+      return { ok: true, message: emailed ? "The client has been emailed." : undefined };
     }
     case "appointment/reschedule": {
       const appt = await scope.byId(appointment, action.id);
       if (!appt) return { ok: false, error: "That appointment is not on file" };
-      await scope.update(appointment, appt.id, { startsAt: new Date(action.startsAt), endsAt: new Date(action.endsAt), providerId: action.providerId ?? appt.providerId, status: appt.status === "cancelled" ? "booked" : appt.status });
-      await audit(scope, actor, "Rescheduled appointment", "appointment", appt.id, await labelFor(scope, appt), { startsAt: appt.startsAt.toISOString() }, { startsAt: action.startsAt });
-      return { ok: true };
+      const moved = await scope.update(appointment, appt.id, { startsAt: new Date(action.startsAt), endsAt: new Date(action.endsAt), providerId: action.providerId ?? appt.providerId, status: appt.status === "cancelled" ? "booked" : appt.status });
+      const emailed = moved ? await notifyOwnerOfBooking(scope, actor.org, moved, "rescheduled") : false;
+      await audit(scope, actor, "Rescheduled appointment", "appointment", appt.id, await labelFor(scope, appt), { startsAt: appt.startsAt.toISOString() }, { startsAt: action.startsAt, ...(emailed ? { emailed: true } : {}) });
+      return { ok: true, message: emailed ? "The client has been emailed." : undefined };
     }
     case "appointment/create": {
       const a = action.appointment;
@@ -95,8 +100,9 @@ async function handle(action: StoreAction, actor: Actor, scope: Scope): Promise<
         }
       }
       if (!created) return { ok: false, error: "Could not find a free reference. Try again." };
-      await audit(scope, actor, a.source === "walk_in" ? "Added walk-in" : "Booked at the desk", "appointment", created.id, await labelFor(scope, created), undefined, { status: created.status, startsAt: created.startsAt.toISOString() });
-      return { ok: true, id: created.id };
+      const emailed = a.source === "walk_in" ? false : await notifyOwnerOfBooking(scope, actor.org, created, "confirmed");
+      await audit(scope, actor, a.source === "walk_in" ? "Added walk-in" : "Booked at the desk", "appointment", created.id, await labelFor(scope, created), undefined, { status: created.status, startsAt: created.startsAt.toISOString(), ...(emailed ? { emailed: true } : {}) });
+      return { ok: true, id: created.id, message: emailed ? "The client has been emailed." : undefined };
     }
     case "appointment/note": {
       const appt = await scope.byId(appointment, action.id);
@@ -229,12 +235,31 @@ async function handle(action: StoreAction, actor: Actor, scope: Scope): Promise<
       await audit(scope, actor, "Cancelled invitation", "member", action.id, action.id);
       return { ok: true };
     }
+    case "reminder/email": {
+      // The one channel that costs nothing. Only when the client gave an email
+      // and Resend is connected; otherwise the desk copies the message as before.
+      const r = await scope.byId(reminder, action.id);
+      if (!r) return { ok: false, error: "That reminder is not on file" };
+      if (r.sentAt) return { ok: false, error: "That reminder was already sent" };
+      const p = await scope.byId(pet, r.petId);
+      const o = p ? await scope.byId(owner, p.ownerId) : undefined;
+      if (!o?.email) return { ok: false, error: "This client has no email on file. Copy the message instead." };
+      if (!emailIsConfigured()) return { ok: false, error: "Email is not connected yet. Copy the message and send it yourself." };
+      try {
+        await sendReminderEmail({ to: o.email, subject: `${p?.name ?? "Your pet"}: ${reminderTitles[r.kind].toLowerCase()}, ${actor.org.name}`, text: r.message, bookingUrl: `https://kalinga.cjjutba.dev/${actor.org.slug}` });
+      } catch (e) {
+        return { ok: false, error: e instanceof Error ? e.message : "The email did not go out. Nothing was marked." };
+      }
+      await scope.update(reminder, r.id, { sentAt: new Date(), sentByMemberId: actor.member.id, sentVia: "email" });
+      await audit(scope, actor, "Emailed reminder", "reminder", r.id, `${p?.name ?? "Pet"}, ${r.kind}`, undefined, { to: o.email });
+      return { ok: true, message: `Emailed to ${o.email}.` };
+    }
     case "reminder/sent":
     case "reminder/unsend": {
       const r = await scope.byId(reminder, action.id);
       if (!r) return { ok: false, error: "That reminder is not on file" };
       const sent = action.type === "reminder/sent";
-      await scope.update(reminder, r.id, { sentAt: sent ? new Date() : null, sentByMemberId: sent ? actor.member.id : null });
+      await scope.update(reminder, r.id, { sentAt: sent ? new Date() : null, sentByMemberId: sent ? actor.member.id : null, sentVia: sent ? "copied" : null });
       const p = await scope.byId(pet, r.petId);
       await audit(scope, actor, sent ? "Marked reminder sent" : "Unmarked reminder", "reminder", r.id, `${p?.name ?? "Pet"}, ${r.kind}`);
       return { ok: true };
