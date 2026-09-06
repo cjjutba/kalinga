@@ -148,6 +148,9 @@ export function SlotPicker({
           className={cn(
             "grid gap-2",
             compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3",
+            // In a dialog the times scroll inside their own box, so the dialog
+            // itself never grows past the screen and its buttons stay put.
+            compact && "max-h-[15rem] overflow-y-auto pr-1",
           )}
         >
           {slots.map((s) => {

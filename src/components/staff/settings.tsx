@@ -295,7 +295,7 @@ export function StaffSettings() {
                         {roleLabel[i.role]}, invited {formatDate(i.createdAt)}, expires {formatDate(i.expiresAt)}
                       </p>
                     </div>
-                    <button type="button" onClick={async () => { if (!(await confirm({ title: `Cancel the invitation to ${i.email}?`, description: "The link stops working. You can invite them again any time.", confirmLabel: "Cancel it", cancelLabel: "Keep it" }))) return; dispatch({ type: "invitation/cancel", id: i.id }); }} aria-label={`Cancel invitation to ${i.email}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+                    <button type="button" onClick={async () => { if (!(await confirm({ title: `Cancel the invitation to ${i.email}?`, description: "The link stops working. You can invite them again any time.", confirmLabel: "Cancel it", cancelLabel: "Keep it" }))) return; dispatch({ type: "invitation/cancel", id: i.id }); }} aria-label={`Cancel invitation to ${i.email}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-status-noshow hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
                       <Trash2 className="size-5" strokeWidth={1.5} />
                     </button>
                   </li>
@@ -347,7 +347,7 @@ function ProviderHours({ provider }: { provider: Provider }) {
         </div>
         <div className="flex items-center gap-2">
           <Saved show={saved} />
-          <button type="button" onClick={async () => { if (!(await confirm({ title: `Remove ${provider.name} from the schedule?`, description: "Their hours stop being offered to pet owners. Appointments already booked with them stay where they are.", confirmLabel: "Remove" }))) return; dispatch({ type: "provider/archive", id: provider.id }); }} aria-label={`Remove ${provider.name} from the schedule`} className="grid size-9 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+          <button type="button" onClick={async () => { if (!(await confirm({ title: `Remove ${provider.name} from the schedule?`, description: "Their hours stop being offered to pet owners. Appointments already booked with them stay where they are.", confirmLabel: "Remove" }))) return; dispatch({ type: "provider/archive", id: provider.id }); }} aria-label={`Remove ${provider.name} from the schedule`} className="grid size-9 place-items-center rounded-full text-text-2 hover:bg-status-noshow hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
             <Trash2 className="size-4" strokeWidth={1.5} />
           </button>
         </div>
@@ -453,7 +453,7 @@ export function ClosuresSettings() {
                       {x.reason}, {x.provider.name}
                     </p>
                   </div>
-                  <button type="button" onClick={async () => { if (!(await confirm({ title: "Remove this closure?", description: `${formatDate(x.date, org.timezone)} opens for booking again for ${x.provider.name}.`, confirmLabel: "Remove" }))) return; dispatch({ type: "provider/upsert", provider: { id: x.provider.id, name: x.provider.name, title: x.provider.title, memberId: x.provider.memberId ?? null, exceptions: x.provider.exceptions.filter((e) => e.date !== x.date) } }); }} aria-label={`Remove closure on ${x.date} for ${x.provider.name}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-field hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+                  <button type="button" onClick={async () => { if (!(await confirm({ title: "Remove this closure?", description: `${formatDate(x.date, org.timezone)} opens for booking again for ${x.provider.name}.`, confirmLabel: "Remove" }))) return; dispatch({ type: "provider/upsert", provider: { id: x.provider.id, name: x.provider.name, title: x.provider.title, memberId: x.provider.memberId ?? null, exceptions: x.provider.exceptions.filter((e) => e.date !== x.date) } }); }} aria-label={`Remove closure on ${x.date} for ${x.provider.name}`} className="grid size-10 place-items-center rounded-full text-text-2 hover:bg-status-noshow hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
                     <Trash2 className="size-5" strokeWidth={1.5} />
                   </button>
                 </li>

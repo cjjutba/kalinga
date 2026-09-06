@@ -7,6 +7,7 @@ import { Check, Copy, X } from "lucide-react";
 import { SlotPicker, type Slot } from "./slot-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pill } from "@/components/primitives/pill";
+import { useConfirm } from "@/components/primitives/confirm";
 import { Celebrate } from "./celebrate";
 import { PublicFooter } from "./public-footer";
 import { Card } from "@/components/primitives/surfaces";
@@ -33,6 +34,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
   const [copied, setCopied] = useState(false);
   const [moving, setMoving] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const confirm = useConfirm();
   const [slot, setSlot] = useState<Slot | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,17 +75,23 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
   }
 
   async function cancel() {
-    setBusy(true);
+    const sure = await confirm({
+      title: "Cancel this booking?",
+      description: "The clinic sees it straight away and the slot opens up for someone else. You can book again any time.",
+      confirmLabel: "Cancel booking",
+      cancelLabel: "Keep it",
+    });
+    if (!sure) return;
+    setCancelling(true);
     setError(null);
     const r = await cancelBooking({ orgSlug: org.slug, reference: appt.reference });
-    setBusy(false);
+    setCancelling(false);
     if (!r.ok) {
       setError(r.error ?? "Could not cancel the booking.");
       return;
     }
     setChanged("cancelled");
     setEmailed(Boolean(r.emailed));
-    setCancelling(false);
     router.refresh();
   }
 
@@ -155,7 +163,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
               <Pill size="sm" variant="secondary" onClick={() => setMoving(true)}>
                 Change the time
               </Pill>
-              <Pill size="sm" variant="text" onClick={() => setCancelling(true)}>
+              <Pill size="sm" variant="dangerText" onClick={cancel} loading={cancelling} loadingLabel="Cancelling">
                 Cancel this booking
               </Pill>
             </div>
@@ -206,13 +214,13 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
       </div>
 
       <Dialog open={moving} onOpenChange={setMoving}>
-        <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-lg overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-lifted">
+        <DialogContent className="flex max-h-[88dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-sheet border-0 bg-sheet p-6 shadow-lifted sm:max-w-lg">
           <DialogHeader className="text-left">
             <DialogTitle className="text-heading font-medium">Pick a new time</DialogTitle>
             <DialogDescription className="text-small text-text-2">With {provider?.name}. Your current slot opens up for someone else.</DialogDescription>
           </DialogHeader>
           {appt.serviceId ? (
-            <div className="mt-4">
+            <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
               <SlotPicker tz={tz} load={load} value={slot} onChange={setSlot} who={provider?.name ?? ""} compact />
             </div>
           ) : (
@@ -224,23 +232,6 @@ export function BookingConfirmation({ data, emailedOnBooking = false, justBooked
             </Pill>
             <Pill size="sm" disabled={!slot} loading={busy} loadingLabel="Moving" onClick={move}>
               {slot ? `Move to ${formatShortDate(slot.startsAt, tz)}, ${formatTimeWithZone(slot.startsAt, tz)}` : "Pick a time"}
-            </Pill>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={cancelling} onOpenChange={setCancelling}>
-        <DialogContent className="w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-md rounded-sheet border-0 bg-sheet p-6 shadow-lifted">
-          <DialogHeader className="text-left">
-            <DialogTitle className="text-heading font-medium">Cancel this booking?</DialogTitle>
-            <DialogDescription className="text-small text-text-2">The clinic will see it straight away. You can book again any time.</DialogDescription>
-          </DialogHeader>
-          <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Pill size="sm" variant="secondary" onClick={() => setCancelling(false)}>
-              Keep it
-            </Pill>
-            <Pill size="sm" variant="danger" loading={busy} loadingLabel="Cancelling" onClick={cancel}>
-              Cancel booking
             </Pill>
           </div>
         </DialogContent>

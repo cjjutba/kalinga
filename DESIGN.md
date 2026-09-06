@@ -250,6 +250,12 @@ its reason underneath, and both take themselves away, an error more slowly
 because it is read twice. Nothing important is only in a toast, so there is
 nothing to dismiss. A field that can say why beside itself still does.
 
+**Destructive actions look destructive, and ask first.** Two variants carry it:
+`danger` when removing is the action of the screen, `dangerText` when it sits
+beside a heavier button. Icon buttons that remove turn red on hover rather than
+staying neutral. All of them go through the one confirmation dialog, so a red
+button in this product never acts on the first click.
+
 **Removing anything asks first.** One dialog, one shape, everywhere: what is
 being removed in the title, what actually happens underneath, a grey button
 that keeps it and a red one that does it. It says the consequence rather than
