@@ -350,8 +350,6 @@ export function ClientForm({ orgSlug, id, inDialog, onDone }: { orgSlug: string;
  *  is a dialog over the list rather than a page of its own. The route stays for
  *  anyone who lands on it directly. */
 export function NewClientDialog({ orgSlug, open, onOpenChange }: { orgSlug: string; open: boolean; onOpenChange: (o: boolean) => void }) {
-  const router = useRouter();
-  const { org } = useOrg(orgSlug);
   const toast = useToast();
   return (
     <Frame open={open} onOpenChange={onOpenChange} title="New client" description="Name is enough to start. Mobile is how reminders reach them.">
@@ -360,9 +358,9 @@ export function NewClientDialog({ orgSlug, open, onOpenChange }: { orgSlug: stri
         inDialog
         onDone={(id) => {
           onOpenChange(false);
-          if (!id) return;
-          toast({ title: "Client added", detail: "Add their pet next." });
-          router.push(`/app/${org.slug}/clients/${id}`);
+          // Stay on the list. The row appears at the top of the table on the
+          // refresh the command already asked for, which is the confirmation.
+          if (id) toast({ title: "Client added", detail: "They are on the list now." });
         }}
       />
     </Frame>

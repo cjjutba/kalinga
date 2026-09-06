@@ -394,8 +394,6 @@ export function PetForm({ orgSlug, id, owner, inDialog, onDone }: { orgSlug: str
 /** The same form over the list it was opened from. The route stays for anyone
  *  who lands on it directly. */
 export function NewPetDialog({ orgSlug, owner, open, onOpenChange }: { orgSlug: string; owner?: string; open: boolean; onOpenChange: (o: boolean) => void }) {
-  const router = useRouter();
-  const { org } = useOrg(orgSlug);
   const toast = useToast();
   return (
     <Frame open={open} onOpenChange={onOpenChange} title="New pet" description="Breed can be a best guess. Aspin and puspin are breeds here.">
@@ -405,9 +403,9 @@ export function NewPetDialog({ orgSlug, owner, open, onOpenChange }: { orgSlug: 
         inDialog
         onDone={(id) => {
           onOpenChange(false);
-          if (!id) return;
-          toast({ title: "Pet added", detail: "Recall dates start from the first visit." });
-          router.push(`/app/${org.slug}/pets/${id}`);
+          // Stay where the pet was added from, list or client. It appears
+          // there on the refresh the command already asked for.
+          if (id) toast({ title: "Pet added", detail: "Recall dates start from the first visit." });
         }}
       />
     </Frame>
