@@ -8,6 +8,7 @@ import { Pill } from "@/components/primitives/pill";
 import { Card } from "@/components/primitives/surfaces";
 import { StatusPill } from "@/components/primitives/status-pill";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/primitives/toast";
 import { useOrg } from "@/lib/org-data";
 import { recallLabel } from "@/lib/domain/recall";
 import type { RecallKind, Reminder } from "@/lib/domain/types";
@@ -63,6 +64,7 @@ function CopyButton({ text }: { text: string }) {
 
 export function RecallQueue({ orgSlug }: { orgSlug: string }) {
   const { org, reminders, pets, owners, members, role, dispatch, emailConfigured } = useOrg(orgSlug);
+  const toast = useToast();
   const ui = useUiState<"empty" | "loading">();
   const [range, setRange] = useState<Range>("week");
   const [showSent, setShowSent] = useState(false);
@@ -168,7 +170,14 @@ export function RecallQueue({ orgSlug }: { orgSlug: string }) {
                               <CopyButton text={r.message} />
                               {!r.sentAt && owner?.email ? (
                                 emailConfigured ? (
-                                  <Pill size="xs" variant="secondary" onClick={() => dispatch({ type: "reminder/email", id: r.id })}>
+                                  <Pill
+                                    size="xs"
+                                    variant="secondary"
+                                    onClick={async () => {
+                                      const res = await dispatch({ type: "reminder/email", id: r.id });
+                                      if (res.ok) toast({ title: `Reminder emailed to ${owner.email}`, detail: `${pet?.name ?? "The pet"} is off the queue.` });
+                                    }}
+                                  >
                                     <Mail className="size-3.5" strokeWidth={1.5} aria-hidden /> Email {owner.email}
                                   </Pill>
                                 ) : (
@@ -185,7 +194,13 @@ export function RecallQueue({ orgSlug }: { orgSlug: string }) {
                                 </button>
                               </span>
                             ) : (
-                              <Pill size="xs" onClick={() => dispatch({ type: "reminder/sent", id: r.id })}>
+                              <Pill
+                                size="xs"
+                                onClick={async () => {
+                                  const res = await dispatch({ type: "reminder/sent", id: r.id });
+                                  if (res.ok) toast({ title: "Marked sent", detail: `${pet?.name ?? "The pet"} is off the queue.` });
+                                }}
+                              >
                                 Mark sent
                               </Pill>
                             )}

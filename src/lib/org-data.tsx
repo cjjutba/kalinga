@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState, useTransition, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { applyAction } from "@/lib/actions/apply";
+import { useToast } from "@/components/primitives/toast";
 import type { ActionResult, StoreAction } from "@/lib/actions/types";
 import type { OrgSnapshot, Organisation, Role } from "@/lib/domain/types";
 
@@ -25,42 +26,30 @@ interface OrgDataValue {
   emailConfigured: boolean;
   dispatch: (action: StoreAction) => Promise<ActionResult>;
   pending: boolean;
-  lastError: string | null;
-  clearError: () => void;
 }
 
 const OrgDataContext = createContext<OrgDataValue | null>(null);
 
 export function OrgDataProvider({ snapshot, role, actorMemberId, memberships, emailConfigured, children }: { snapshot: OrgSnapshot; role: Role; actorMemberId: string; memberships: Membership[]; emailConfigured: boolean; children: ReactNode }) {
   const router = useRouter();
+  const toast = useToast();
   const [pending, startTransition] = useTransition();
-  const [lastError, setLastError] = useState<string | null>(null);
 
+  // Every command goes through here, so every refusal is reported in one
+  // place. Screens that can say something better keep their own message and
+  // this is the backstop.
   const dispatch = useCallback(
     async (action: StoreAction): Promise<ActionResult> => {
       const result = await applyAction(snapshot.organisation.slug, action);
-      if (!result.ok) setLastError(result.error);
+      if (!result.ok) toast({ kind: "error", title: "That did not save", detail: result.error });
       else startTransition(() => router.refresh());
       return result;
     },
-    [snapshot.organisation.slug, router],
+    [snapshot.organisation.slug, router, toast],
   );
 
-  const value = useMemo<OrgDataValue>(() => ({ snapshot, role, actorMemberId, memberships, emailConfigured, dispatch, pending, lastError, clearError: () => setLastError(null) }), [snapshot, role, actorMemberId, memberships, emailConfigured, dispatch, pending, lastError]);
-  return (
-    <OrgDataContext.Provider value={value}>
-      {children}
-      {lastError ? (
-        <div role="alert" className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-md rounded-card bg-sheet p-4 shadow-[0_12px_32px_rgba(0,0,0,0.12)]">
-          <p className="text-small font-medium">That did not save</p>
-          <p className="mt-1 text-small text-text-2">{lastError}</p>
-          <button type="button" onClick={() => setLastError(null)} className="mt-3 h-8 rounded-full bg-pill-2 px-3 text-label font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
-            Close
-          </button>
-        </div>
-      ) : null}
-    </OrgDataContext.Provider>
-  );
+  const value = useMemo<OrgDataValue>(() => ({ snapshot, role, actorMemberId, memberships, emailConfigured, dispatch, pending }), [snapshot, role, actorMemberId, memberships, emailConfigured, dispatch, pending]);
+  return <OrgDataContext.Provider value={value}>{children}</OrgDataContext.Provider>;
 }
 
 /** Everything scoped to the organisation the shell is showing. Same shape the prototype's hook returned. */
