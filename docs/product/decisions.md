@@ -609,6 +609,59 @@ account is a quiet ghost button, not a second solid one.
 to pay ahead of everyone else. Nothing above changes what the product does. All
 of it changes whether the product looks like something worth paying for.
 
+## Saying things back, and who may open a clinic
+
+**Date.** 7 September 2026.
+
+**Decided.** Five things, from a session spent using the product as a new
+clinic rather than reading it.
+
+**One toast, bottom right, no close button.** The old error box sat at the
+bottom of the screen with a Close button and only ever appeared when something
+failed. It is now one component with three states, it takes itself away, and
+success uses it too: an appointment saved, a client added, a reminder emailed.
+An error lingers longer than a success because it is read twice, once to see it
+failed and once to read why. Nothing important lives only in a toast, which is
+what makes a close button unnecessary.
+
+**The appointment panel stages its changes.** Tapping a row opened a panel
+whose status buttons wrote to the database on the first click, so a misplaced
+tap marked a real client as not arrived. The status and the note are a draft
+now, with Save changes to commit them and Discard beside it while the draft
+differs from what is stored. Reschedule and cancel keep their own dialogs,
+because those already ask before they act.
+
+**Creating a record is a dialog, the record is a page.** New client and new pet
+open over the list they were started from, the way the walk-in dialog already
+did, because both are typed while a phone is ringing. Reading, editing and
+anything with a link worth sending stays a page with its own address, and the
+create routes still work for anyone who lands on one directly.
+
+**Only an owner opens a clinic.** Front desk at someone else's clinic could see
+Create another clinic and use it. The rule is now one sentence in two places:
+an account may create a clinic when it owns one already or belongs to none.
+The auth plugin enforces it, the sidebar and the clinic chooser stop offering
+it, and the page says so in words rather than letting the button fail.
+
+Roles are not getting separate route trees. One shell at `/app/[org]` with
+navigation filtered by permission and a server check on every page and action
+is the version that cannot drift: a role change takes effect on the next click,
+a guessed URL returns a 403, and there is one copy of each screen. Separate
+`/owner` and `/desk` trees would duplicate every page, break bookmarks the day
+someone is promoted, and move the security story from one guard into three.
+
+**Email became a real template.** Invitations were plain text with a bare link,
+which is the shape Gmail has learned to distrust, and one landed in spam on a
+domain whose SPF, DKIM and DMARC all pass. Every message now goes out as HTML
+and text together: a card, a sentence, one button, and the same link in full
+underneath for anyone whose client strips it. No images, so nothing is blocked.
+Replies reach a person, and an invitation replies to whoever sent it. Reminders
+carry a List-Unsubscribe header pointing at that address.
+
+**Why recorded.** Four of the five are the same decision in different clothes:
+say what happened, and make the person mean it before it is written. The fifth
+is that authentication passing is not deliverability.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a

@@ -239,6 +239,23 @@ first column carries what they said on a second line. A timeline, such as the
 audit trail, stays a list, because its grouping by day matters more than its
 columns.
 
+**One toast, bottom right, no button on it.** Anything that happens away from
+the eye says so there: a saved appointment, a reminder emailed, a refusal from
+the server. Success reads in the ink colour, a refusal in the error colour with
+its reason underneath, and both take themselves away, an error more slowly
+because it is read twice. Nothing important is only in a toast, so there is
+nothing to dismiss. A field that can say why beside itself still does.
+
+**Creating a record is a dialog. The record is a page.** A new client or a new
+pet is four or eight fields typed while a phone is ringing, so it opens over
+the list it was started from. Reading, editing and everything with a link worth
+sending stays a page with its own address. The create routes stay reachable for
+anyone who lands on one directly.
+
+**Nothing in a panel saves as you touch it.** The appointment panel opens with
+a tap on a row, so its status and note are a draft with one button to commit
+them. Reschedule and cancel keep their own dialogs, because they already ask.
+
 **The staff sidebar belongs to the clinic.** Its top is the clinic name and its
 switcher, not the product name, because the person working here knows what they
 opened. A hairline separates it from the day. The account sits at the bottom
