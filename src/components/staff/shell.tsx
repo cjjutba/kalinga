@@ -32,7 +32,7 @@ const nav: { label: string; segment: string; icon: typeof CalendarDays; permissi
   { label: "Audit", segment: "audit", icon: ClipboardList, permission: "view_audit" },
 ];
 
-const menuContent = "w-64 rounded-guide border-0 bg-sheet p-1.5 ring-1 ring-divider shadow-[0_12px_32px_rgba(0,0,0,0.14)]";
+const menuContent = "w-64 rounded-guide border-0 bg-sheet p-1.5 ring-1 ring-divider shadow-lifted";
 const menuItem = "rounded-tag px-3 py-2.5 text-[15px]";
 
 export function StaffShell({ userName, children }: { userName: string; children: ReactNode }) {
@@ -194,7 +194,7 @@ export function StaffShell({ userName, children }: { userName: string; children:
           {/* A second clinic is made from inside the first, not on a page of
               its own. Only the address in the bar changes when it lands. */}
           <Dialog open={newClinicOpen} onOpenChange={setNewClinicOpen}>
-            <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.14)] sm:max-w-lg sm:p-7">
+            <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-lifted sm:max-w-lg sm:p-7">
               <DialogHeader className="text-left">
                 <DialogTitle className="text-heading font-medium">Create another clinic</DialogTitle>
                 <DialogDescription className="text-small text-text-2">You own this one too. Services, hours and staff come next, inside it.</DialogDescription>

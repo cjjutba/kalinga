@@ -114,8 +114,8 @@ export function InviteForm({ invitation, signedInAs }: { invitation: Invitation 
           <p className="text-small text-text-2">
             Your account will use <span className="font-medium text-text">{invitation.email}</span>.
           </p>
-          <InputField on="auto" label="Your name" name="name" autoComplete="name" placeholder="Maria Santos" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} disabled={loading} />
-          <InputField on="auto" label="Choose a password" name="password" type="password" autoComplete="new-password" placeholder="At least 10 characters" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} disabled={loading} />
+          <InputField on="auth" label="Your name" name="name" autoComplete="name" placeholder="Maria Santos" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} disabled={loading} />
+          <InputField on="auth" label="Choose a password" name="password" type="password" autoComplete="new-password" placeholder="At least 10 characters" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} disabled={loading} />
           <Pill type="submit" block loading={loading} loadingLabel="Joining">
             Join clinic
           </Pill>

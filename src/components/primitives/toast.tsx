@@ -79,7 +79,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               key={t.id}
               role={t.kind === "error" ? "alert" : "status"}
               className={cn(
-                "pointer-events-auto flex gap-2.5 rounded-guide bg-sheet p-3.5 ring-1 ring-divider shadow-[0_12px_32px_rgba(0,0,0,0.14)]",
+                "pointer-events-auto flex gap-2.5 rounded-guide bg-sheet p-3.5 ring-1 ring-divider shadow-lifted",
                 "animate-in fade-in-0 slide-in-from-bottom-2 duration-150 motion-reduce:animate-none",
               )}
             >

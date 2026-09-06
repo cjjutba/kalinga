@@ -12,6 +12,7 @@ import { Card } from "@/components/primitives/surfaces";
 import { getPublicSlots } from "@/lib/actions/slots";
 import { bookAppointment } from "@/lib/actions/public";
 import { formatLongDate, formatPeso, formatTimeWithZone, zoneLabel } from "@/lib/time";
+import { controlOn, steppedFlow } from "@/lib/design/surfaces";
 import { cn } from "@/lib/utils";
 
 // The page a pet owner actually uses. Five steps: service, vet or any, slot,
@@ -148,7 +149,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
     cn(
       "flex w-full items-center justify-between gap-3 rounded-card px-4 py-4 text-left transition-colors duration-150 motion-reduce:transition-none",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-sheet",
-      selected ? "bg-action text-on-action" : "bg-page text-text hover:bg-divider/70 lg:bg-field lg:hover:bg-divider",
+      selected ? "bg-action text-on-action" : cn(controlOn.shell, "text-text hover:bg-divider/70 lg:hover:bg-divider"),
     );
 
   return (
@@ -160,10 +161,10 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
     //
     // The panel's height is fixed, so a long step scrolls inside it and the
     // shell never grows or shrinks between steps.
-    <div className="min-h-dvh bg-page lg:flex lg:items-center lg:justify-center lg:p-6">
-      <div className="min-h-dvh w-full bg-sheet p-2 lg:min-h-0 lg:max-w-[1240px] lg:rounded-sheet">
-        <div className="lg:flex lg:h-[44rem]">
-          <aside className="hidden w-[320px] shrink-0 flex-col p-8 lg:flex print:hidden">
+    <div className={cn("min-h-dvh lg:flex lg:items-center lg:justify-center lg:p-6", steppedFlow.window)}>
+      <div className={cn("min-h-dvh w-full p-2 lg:min-h-0 lg:max-w-booking lg:rounded-sheet", steppedFlow.frame)}>
+        <div className="lg:flex lg:h-panel">
+          <aside className="hidden w-rail shrink-0 flex-col p-8 lg:flex print:hidden">
           <div>
             <p className="text-body font-medium">{org.name}</p>
             {org.city ? <p className="mt-0.5 text-label text-text-2">{org.city}</p> : null}
@@ -219,8 +220,8 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
               Content starts at the top of it, never centred, so a step with
               two choices and a step with a form begin on the same line and
               nothing jumps between them. */}
-          <main className="flex justify-center px-3 py-6 lg:flex-1 lg:overflow-hidden lg:rounded-card lg:border lg:border-divider lg:bg-page lg:px-4 lg:py-10">
-          <div className="flex w-full max-w-md flex-col gap-8 lg:h-full lg:min-h-0">
+          <main className={cn("flex justify-center px-3 py-6 lg:flex-1 lg:overflow-hidden lg:rounded-card lg:px-4 lg:py-10", steppedFlow.panel)}>
+          <div className="flex w-full max-w-step flex-col gap-8 lg:h-full lg:min-h-0">
             {/* Everything above the buttons scrolls; the buttons do not, so a
                 long step never hides the way forward. */}
             <div className="flex flex-col gap-8 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-1">
@@ -293,7 +294,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                 <>
                   <Title heading="When suits you?" lead={`Times are clinic time, ${zoneLabel(tz)}. ${service?.name}, ${service?.durationMin} minutes.`} />
                   {slotError ? (
-                    <div role="alert" className="rounded-guide bg-page p-4 lg:bg-field">
+                    <div role="alert" className={cn("rounded-guide p-4", controlOn.shell)}>
                       <p className="text-body font-medium">That slot was just taken</p>
                       <p className="mt-1 text-small text-text-2">{slotError} Nothing was saved.</p>
                     </div>
@@ -324,7 +325,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
               ) : (
                 <>
                   <Title heading="Check and confirm" lead="Nothing is booked until you press the button." />
-                  <Card className="bg-page p-5 lg:bg-field">
+                  <Card className={cn("p-5", controlOn.shell)}>
                     <dl className="grid grid-cols-[5rem_minmax(0,1fr)] gap-x-4 gap-y-3 text-small">
                       <dt className="text-text-2">Service</dt>
                       <dd>

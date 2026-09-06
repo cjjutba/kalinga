@@ -154,7 +154,7 @@ function ServiceDialog({ service, open, onOpenChange }: { service: Service | nul
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-md rounded-sheet border-0 bg-sheet p-6 shadow-[0_12px_32px_rgba(0,0,0,0.12)]">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-md rounded-sheet border-0 bg-sheet p-6 shadow-lifted">
         <DialogHeader className="text-left">
           <DialogTitle className="text-heading font-medium">{existing ? `Edit ${existing.name}` : "New service"}</DialogTitle>
         </DialogHeader>

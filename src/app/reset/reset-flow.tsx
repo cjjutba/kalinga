@@ -71,8 +71,8 @@ export function ResetFlow() {
     return (
       <form onSubmit={save} noValidate className="flex flex-col gap-5">
         <AuthTitle>Choose a new password</AuthTitle>
-        <InputField on="auto" label="New password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} helper="At least 10 characters." error={error} disabled={loading} />
-        <InputField on="auto" label="Confirm password" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} disabled={loading} />
+        <InputField on="auth" label="New password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} helper="At least 10 characters." error={error} disabled={loading} />
+        <InputField on="auth" label="Confirm password" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} disabled={loading} />
         <Pill type="submit" block loading={loading} loadingLabel="Saving">
           Save password
         </Pill>
@@ -98,7 +98,7 @@ export function ResetFlow() {
   return (
     <form onSubmit={request} noValidate className="flex flex-col gap-5">
       <AuthTitle lead="We'll email you a link that works for one hour.">Reset your password</AuthTitle>
-      <InputField on="auto" label="Email" type="email" autoComplete="email" inputMode="email" placeholder="you@clinic.com" value={email} onChange={(e) => setEmail(e.target.value)} error={error} disabled={loading} />
+      <InputField on="auth" label="Email" type="email" autoComplete="email" inputMode="email" placeholder="you@clinic.com" value={email} onChange={(e) => setEmail(e.target.value)} error={error} disabled={loading} />
       <Pill type="submit" block loading={loading} loadingLabel="Sending">
         Send reset link
       </Pill>

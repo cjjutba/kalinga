@@ -51,7 +51,7 @@ export default function Home() {
           </div>
           <div className="relative">
             <Photo className="aspect-[4/5] rounded-sheet md:aspect-[5/6]" caption="Photograph, an aspin portrait" />
-            <Card tone="tint" className="absolute -bottom-6 left-4 right-4 rotate-[-2deg] p-4 shadow-[0_12px_32px_rgba(0,0,0,0.08)] sm:left-auto sm:w-72" aria-hidden>
+            <Card tone="tint" className="absolute -bottom-6 left-4 right-4 rotate-[-2deg] p-4 shadow-lifted sm:left-auto sm:w-72" aria-hidden>
               <p className="text-label font-medium text-text-2">Next appointment</p>
               <p className="mt-1 text-body">Kiko, 9:30 AM, Vaccination</p>
               <StatusPill status="confirmed" className="mt-2 bg-sheet" />

@@ -118,6 +118,18 @@
   --color-status-overdue: var(--status-overdue);
   --color-status-overdue-fg: var(--status-overdue-fg);
 
+  /* Layout constants more than one component needs, so no file invents its
+     own. The booking group's cap, its rail, its panel height, and the column
+     a step's content is read in. */
+  --container-booking: 1240px;
+  --container-step: 28rem;
+  --spacing-rail: 320px;
+  --spacing-panel: 44rem;
+
+  /* The only shadow in the product. It lifts a thing that floats over the
+     page: a dialog, a menu, a toast. Nothing that sits on the page has one. */
+  --shadow-lifted: 0 12px 32px rgb(0 0 0 / 0.12);
+
   --radius-sheet: 24px;
   --radius-card: 20px;
   --radius-guide: 16px;
