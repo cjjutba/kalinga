@@ -252,7 +252,13 @@ that keeps it and a red one that does it. It says the consequence rather than
 warning that the act cannot be undone, because most of these can be undone and
 the ones that cannot say so in their own words.
 
-**A flow with steps carries them on a rail.** On a laptop the steps stand down
+**A flow with steps carries them on a rail, and the rail is the page.** The
+steps stand on the ground itself with no panel behind them, and from the laptop
+breakpoint up the step being answered is a panel beside them: a hairline, the
+sheet tone, its own height, and the content centred inside a 28rem column.
+Below that width there is no panel at all, so the step sits on the page and the
+controls step up one tone to compensate. That is what the "shell" surface in
+Field means, and it is the mirror of the "auto" surface the auth pages use. On a laptop the steps stand down
 the left with their state on them, done, current and not yet, and any step
 already passed can be clicked to return to it. Below that width the rail lies
 down as segments across the top and behaves the same. The buttons belong under

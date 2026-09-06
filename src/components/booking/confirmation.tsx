@@ -7,6 +7,7 @@ import { Check, Copy } from "lucide-react";
 import { SlotPicker, type Slot } from "./slot-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pill } from "@/components/primitives/pill";
+import { PublicFooter } from "./public-footer";
 import { Card } from "@/components/primitives/surfaces";
 import { StatusPill } from "@/components/primitives/status-pill";
 import type { getBookingByReference } from "@/lib/db/queries";
@@ -85,7 +86,8 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
   }
 
   return (
-    <main className="mx-auto w-full max-w-xl px-5 py-8">
+    <>
+      <main className="mx-auto w-full max-w-xl px-5 py-8">
       <div className="flex items-start justify-between gap-3">
         <div>
           <span className="grid size-12 place-items-center rounded-full bg-action text-on-action" aria-hidden>
@@ -227,5 +229,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
         </DialogContent>
       </Dialog>
     </main>
+      <PublicFooter />
+    </>
   );
 }

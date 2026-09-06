@@ -11,13 +11,16 @@ import { cn } from "@/lib/utils";
 // page it is --sheet. Never a border. Errors are a red ring and one red line.
 
 // "auto" is for auth forms, which sit on a sheet below the laptop breakpoint
-// and directly on the page above it.
-type Surface = "sheet" | "page" | "auto";
+// and directly on the page above it. "shell" is the other way round, for the
+// booking flow, which is bare on a phone and inside a panel from the laptop
+// breakpoint up.
+type Surface = "sheet" | "page" | "auto" | "shell";
 
 const surfaceFill: Record<Surface, string> = {
   sheet: "bg-field",
   page: "bg-sheet",
   auto: "bg-field lg:bg-sheet",
+  shell: "bg-sheet lg:bg-field",
 };
 
 interface FieldFrameProps {
