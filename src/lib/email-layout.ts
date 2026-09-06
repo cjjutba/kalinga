@@ -27,11 +27,17 @@ export interface EmailContent {
   signature?: string;
 }
 
-const page = "#f5f5f7";
 const card = "#ffffff";
 const ink = "#0a0a0a";
 const muted = "#656569";
+const hairline = "#e5e5ea";
 const font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+
+// The mark, as a PNG because no mail client can be trusted with an SVG. Its
+// alt text is the name, so a client that blocks images still says who sent
+// this.
+const origin = process.env.BETTER_AUTH_URL ?? "https://kalinga.cjjutba.dev";
+const logo = `${origin}/brand/icon-192.png`;
 
 function escape(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -83,22 +89,22 @@ export function renderEmail(c: EmailContent): string {
 <meta name="supported-color-schemes" content="light">
 <title>${escape(c.heading)}</title>
 </head>
-<body style="margin:0;padding:0;background:${page};font-family:${font};-webkit-font-smoothing:antialiased">
+<body style="margin:0;padding:0;background:${card};font-family:${font};-webkit-font-smoothing:antialiased">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent">${escape(c.preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${page}">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${card}">
   <tr><td align="center" style="padding:32px 16px">
     <table role="presentation" width="520" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:520px">
-      <tr><td style="padding:0 4px 16px">
-        <span style="font-size:17px;font-weight:700;letter-spacing:-0.02em;color:${ink}">Kalinga</span>
+      <tr><td style="padding:0 0 18px">
+        <img src="${logo}" width="40" height="40" alt="Kalinga" style="display:block;border:0;outline:none;text-decoration:none;border-radius:9px">
       </td></tr>
-      <tr><td style="background:${card};border-radius:16px;padding:28px">
+      <tr><td style="background:${card};border:1px solid ${hairline};border-radius:14px;padding:28px">
         <h1 style="margin:0 0 12px;font-size:20px;line-height:1.3;font-weight:600;color:${ink}">${escape(c.heading)}</h1>
         ${paragraphs}
         ${button}
         ${fallback}
         ${footnote}
       </td></tr>
-      <tr><td style="padding:16px 4px 0;font-size:12px;line-height:1.5;color:${muted};border-top:0">
+      <tr><td style="padding:16px 2px 0;font-size:12px;line-height:1.5;color:${muted}">
         ${signature}
         <p style="margin:0">Kalinga is booking, records and recall for veterinary clinics in the Philippines.</p>
       </td></tr>
