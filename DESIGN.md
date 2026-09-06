@@ -41,13 +41,13 @@ the same tokens with the second column of values.
 
 | Token | Use | Light | Dark |
 | --- | --- | --- | --- |
-| `--page` | Page background | `#F5F5F7` | `#0A0A0A` |
-| `--sheet` | Sheets, cards, inputs on the page | `#FFFFFF` | `#161618` |
-| `--field` | Inputs and guide cards on a sheet | `#F2F2F4` | `#1F1F22` |
+| `--page` | Page background | `#FFFFFF` | `#0A0A0A` |
+| `--sheet` | Sheets, cards, inputs on the page | `#F5F5F7` | `#161618` |
+| `--field` | Inputs and guide cards on a sheet | `#EBEBEE` | `#1F1F22` |
 | `--text` | Primary text, icons, links | `#0A0A0A` | `#F5F5F7` |
 | `--text-2` | Secondary text | `#656569` | `#9A9AA1` |
 | `--text-3` | Placeholder only, never content | `#A0A0A6` | `#6B6B70` |
-| `--divider` | Rare. Table rows in dense views | `#E5E5EA` | `#26262A` |
+| `--divider` | Rare. Table rows in dense views | `#E4E4E9` | `#26262A` |
 | `--action` | Primary pill background | `#0A0A0A` | `#F5F5F7` |
 | `--on-action` | Text on the primary pill | `#FFFFFF` | `#0A0A0A` |
 | `--action-pressed` | Primary pill pressed | `#262626` | `#D9D9DE` |
@@ -59,6 +59,7 @@ the same tokens with the second column of values.
 
 Rules that follow from the table.
 
+- The ground is white in light mode and everything raised off it is a step of grey, not the other way round. `--page` is the ground, `--sheet` is what sits on it, `--field` is what sits on that.
 - An input is always one step of tone away from what it sits on. On a sheet it is `--field`. On the page it is `--sheet`. It never has a border.
 - Text links are `--text` at medium weight. No underline at rest, no blue.
 - `--tint` is for cards that show featured content, such as the next appointment. It never colours a button, a status or text.

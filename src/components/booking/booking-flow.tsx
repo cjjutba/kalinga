@@ -148,18 +148,21 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
     cn(
       "flex w-full items-center justify-between gap-3 rounded-card px-4 py-4 text-left transition-colors duration-150 motion-reduce:transition-none",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-sheet",
-      selected ? "bg-action text-on-action" : "bg-sheet text-text hover:bg-divider/70 lg:bg-field lg:hover:bg-divider",
+      selected ? "bg-action text-on-action" : "bg-page text-text hover:bg-divider/70 lg:bg-field lg:hover:bg-divider",
     );
 
   return (
-    // Three grounds, one inside the next. The window is the sheet tone, the
-    // shell holding the rail and the panel is a step down from it, and the
-    // panel itself comes back up to the sheet tone, so it reads as cut out of
+    // Three grounds, one inside the next. The window is the page tone, the
+    // shell holding the rail and the panel is the sheet tone a step in from
+    // it, and the panel comes back to the page tone, so it reads as cut out of
     // the shell with a hairline round it and an even edge on every side. No
     // shadows anywhere: the tones do the separating, as everywhere else.
-    <div className="min-h-dvh bg-sheet lg:flex lg:items-center lg:justify-center lg:p-6">
-      <div className="min-h-dvh w-full bg-page p-2 lg:min-h-0 lg:max-w-[1240px] lg:rounded-sheet">
-        <div className="lg:flex lg:min-h-[44rem]">
+    //
+    // The panel's height is fixed, so a long step scrolls inside it and the
+    // shell never grows or shrinks between steps.
+    <div className="min-h-dvh bg-page lg:flex lg:items-center lg:justify-center lg:p-6">
+      <div className="min-h-dvh w-full bg-sheet p-2 lg:min-h-0 lg:max-w-[1240px] lg:rounded-sheet">
+        <div className="lg:flex lg:h-[44rem]">
           <aside className="hidden w-[320px] shrink-0 flex-col p-8 lg:flex print:hidden">
           <div>
             <p className="text-body font-medium">{org.name}</p>
@@ -216,8 +219,11 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
               Content starts at the top of it, never centred, so a step with
               two choices and a step with a form begin on the same line and
               nothing jumps between them. */}
-          <main className="flex justify-center px-3 py-6 lg:flex-1 lg:rounded-card lg:border lg:border-divider lg:bg-sheet lg:px-4 lg:py-12">
-          <div className="flex w-full max-w-md flex-col gap-8">
+          <main className="flex justify-center px-3 py-6 lg:flex-1 lg:overflow-hidden lg:rounded-card lg:border lg:border-divider lg:bg-page lg:px-4 lg:py-10">
+          <div className="flex w-full max-w-md flex-col gap-8 lg:h-full lg:min-h-0">
+            {/* Everything above the buttons scrolls; the buttons do not, so a
+                long step never hides the way forward. */}
+            <div className="flex flex-col gap-8 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-1">
             <div className="flex flex-col gap-4 lg:hidden">
               <button
                 type="button"
@@ -287,7 +293,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                 <>
                   <Title heading="When suits you?" lead={`Times are clinic time, ${zoneLabel(tz)}. ${service?.name}, ${service?.durationMin} minutes.`} />
                   {slotError ? (
-                    <div role="alert" className="rounded-guide bg-sheet p-4 lg:bg-field">
+                    <div role="alert" className="rounded-guide bg-page p-4 lg:bg-field">
                       <p className="text-body font-medium">That slot was just taken</p>
                       <p className="mt-1 text-small text-text-2">{slotError} Nothing was saved.</p>
                     </div>
@@ -318,42 +324,38 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
               ) : (
                 <>
                   <Title heading="Check and confirm" lead="Nothing is booked until you press the button." />
-                  <Card className="bg-sheet p-5 lg:bg-field">
-                    <dl className="flex flex-col gap-3 text-body">
-                      <div className="flex justify-between gap-4">
-                        <dt className="text-text-2">Service</dt>
-                        <dd className="text-right">
-                          {service?.name}, {formatPeso(service?.pricePhp ?? 0)}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <dt className="text-text-2">When</dt>
-                        <dd className="text-right tabular">
-                          {slot ? formatLongDate(slot.startsAt, tz) : ""}
-                          <br />
-                          {slot ? formatTimeWithZone(slot.startsAt, tz) : ""}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <dt className="text-text-2">With</dt>
-                        <dd className="text-right">{providers.find((p) => p.id === slot?.providerId)?.name ?? "Any available"}</dd>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <dt className="text-text-2">For</dt>
-                        <dd className="text-right">
-                          {details.petName}, {details.species}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <dt className="text-text-2">You</dt>
-                        <dd className="min-w-0 text-right">
-                          {details.name}
-                          <br />
-                          <span className="tabular">{details.mobile}</span>
-                          <br />
-                          <span className="break-all">{details.email}</span>
-                        </dd>
-                      </div>
+                  <Card className="bg-page p-5 lg:bg-field">
+                    <dl className="grid grid-cols-[5rem_minmax(0,1fr)] gap-x-4 gap-y-3 text-small">
+                      <dt className="text-text-2">Service</dt>
+                      <dd>
+                        {service?.name}, {formatPeso(service?.pricePhp ?? 0)}
+                      </dd>
+                      <dt className="text-text-2">When</dt>
+                      <dd className="tabular">
+                        {slot ? formatLongDate(slot.startsAt, tz) : ""}
+                        <br />
+                        {slot ? formatTimeWithZone(slot.startsAt, tz) : ""}
+                      </dd>
+                      <dt className="text-text-2">With</dt>
+                      <dd>{providers.find((p) => p.id === slot?.providerId)?.name ?? "Any available"}</dd>
+                      {org.address ? (
+                        <>
+                          <dt className="text-text-2">Where</dt>
+                          <dd>{org.address}</dd>
+                        </>
+                      ) : null}
+                      <dt className="text-text-2">For</dt>
+                      <dd>
+                        {details.petName}, {details.species}
+                      </dd>
+                      <dt className="text-text-2">You</dt>
+                      <dd className="min-w-0">
+                        {details.name}
+                        <br />
+                        <span className="tabular">{details.mobile}</span>
+                        <br />
+                        <span className="break-all">{details.email}</span>
+                      </dd>
                     </dl>
                   </Card>
                   <p className="-mt-4 text-small text-text-2">
@@ -366,10 +368,13 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                 </>
               )}
 
-              {/* Both buttons together at the left, back first and the way
-                  forward beside it, so the pair reads in the order it is used
-                  and neither drifts to the far edge of the panel. */}
-              <div className="flex flex-wrap items-center gap-3">
+            </div>
+            </div>
+
+            {/* Both buttons together at the left, back first and the way
+                forward beside it, so the pair reads in the order it is used
+                and neither drifts to the far edge of the panel. */}
+            <div className="flex flex-wrap items-center gap-3 lg:px-1">
                 {step > 0 ? (
                   <Pill variant="secondary" onClick={back}>
                     Back
@@ -384,7 +389,6 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                     Confirm booking
                   </Pill>
                 )}
-              </div>
             </div>
           </div>
           </main>
