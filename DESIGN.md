@@ -256,10 +256,11 @@ removes should not read as a link. Icon buttons that remove turn red on hover
 rather than staying neutral. Every one of them goes through the confirmation
 dialog, so a red button in this product never acts on the first click.
 
-**A button says one or two words.** Never the date, the pet or the clinic that
-are already on the screen beside it: "Move", not "Move to Mon 7 Sep, 9:00 AM
-PHT". The screen carries the detail and the button carries the verb. A test
-fails the build on a label written as a sentence.
+**A button says one to three words.** It names the act and never repeats the
+date, the pet or the clinic that are already on the screen beside it: "Move my
+booking", not "Move to Mon 7 Sep, 9:00 AM PHT". Short enough to read at a
+glance, long enough to say what happens. A test fails the build on a label
+written as a sentence.
 
 **Removing anything asks first.** One dialog, one shape, everywhere: what is
 being removed in the title, what actually happens underneath, a grey button

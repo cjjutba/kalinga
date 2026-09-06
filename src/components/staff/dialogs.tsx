@@ -189,7 +189,7 @@ export function NewAppointmentDialog({ open, onOpenChange, day, defaultPetId, on
           Close
         </Pill>
         <Pill size="sm" disabled={!pet || !slot} loading={busy} loadingLabel="Booking" onClick={book}>
-          Book
+          Book appointment
         </Pill>
       </div>
     </Frame>
