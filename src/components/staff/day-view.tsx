@@ -9,7 +9,7 @@ import { FirstRun } from "./first-run";
 import { AppointmentDrawer } from "./appointment-drawer";
 import { CancelDialog, NewAppointmentDialog, RescheduleDialog, WalkInDialog } from "./dialogs";
 import { Pill } from "@/components/primitives/pill";
-import { StatusPill } from "@/components/primitives/status-pill";
+import { StatusPill, statusLabel } from "@/components/primitives/status-pill";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrg } from "@/lib/org-data";
 import { appointmentsOn, daysWithAppointments, defaultDay, joinAppointment } from "@/lib/domain/selectors";
@@ -64,7 +64,12 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
   const strip = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(addDays(today, -1), i) as TZDate), [today]);
   const now = clinicNow(tz);
   const isToday = isSameDay(day, today);
-  const nowIndex = isToday && mounted ? rows.findIndex((r) => !isBefore(new Date(r.appointment.startsAt), now)) : -1;
+  // The line only means something once some of the day is behind you. At the
+  // top of the list it says nothing the day has not already said.
+  const nextUp = isToday && mounted ? rows.findIndex((r) => !isBefore(new Date(r.appointment.startsAt), now)) : -1;
+  const nowIndex = nextUp > 0 ? nextUp : -1;
+  // What the desk is counting is who is still coming.
+  const live = rows.filter((r) => r.appointment.status !== "cancelled" && r.appointment.status !== "no_show").length;
 
   if (ui === "first-run" || (services.length === 0 && providers.length === 0)) return <FirstRun orgSlug={org.slug} clinicName={org.name} />;
 
@@ -73,10 +78,12 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
       <PageHeader
         title={relativeDayLabel(day, tz)}
         lead={
-          rows.length ? (
+          live ? (
             <>
-              {rows.length} {rows.length === 1 ? "appointment" : "appointments"}. Times in {zoneLabel(tz)}.
+              {live} {live === 1 ? "appointment" : "appointments"}. Times in {zoneLabel(tz)}.
             </>
+          ) : rows.length ? (
+            <>Nothing left on this day. Times in {zoneLabel(tz)}.</>
           ) : (
             <>Times in {zoneLabel(tz)}.</>
           )
@@ -95,15 +102,19 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
         }
       />
 
-      <div className="mb-5 flex flex-col gap-3">
+      {/* One toolbar: which day, then whose day. Nothing here repeats what
+          the list underneath already says. */}
+      <div className="mb-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setDay((d) => addDays(d, -1) as TZDate)} aria-label="Previous day" className="grid size-10 shrink-0 place-items-center rounded-full bg-sheet hover:bg-divider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+          <button type="button" onClick={() => setDay((d) => addDays(d, -1) as TZDate)} aria-label="Previous day" className="grid size-9 shrink-0 place-items-center rounded-full text-text-2 hover:bg-sheet hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
             <ChevronLeft className="size-5" strokeWidth={1.5} />
           </button>
           <div role="radiogroup" aria-label="Day" className="flex flex-1 gap-1.5 overflow-x-auto py-0.5 [scrollbar-width:none]">
             {strip.map((d) => {
               const sel = isSameDay(d, day);
-              const has = busyDays.has(dayKey(d, tz));
+              // A dot marks a day with something on it. Never under the day
+              // being shown: the list below is the answer.
+              const has = busyDays.has(dayKey(d, tz)) && !sel;
               return (
                 <button
                   key={d.toISOString()}
@@ -112,67 +123,77 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
                   aria-checked={sel}
                   onClick={() => setDay(d)}
                   className={cn(
-                    "flex min-w-[56px] flex-1 flex-col items-center rounded-input py-1.5 text-label transition-colors duration-150 motion-reduce:transition-none",
+                    "flex min-w-[52px] flex-1 flex-col items-center gap-0.5 rounded-input py-2 transition-colors duration-150 motion-reduce:transition-none",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
-                    sel ? "bg-action text-on-action" : "bg-sheet text-text hover:bg-divider",
+                    sel ? "bg-action text-on-action" : "bg-sheet text-text hover:bg-field",
                   )}
                 >
-                  <span className="font-medium">{isSameDay(d, today) ? "Today" : format(d, "EEE")}</span>
-                  <span className="text-body tabular">{format(d, "d")}</span>
-                  <span className={cn("mt-0.5 size-1 rounded-full", has ? (sel ? "bg-on-action" : "bg-text") : "bg-transparent")} aria-hidden />
+                  <span className={cn("text-label", sel ? "text-on-action/80" : "text-text-2")}>{isSameDay(d, today) ? "Today" : format(d, "EEE")}</span>
+                  <span className="text-small font-medium tabular">{format(d, "d")}</span>
+                  <span className={cn("size-1 rounded-full", has ? "bg-text-3" : "bg-transparent")} aria-hidden />
                 </button>
               );
             })}
           </div>
-          <button type="button" onClick={() => setDay((d) => addDays(d, 1) as TZDate)} aria-label="Next day" className="grid size-10 shrink-0 place-items-center rounded-full bg-sheet hover:bg-divider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+          <button type="button" onClick={() => setDay((d) => addDays(d, 1) as TZDate)} aria-label="Next day" className="grid size-9 shrink-0 place-items-center rounded-full text-text-2 hover:bg-sheet hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
             <ChevronRight className="size-5" strokeWidth={1.5} />
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div role="radiogroup" aria-label="Show" className="flex flex-wrap gap-1.5">
-            {[{ id: "all", label: "Everyone" }, ...providers.map((p) => ({ id: p.id, label: p.name.replace(/^Dr\.\s*/, "Dr. ").split(" ").slice(0, 2).join(" ") }))].map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                role="radio"
-                aria-checked={activeFilter === opt.id}
-                onClick={() => setFilter(opt.id)}
-                className={cn(
-                  "h-8 rounded-full px-3 text-label font-medium transition-colors duration-150 motion-reduce:transition-none",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
-                  activeFilter === opt.id ? "bg-action text-on-action" : "bg-sheet text-text-2 hover:text-text",
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
+        {providers.length > 1 || counts.length > 1 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {providers.length > 1 ? (
+              <div role="radiogroup" aria-label="Show" className="flex flex-wrap gap-1.5">
+                {[{ id: "all", label: "Everyone" }, ...providers.map((p) => ({ id: p.id, label: p.name.split(" ").slice(0, 2).join(" ") }))].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={activeFilter === opt.id}
+                    onClick={() => setFilter(opt.id)}
+                    className={cn(
+                      "h-8 rounded-full px-3 text-label font-medium transition-colors duration-150 motion-reduce:transition-none",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
+                      activeFilter === opt.id ? "bg-action text-on-action" : "bg-sheet text-text-2 hover:text-text",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <span />
+            )}
+            {/* Only worth showing when the day is mixed. On a day where
+                everything is booked, the lead above has already said so. */}
+            {counts.length > 1 ? (
+              <p className="text-label text-text-2" aria-label="Summary">
+                {counts.map(({ status, n }, i) => (
+                  <Fragment key={status}>
+                    {i ? <span aria-hidden> · </span> : null}
+                    <span className="tabular">{n}</span> {statusLabel[status].toLowerCase()}
+                  </Fragment>
+                ))}
+              </p>
+            ) : null}
           </div>
-          {counts.length ? (
-            <ul className="flex flex-wrap gap-2" aria-label="Summary">
-              {counts.map(({ status, n }) => (
-                <li key={status} className="flex items-center gap-1.5 text-label text-text-2">
-                  <StatusPill status={status} size="sm" />
-                  <span className="tabular">{n}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
+        ) : null}
       </div>
 
       {ui === "loading" ? (
-        <ul className="flex flex-col gap-2" aria-busy>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <li key={i} className="rounded-guide bg-sheet p-4">
-              <Skeleton className="h-4 w-24 rounded-tag bg-field" />
-              <Skeleton className="mt-2 h-5 w-2/3 rounded-tag bg-field" />
-            </li>
+        <div className="overflow-hidden rounded-card bg-sheet" aria-busy>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4 border-b border-divider px-4 py-4 last:border-0">
+              <Skeleton className="h-4 w-14 rounded-tag bg-field" />
+              <Skeleton className="h-4 w-40 rounded-tag bg-field" />
+              <Skeleton className="ml-auto hidden h-4 w-24 rounded-tag bg-field lg:block" />
+            </div>
           ))}
-        </ul>
+        </div>
       ) : rows.length === 0 ? (
         <EmptyState
-          title={`Nothing booked ${isToday ? "today" : "on " + format(day, "EEEE d MMMM")}`}
+          // The heading above already names the day.
+          title="Nothing booked"
           lead={busyDays.size ? "The clinic is open. A quiet day, or the day view is on the wrong date." : "No appointments yet. Share the booking link and they will appear here."}
           action={
             manage ? (
@@ -183,48 +204,59 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
           }
         />
       ) : (
-        <ol className="flex flex-col gap-2">
+        // One card, hairlines between rows, columns that line up down the day.
+        <ol className="overflow-hidden rounded-card bg-sheet">
           {rows.map((r, i) => {
             const a = r.appointment;
             const dim = a.status === "cancelled" || a.status === "no_show" || a.status === "completed";
             return (
               <Fragment key={a.id}>
                 {i === nowIndex ? (
-                  <li aria-label="Now" className="flex items-center gap-3 py-1 text-label text-text-2">
-                    <span className="h-px flex-1 bg-text" />
+                  <li aria-label="Now" className="flex items-center gap-3 border-b border-divider px-4 py-2 text-label text-text-2">
                     <span className="tabular">Now, {formatTime(now, tz)}</span>
-                    <span className="h-px flex-1 bg-text" />
+                    <span className="h-px flex-1 bg-divider" />
                   </li>
                 ) : null}
-                <li>
-                <button
-                  type="button"
-                  onClick={() => setSelected(a.id)}
-                  className={cn(
-                    "grid w-full grid-cols-[76px_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1 rounded-guide bg-sheet px-4 py-3 text-left",
-                    "md:grid-cols-[80px_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto] md:items-center",
-                    "hover:bg-divider/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page transition-colors duration-150 motion-reduce:transition-none",
-                  )}
-                >
-                  <span className={cn("whitespace-nowrap text-small font-medium tabular md:text-body", dim && "text-text-2")}>{formatTime(a.startsAt, tz)}</span>
-                  <span className="min-w-0">
-                    <span className={cn("block text-body font-medium", dim && "text-text-2", a.status === "cancelled" && "line-through decoration-1")}>
-                      {r.pet?.name ?? "Pet"}
-                      <span className="font-normal text-text-2">, {r.pet?.breed}</span>
+                <li className="border-b border-divider last:border-0">
+                  <button
+                    type="button"
+                    onClick={() => setSelected(a.id)}
+                    className={cn(
+                      "grid w-full grid-cols-[76px_minmax(0,1fr)] items-start gap-x-3 gap-y-1 px-4 py-3.5 text-left",
+                      // Columns only from the laptop breakpoint. At tablet
+                      // width five of them squeeze the service into an
+                      // ellipsis, and a stacked row reads better than that.
+                      "lg:grid-cols-[88px_minmax(0,2.2fr)_minmax(0,1.6fr)_minmax(0,1.2fr)_auto_1rem] lg:items-center lg:gap-x-4",
+                      "transition-colors duration-150 hover:bg-field/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus motion-reduce:transition-none",
+                    )}
+                  >
+                    <span className={cn("whitespace-nowrap text-small font-medium tabular", dim ? "text-text-2" : "text-text")}>{formatTime(a.startsAt, tz)}</span>
+
+                    <span className="col-start-2 min-w-0">
+                      <span className={cn("block truncate text-body font-medium", dim && "text-text-2", a.status === "cancelled" && "line-through decoration-1")}>
+                        {r.pet?.name ?? "Pet"}
+                        <span className="font-normal text-text-2">, {r.pet?.breed}</span>
+                      </span>
+                      <span className="block truncate text-small text-text-2">
+                        {r.owner?.name}
+                        {!r.owner?.mobile ? ", no mobile on file" : ""}
+                      </span>
                     </span>
-                    <span className="block text-small text-text-2">
-                      {r.owner?.name}
-                      {!r.owner?.mobile ? <span className="text-text-2">, no mobile on file</span> : null}
+
+                    {/* Under the time on a phone, so the pet's name has the
+                        whole width. Back in its column from the laptop up. */}
+                    <span className="col-start-1 row-start-2 lg:col-start-5 lg:row-start-1">
+                      <StatusPill status={a.status} size="sm" />
                     </span>
-                  </span>
-                  <span className="col-start-3 row-start-1 md:col-start-5">
-                    <StatusPill status={a.status} size="sm" />
-                  </span>
-                  <span className="col-span-2 col-start-2 text-small text-text-2 md:col-span-1 md:col-start-3">
-                    {r.service ? `${r.service.name}, ${r.service.durationMin} min` : <span className="italic">Walk-in, no service yet</span>}
-                  </span>
-                  <span className="col-span-2 col-start-2 text-small text-text-2 md:col-span-1 md:col-start-4">{r.provider?.name}</span>
-                </button>
+
+                    <span className="col-start-2 truncate text-small text-text-2 lg:col-start-3">
+                      {r.service ? `${r.service.name}, ${r.service.durationMin} min` : <span className="italic">Walk-in, no service yet</span>}
+                    </span>
+
+                    <span className="col-start-2 truncate text-small text-text-2 lg:col-start-4">{r.provider?.name}</span>
+
+                    <ChevronRight className="col-start-6 hidden size-4 text-text-3 lg:block" strokeWidth={1.5} aria-hidden />
+                  </button>
                 </li>
               </Fragment>
             );
