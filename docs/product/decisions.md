@@ -390,6 +390,43 @@ Client portal identity is a magic link to the booking email, with manage booking
 reachable by reference alone. The public form captures pet name and species.
 Adding a visit completes the appointment and sets the next recall date.
 
+## 2026-09-06, F6 roles and permissions
+
+### Pages refuse with a 403, and a test reads every page
+
+Every page under `src/app/app/[org]/` starts with
+`requirePagePermission(org, permission)`. When the role lacks it, Next's
+`forbidden()` renders the segment's `forbidden.tsx` inside the staff shell with
+a 403 status. `guards.test.ts` walks the page files, checks each one names the
+permission the route map expects, and fails when a new page is added without an
+entry. The portal pages are checked the same way for `requireSession`.
+
+**Why.** "Provably unable to reach by guessing a URL" has to be a property of
+the code, not a manual check. A page missing its guard now fails the build, and
+a route nobody has classified cannot ship. The refusal is an HTTP status rather
+than an empty screen so it can be asserted from outside the browser.
+
+### The role matrix is written twice on purpose
+
+`roles.test.ts` lists, for each role, exactly the permissions it must not hold
+and exactly the commands `applyAction` must refuse. Changing a grant in
+`roles.ts` fails this test until the same change is made to the list.
+
+**Why.** A permission widened by accident should cost a deliberate second edit.
+The lists mirror `roles.md`, so the spec, the code and the test say the same
+thing.
+
+### Input schemas and the permission map live outside "use server" files
+
+`bookingInput` and `manageInput` moved to `src/lib/actions/schemas.ts`, and the
+command to permission map to `src/lib/actions/permissions.ts`. The server action
+modules import them.
+
+**Why.** A "use server" module may only export async functions, which is what
+broke clinic creation in F1. Plain modules can be unit tested without pulling in
+Next or the database, so the honeypot, the mobile format and the per role
+refusals are covered directly.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a

@@ -130,14 +130,20 @@ and add today's visit.
 
 ## F6 Roles and permissions
 
-The four roles enforced properly rather than by hiding buttons. Owner, vet, front
-desk, pet owner. See `roles.md`.
+**Shipped 2026-09-06.** The four roles enforced properly rather than by hiding
+buttons. Owner, vet, front desk, pet owner. See `roles.md`.
 
-Every permission checked on the server. A test per role asserting what it cannot
-reach.
+Every permission checked on the server. Every staff page calls
+`requirePagePermission` before it renders and a guessed URL returns a 403 with
+the refusal drawn inside the shell. The payload the shell receives is filtered
+through `visibleSnapshot`, so the audit trail, pending invitations and visit
+notes never leave the server for a role that may not see them. A test per role
+asserts what it cannot reach, another reads every page file and fails the
+build if a route is missing its guard, and a third pins the visibility filter.
 
 **Done when** a front desk account is provably unable to reach owner-only data by
-guessing a URL.
+guessing a URL. It is: `/app/[org]/settings`, `/audit` and `/pets/[id]/visit`
+answer 403 to a front desk session.
 
 **Review: deep.**
 

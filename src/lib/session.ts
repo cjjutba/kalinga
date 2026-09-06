@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { forbidden, notFound, redirect } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { auth } from "./auth";
 import { db } from "./db/client";
@@ -48,6 +48,18 @@ export const requireMember = cache(async (orgSlug: string): Promise<Actor> => {
 export async function requirePermission(orgSlug: string, permission: Permission): Promise<Actor> {
   const actor = await requireMember(orgSlug);
   if (!can(actor.role, permission)) throw new Error(`The ${actor.role} role cannot ${permission.replace(/_/g, " ")}`);
+  return actor;
+}
+
+/**
+ * For pages. When the role lacks the permission the request ends in a 403
+ * rendered by the nearest forbidden.tsx, so a guessed URL returns a refusal
+ * rather than a shell with nothing in it. The action path uses
+ * requirePermission and returns the error to the caller instead.
+ */
+export async function requirePagePermission(orgSlug: string, permission: Permission): Promise<Actor> {
+  const actor = await requireMember(orgSlug);
+  if (!can(actor.role, permission)) forbidden();
   return actor;
 }
 

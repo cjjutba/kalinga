@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
+import { bookingInput, manageInput } from "./schemas";
 import { eq } from "drizzle-orm";
 import { allowRate, getOrganisationBySlug } from "@/lib/db/queries";
 import { scoped } from "@/lib/db/scoped";
@@ -15,21 +16,6 @@ import { subDays, addDays } from "date-fns";
 // booking inside a transaction. The availability engine checks the slot and
 // the database exclusion constraint checks it again, so two people confirming
 // the same time cannot both succeed.
-
-const bookingInput = z.object({
-  orgSlug: z.string().min(1),
-  serviceId: z.string().min(1),
-  providerId: z.string().min(1),
-  startsAt: z.string().datetime({ offset: true }),
-  name: z.string().trim().min(1).max(200),
-  mobile: z.string().trim().regex(/^\d[\d\s]{9,12}$/),
-  email: z.string().trim().email().max(200).or(z.literal("")).optional(),
-  petName: z.string().trim().min(1).max(100),
-  species: z.enum(["dog", "cat"]),
-  notes: z.string().trim().max(2000).optional(),
-  /** Honeypot. Real people never see it and never fill it. */
-  website: z.string().max(0),
-});
 
 export type BookingResult = { ok: true; reference: string } | { ok: false; error: string; code?: "taken" | "limited" };
 
@@ -93,8 +79,6 @@ export async function bookAppointment(raw: unknown): Promise<BookingResult> {
     return { ok: false, error: "The booking did not go through. Nothing was saved. Try again or call the clinic." };
   }
 }
-
-const manageInput = z.object({ orgSlug: z.string().min(1), reference: z.string().min(4).max(16) });
 
 /** The pet owner cancels their own booking. The reference on their confirmation is the key. */
 export async function cancelBooking(raw: unknown): Promise<{ ok: boolean; error?: string }> {

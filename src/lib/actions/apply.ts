@@ -8,34 +8,13 @@ import { requirePermission, type Actor } from "@/lib/session";
 import { updateOrganisation } from "@/lib/db/queries";
 import { appointment, auditEvent, owner, pet, provider, reminder, service, visit } from "@/lib/db/schema";
 import type { Scope } from "@/lib/db/scoped";
-import type { Permission } from "@/lib/roles";
 import { actionSchema, type ActionResult, type StoreAction } from "./types";
+import { permissionFor } from "./permissions";
 
 // One server action, one command handler. The screens dispatch the same
 // discriminated union the prototype's reducer took. Here it is validated,
 // permission checked against the membership on the server, applied through
 // the organisation's scope, and written to the audit trail.
-
-const permissionFor: Record<StoreAction["type"], Permission> = {
-  "appointment/status": "manage_appointments",
-  "appointment/reschedule": "manage_appointments",
-  "appointment/create": "manage_appointments",
-  "appointment/note": "manage_appointments",
-  "visit/add": "add_visit",
-  "owner/upsert": "edit_clients",
-  "pet/upsert": "edit_clients",
-  "service/upsert": "view_settings",
-  "service/archive": "view_settings",
-  "provider/upsert": "view_settings",
-  "provider/archive": "view_settings",
-  "member/invite": "view_settings",
-  "member/role": "view_settings",
-  "member/remove": "view_settings",
-  "invitation/cancel": "view_settings",
-  "reminder/sent": "view_recall",
-  "reminder/unsend": "view_recall",
-  "org/update": "view_settings",
-};
 
 const statusVerbs: Record<string, string> = {
   booked: "Reopened appointment",

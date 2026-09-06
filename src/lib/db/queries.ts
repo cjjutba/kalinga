@@ -8,6 +8,7 @@ import { scoped, type Scope } from "./scoped";
 import type * as Row from "./types";
 import type * as View from "@/lib/domain/types";
 import { dueItems } from "@/lib/domain/recall";
+import { visibleSnapshot } from "@/lib/domain/visibility";
 import { renderReminder } from "@/content/templates";
 import { openSlots, type Busy, type Slot } from "@/lib/availability";
 import { can, isRole, type Role } from "@/lib/roles";
@@ -117,10 +118,10 @@ export async function ensureReminders(scope: Scope, org: View.Organisation): Pro
 }
 
 /**
- * Everything the staff shell renders, already filtered by what the role may
- * see. Hiding a button is not a permission, and neither is a payload the
- * browser never draws: the audit trail, pending invitations and visit notes
- * leave the server only for roles that hold the matching permission.
+ * Everything the staff shell renders, filtered through visibleSnapshot so the
+ * audit trail, pending invitations and visit notes leave the server only for
+ * roles that hold the matching permission. The two heaviest reads are also
+ * skipped outright for roles that would never receive them.
  */
 export async function loadOrgSnapshot(orgRow: Row.Organisation, role: Role): Promise<View.OrgSnapshot> {
   const scope = scoped(orgRow.id);
@@ -139,8 +140,7 @@ export async function loadOrgSnapshot(orgRow: Row.Organisation, role: Role): Pro
     scope.list(reminder, gte(reminder.dueOn, format(subDays(now, 60), "yyyy-MM-dd"))),
     can(role, "view_audit") ? scope.raw.select().from(auditEvent).where(scope.where(auditEvent)).orderBy(desc(auditEvent.at)).limit(300) : Promise.resolve([]),
   ]);
-  const showNotes = can(role, "view_visit_notes");
-  return {
+  return visibleSnapshot({
     organisation,
     members,
     invitations,
@@ -149,10 +149,10 @@ export async function loadOrgSnapshot(orgRow: Row.Organisation, role: Role): Pro
     owners: owners.map(toOwner),
     pets: pets.map(toPet),
     appointments: appointments.map(toAppointment).sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
-    visits: visits.map(toVisit).map((v) => (showNotes ? v : { ...v, notes: "" })),
+    visits: visits.map(toVisit),
     reminders: reminders.map(toReminder),
     audit: (audit as Row.AuditEvent[]).map(toAudit),
-  };
+  }, role);
 }
 
 /** The public face of a clinic: what a pet owner sees before booking. */

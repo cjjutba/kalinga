@@ -187,7 +187,8 @@ evidence, not licensed for reuse, because Kalinga is meant to be sold.
 | `src/lib/availability/` | The scheduling engine. Pure, tested, no side effects. `openSlots` and `isFree`, nine tests in `engine.test.ts`. |
 | `src/lib/db/` | Drizzle schema, the Better Auth tables, the `Scope` query layer and the scoping test that fails the build. `queries.ts` builds the view models. |
 | `src/lib/actions/` | Server actions. `apply.ts` is the one command handler behind the staff shell, `public.ts` the unauthenticated booking path, `slots.ts` the slot loaders. |
-| `src/lib/auth.ts`, `session.ts`, `access.ts` | Better Auth config, the session helpers every page and action call, and the role permissions. |
+| `src/lib/auth.ts`, `session.ts`, `access.ts`, `roles.ts` | Better Auth config, the session helpers every page and action call (`requirePagePermission` for pages, `requirePermission` for actions), and the role permissions. |
+| `src/lib/*.test.ts` | The tests that fail the build: scoping, a page guard on every staff route, what each role cannot reach, the visibility filter, the booking schema, and the engine. |
 | `drizzle/` | Generated SQL migrations. `pnpm build` applies them before `next build`. |
 | `src/content/` | Typed marketing and static copy, the privacy notice, the message templates, the route directory. |
 | `.claude/launch.json` | Starts `pnpm dev` on port 3000 for the browser preview. |
