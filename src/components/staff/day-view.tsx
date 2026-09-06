@@ -112,9 +112,10 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
           <div role="radiogroup" aria-label="Day" className="flex flex-1 gap-1.5 overflow-x-auto py-0.5 [scrollbar-width:none]">
             {strip.map((d) => {
               const sel = isSameDay(d, day);
-              // A dot marks a day with something on it. Never under the day
-              // being shown: the list below is the answer.
-              const has = busyDays.has(dayKey(d, tz)) && !sel;
+              // A dot marks a day with something on it, the selected one
+              // included: it is how you tell a quiet day from a busy one
+              // without opening it.
+              const has = busyDays.has(dayKey(d, tz));
               return (
                 <button
                   key={d.toISOString()}
@@ -130,7 +131,7 @@ export function DayView({ orgSlug }: { orgSlug: string }) {
                 >
                   <span className={cn("text-label", sel ? "text-on-action/80" : "text-text-2")}>{isSameDay(d, today) ? "Today" : format(d, "EEE")}</span>
                   <span className="text-small font-medium tabular">{format(d, "d")}</span>
-                  <span className={cn("size-1 rounded-full", has ? "bg-text-3" : "bg-transparent")} aria-hidden />
+                  <span className={cn("size-1 rounded-full", has ? (sel ? "bg-on-action/70" : "bg-text-3") : "bg-transparent")} aria-hidden />
                 </button>
               );
             })}

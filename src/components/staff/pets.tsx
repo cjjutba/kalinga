@@ -12,6 +12,7 @@ import { InputField, SelectField, TextareaField } from "@/components/primitives/
 import { Pill } from "@/components/primitives/pill";
 import { Card } from "@/components/primitives/surfaces";
 import { DataTable, TableSkeleton } from "@/components/primitives/data-table";
+import { InitialBadge } from "@/components/primitives/tag";
 import { StatusPill } from "@/components/primitives/status-pill";
 import { useOrg } from "@/lib/org-data";
 import { dueItems, recallLabel, soonest } from "@/lib/domain/recall";
@@ -76,20 +77,17 @@ export function PetsList({ orgSlug }: { orgSlug: string }) {
               key: "pet",
               header: "Pet",
               cell: ({ pet, owner }) => (
-                <>
-                  <span className="block truncate text-body">{pet.name}</span>
-                  <span className="mt-0.5 block truncate text-label text-text-2 md:hidden">
-                    {pet.breed}
-                    {owner ? `, ${owner.name}` : ""}
+                <span className="flex items-center gap-3">
+                  <InitialBadge name={pet.name} />
+                  <span className="min-w-0">
+                    <span className="block truncate text-body">{pet.name}</span>
+                    <span className="block truncate text-label text-text-2">
+                      {pet.breed}
+                      <span className="md:hidden">{owner ? `, ${owner.name}` : ""}</span>
+                    </span>
                   </span>
-                </>
+                </span>
               ),
-            },
-            {
-              key: "breed",
-              header: "Breed",
-              className: "hidden md:table-cell",
-              cell: ({ pet }) => <span className="text-text-2">{pet.breed}</span>,
             },
             {
               key: "owner",
