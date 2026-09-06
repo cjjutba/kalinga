@@ -165,7 +165,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
             <p className="text-body font-medium">{org.name}</p>
             {org.city ? <p className="mt-0.5 text-label text-text-2">{org.city}</p> : null}
           </div>
-          <ol className="mt-10 flex flex-col gap-5">
+          <ol className="mt-9 flex flex-col gap-6">
             {steps.map((s, i) => {
               const done = i < step;
               const current = i === step;
@@ -178,7 +178,7 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                     disabled={!can}
                     aria-current={current ? "step" : undefined}
                     className={cn(
-                      "flex w-full items-center gap-4 rounded-input text-left transition-opacity duration-150 motion-reduce:transition-none",
+                      "flex w-full items-center gap-3.5 rounded-input text-left transition-opacity duration-150 motion-reduce:transition-none",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-page",
                       can && "hover:opacity-70",
                     )}
@@ -193,19 +193,19 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                       {done ? <Check className="size-3.5" strokeWidth={2} /> : i + 1}
                     </span>
                     <span className="min-w-0">
-                      <span className={cn("block text-small font-medium", current || done ? "text-text" : "text-text-2")}>{s.name}</span>
-                      <span className="block text-label text-text-2">{s.lead}</span>
+                      <span className={cn("block text-small font-medium leading-tight", current || done ? "text-text" : "text-text-2")}>{s.name}</span>
+                      <span className="mt-1 block text-label leading-tight text-text-2">{s.lead}</span>
                     </span>
                   </button>
                 </li>
               );
             })}
           </ol>
-          <div className="mt-auto flex flex-col gap-2 pt-8">
-            <Link href={`/${org.slug}`} className="rounded-tag text-label font-medium text-text-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+          <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 pt-8">
+            <Link href={`/${org.slug}`} className="rounded-tag text-label text-text-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
               Back to the clinic
             </Link>
-            <Link href="/privacy" className="rounded-tag text-label text-text-3 hover:text-text-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+            <Link href="/privacy" className="rounded-tag text-label text-text-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
               Privacy
             </Link>
           </div>
@@ -363,7 +363,14 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                 </>
               )}
 
-              <div className="flex flex-wrap items-center gap-2">
+              {/* Back on the left, the way forward on the right, both the
+                  same button so neither reads as an afterthought. */}
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                {step > 0 ? (
+                  <Pill variant="secondary" onClick={back} className="mr-auto">
+                    Back
+                  </Pill>
+                ) : null}
                 {step < 4 ? (
                   <Pill onClick={next} disabled={(step === 0 && !serviceId) || (step === 2 && !slot)}>
                     {step === 2 && slot ? `Book ${formatTimeWithZone(slot.startsAt, tz)}` : "Continue"}
@@ -373,11 +380,6 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
                     Confirm booking
                   </Pill>
                 )}
-                {step > 0 ? (
-                  <Pill variant="text" onClick={back}>
-                    Back
-                  </Pill>
-                ) : null}
               </div>
             </div>
           </div>
