@@ -129,13 +129,13 @@ export function SlotPicker({
           <p className="mt-1 text-small text-text-2">{error}</p>
         </div>
       ) : !byDay ? (
-        <div className={cn("grid gap-2", compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3")} aria-busy>
+        <div className={cn("grid gap-2", compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4")} aria-busy>
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-12 rounded-input bg-field" />
           ))}
         </div>
       ) : slots.length ? (
-        <div role="radiogroup" aria-label="Time" className={cn("grid gap-2", compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3")}>
+        <div role="radiogroup" aria-label="Time" className={cn("grid gap-2", compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4")}>
           {slots.map((s) => {
             const selected = value?.startsAt === s.startsAt;
             return (

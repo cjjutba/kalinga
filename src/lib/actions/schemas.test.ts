@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { bookingInput, manageInput } from "./schemas";
 
 // The unauthenticated write path validates before it touches the database.
-// These pin the honeypot, the mobile format and the optional email.
+// These pin the honeypot, the mobile format and the contact details.
 
 const good = {
   orgSlug: "lunhaw",
@@ -41,10 +41,11 @@ describe("bookingInput", () => {
     }
   });
 
-  it("treats email as optional but well formed when given", () => {
-    expect(bookingInput.safeParse({ ...good, email: "" }).success).toBe(true);
-    expect(bookingInput.safeParse({ ...good, email: undefined }).success).toBe(true);
+  it("needs a real email, because the confirmation and reminders go there", () => {
+    expect(bookingInput.safeParse({ ...good, email: "" }).success).toBe(false);
+    expect(bookingInput.safeParse({ ...good, email: undefined }).success).toBe(false);
     expect(bookingInput.safeParse({ ...good, email: "not an email" }).success).toBe(false);
+    expect(bookingInput.safeParse(good).success).toBe(true);
   });
 
   it("only knows dogs and cats in v1", () => {

@@ -12,7 +12,8 @@ export const bookingInput = z.object({
   name: z.string().trim().min(1).max(200),
   /** Philippine mobile as typed: 11 digits, spaces allowed. */
   mobile: z.string().trim().regex(/^\d[\d\s]{9,12}$/),
-  email: z.string().trim().email().max(200).or(z.literal("")).optional(),
+  /** Required: the confirmation and every reminder go here. */
+  email: z.string().trim().email().max(200),
   petName: z.string().trim().min(1).max(100),
   species: z.enum(["dog", "cat"]),
   notes: z.string().trim().max(2000).optional(),
