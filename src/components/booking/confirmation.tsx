@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, X } from "lucide-react";
 import { SlotPicker, type Slot } from "./slot-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pill } from "@/components/primitives/pill";
@@ -15,6 +15,7 @@ import { getPublicSlots } from "@/lib/actions/slots";
 import { cancelBooking, rescheduleBooking } from "@/lib/actions/public";
 import { renderBookingChanged, renderBookingConfirmation } from "@/content/templates";
 import { formatLongDate, formatPeso, formatShortDate, formatTimeWithZone } from "@/lib/time";
+import { cn } from "@/lib/utils";
 import { firstName } from "@/lib/domain/selectors";
 
 type Booking = NonNullable<Awaited<ReturnType<typeof getBookingByReference>>>;
@@ -85,103 +86,122 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
     router.refresh();
   }
 
+  const cancelled = changed === "cancelled" || appt.status === "cancelled";
+  const heading = cancelled ? "This booking is cancelled" : changed === "rescheduled" ? "Your booking has moved" : appt.status === "completed" ? "This visit has happened" : "You're booked";
+  const lead = cancelled
+    ? "The slot is open again. Book another time whenever you are ready."
+    : emailed && owner?.email
+      ? `A copy has gone to ${owner.email}. Keep this page, it is how you change or cancel.`
+      : "Keep this page, it is how you change or cancel.";
+
   return (
     // The same panel the booking flow ends in, without the rail, so the last
-    // screen belongs to the same product as the five before it.
+    // screen belongs to the same product as the five before it. Three parts,
+    // hairline between each: that it worked, what was booked with the day and
+    // time leading, and how to change it.
     <div className="flex min-h-dvh flex-col bg-page">
       <div className="flex flex-1 justify-center px-4 py-8 md:items-center md:px-6 md:py-10">
-      <main className="w-full max-w-md md:rounded-card md:border md:border-divider md:p-8">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <span className="grid size-12 place-items-center rounded-full bg-action text-on-action" aria-hidden>
-            <Check className="size-6" strokeWidth={2} />
-          </span>
-          <h1 className="mt-4 text-title font-medium text-balance">{changed === "cancelled" || appt.status === "cancelled" ? "This booking is cancelled" : changed === "rescheduled" ? "Moved" : appt.status === "completed" ? "This visit has happened" : "You're booked"}</h1>
-          <p className="mt-1 text-small text-text-2">
-            Reference <span className="tabular font-medium text-text">{appt.reference}</span>. Keep this page, it is how you change or cancel.
-            {emailed && owner?.email ? <> A copy has gone to {owner.email}.</> : null}
-          </p>
-        </div>
-        <StatusPill status={appt.status} />
+        <main className="w-full max-w-step md:rounded-card md:border md:border-divider md:p-8">
+          <div className="flex items-start justify-between gap-3">
+            <span
+              className={cn("grid size-11 place-items-center rounded-full", cancelled ? "bg-field text-text-2" : "bg-action text-on-action")}
+              aria-hidden
+            >
+              {cancelled ? <X className="size-5" strokeWidth={2} /> : <Check className="size-5" strokeWidth={2} />}
+            </span>
+            {/* The check and the heading already say "booked". The pill is
+                for the states they do not cover. */}
+            {appt.status === "booked" || appt.status === "confirmed" ? null : <StatusPill status={appt.status} />}
+          </div>
+
+          <h1 className="mt-5 text-title font-medium text-balance">{heading}</h1>
+          <p className="mt-1.5 text-small text-text-2">{lead}</p>
+
+          <div className="mt-6 border-t border-divider pt-6">
+            <p className="text-heading font-medium tabular">{formatLongDate(appt.startsAt, tz)}</p>
+            <p className="mt-0.5 text-body tabular text-text-2">{formatTimeWithZone(appt.startsAt, tz)}</p>
+
+            <dl className="mt-5 grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-small">
+              <dt className="text-text-2">What</dt>
+              <dd>
+                {service?.name ?? "Visit"}
+                {service ? `, ${formatPeso(service.pricePhp)}` : ""}
+              </dd>
+              <dt className="text-text-2">With</dt>
+              <dd>{provider?.name}</dd>
+              <dt className="text-text-2">For</dt>
+              <dd>{pet?.name}</dd>
+              {org.address ? (
+                <>
+                  <dt className="text-text-2">Where</dt>
+                  <dd>{org.address}</dd>
+                </>
+              ) : null}
+              <dt className="text-text-2">Reference</dt>
+              <dd className="tabular font-medium">{appt.reference}</dd>
+            </dl>
+          </div>
+
+          {error ? (
+            <p role="alert" className="mt-5 text-small text-error">
+              {error}
+            </p>
+          ) : null}
+
+          {canChange ? (
+            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-divider pt-6">
+              <Pill size="sm" variant="secondary" onClick={() => setMoving(true)}>
+                Change the time
+              </Pill>
+              <Pill size="sm" variant="text" onClick={() => setCancelling(true)}>
+                Cancel this booking
+              </Pill>
+            </div>
+          ) : cancelled ? (
+            <div className="mt-6 border-t border-divider pt-6">
+              <Pill asChild size="sm">
+                <Link href={`/${org.slug}/book`}>Book another time</Link>
+              </Pill>
+            </div>
+          ) : null}
+        </main>
       </div>
 
-      <Card className="mt-6 p-5">
-        <dl className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 gap-y-3 text-small">
-          <dt className="text-text-2">When</dt>
-          <dd className="tabular">
-            {formatLongDate(appt.startsAt, tz)}
-            <br />
-            {formatTimeWithZone(appt.startsAt, tz)}
-          </dd>
-          <dt className="text-text-2">What</dt>
-          <dd>
-            {service?.name ?? "Visit"}
-            {service ? `, ${formatPeso(service.pricePhp)}` : ""}
-          </dd>
-          <dt className="text-text-2">With</dt>
-          <dd>{provider?.name}</dd>
-          <dt className="text-text-2">For</dt>
-          <dd>{pet?.name}</dd>
-          {org.address ? (
-            <>
-              <dt className="text-text-2">Where</dt>
-              <dd>{org.address}</dd>
-            </>
-          ) : null}
-        </dl>
-      </Card>
-
-      <section className="mt-6" aria-labelledby="msg">
-        <h2 id="msg" className="text-label font-medium text-text-2">
-          Your confirmation
-        </h2>
-        <blockquote className="mt-2 rounded-guide bg-sheet p-4 text-small leading-[1.5] md:bg-field">{message}</blockquote>
-        <Pill
-          size="sm"
-          variant="secondary"
-          className="mt-3"
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(message);
-              setCopied(true);
-              window.setTimeout(() => setCopied(false), 1500);
-            } catch {
-              setCopied(false);
-            }
-          }}
-        >
-          {copied ? <Check className="size-4" strokeWidth={2} aria-hidden /> : <Copy className="size-4" strokeWidth={1.5} aria-hidden />}
-          {copied ? "Copied" : "Copy message"}
-        </Pill>
-      </section>
-
-      {error ? (
-        <p role="alert" className="mt-4 text-small text-error">
-          {error}
-        </p>
-      ) : null}
-
-      {canChange ? (
-        <div className="mt-8 flex flex-col gap-2">
-          <Pill block variant="secondary" onClick={() => setMoving(true)}>
-            Change the time
-          </Pill>
-          <Pill block variant="text" onClick={() => setCancelling(true)}>
-            Cancel this booking
-          </Pill>
-        </div>
-      ) : appt.status === "cancelled" ? (
-        <Pill asChild block className="mt-8">
-          <Link href={`/${org.slug}/book`}>Book again</Link>
-        </Pill>
-      ) : null}
-
-      <p className="mt-8 text-center text-small text-text-2">
-        Want to see your pets and past visits?{" "}
-        <Link href="/me" className="font-medium text-text hover:underline">
-          Open your Kalinga
-        </Link>
-      </p>
+      {/* The message the clinic would have sent by hand, for anyone who wants
+          to forward it. Quieter than the booking itself, so it sits under the
+          panel rather than in it. */}
+      <div className="mx-auto w-full max-w-step px-4 pb-10 pt-8 md:px-6 md:pt-6">
+        <section aria-labelledby="msg">
+          <h2 id="msg" className="text-label font-medium text-text-2">
+            Your confirmation
+          </h2>
+          <blockquote className="mt-2 rounded-guide bg-sheet p-4 text-small leading-[1.5]">{message}</blockquote>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Pill
+              size="xs"
+              variant="secondary"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(message);
+                  setCopied(true);
+                  window.setTimeout(() => setCopied(false), 1500);
+                } catch {
+                  setCopied(false);
+                }
+              }}
+            >
+              {copied ? <Check className="size-3.5" strokeWidth={2} aria-hidden /> : <Copy className="size-3.5" strokeWidth={1.5} aria-hidden />}
+              {copied ? "Copied" : "Copy message"}
+            </Pill>
+            <p className="text-label text-text-2">
+              Want to see your pets and past visits?{" "}
+              <Link href="/me" className="font-medium text-text hover:underline">
+                Open your Kalinga
+              </Link>
+            </p>
+          </div>
+        </section>
+      </div>
 
       <Dialog open={moving} onOpenChange={setMoving}>
         <DialogContent className="max-h-[92dvh] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] sm:max-w-lg overflow-y-auto rounded-sheet border-0 bg-sheet p-6 shadow-lifted">
@@ -223,8 +243,7 @@ export function BookingConfirmation({ data, emailedOnBooking = false }: { data: 
           </div>
         </DialogContent>
       </Dialog>
-    </main>
-      </div>
+
       <PublicFooter />
     </div>
   );
