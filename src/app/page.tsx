@@ -39,11 +39,14 @@ export default function Home() {
           <div>
             <h1 className="text-[34px] font-medium leading-[1.1] tracking-[-0.01em] text-balance md:text-[44px]">{landing.hero.title}</h1>
             <p className="mt-5 max-w-lg text-body text-text-2">{landing.hero.lead}</p>
-            <div className="mt-8">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Pill asChild>
                 <Link href={landing.hero.primary.href}>
                   {landing.hero.primary.label} <ArrowRight className="size-4" strokeWidth={1.5} aria-hidden />
                 </Link>
+              </Pill>
+              <Pill asChild variant="secondary">
+                <Link href={landing.hero.secondary.href}>{landing.hero.secondary.label}</Link>
               </Pill>
             </div>
           </div>
