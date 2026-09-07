@@ -50,6 +50,9 @@ export function SlotPicker({
   // A tile has to be one step of tone away from whatever is behind it, and on
   // the booking flow what is behind it changes with the width.
   const tile = controlOn[on === "shell" ? "shell" : "panel"];
+  // Written out rather than built from `tile`, because Tailwind only generates
+  // a class it can see in the source.
+  const tileHover = on === "shell" ? "hover:bg-sheet" : "hover:bg-field";
   const today = useMemo(() => startOfDay(startDay ? new TZDate(startDay, tz) : clinicNow(tz)) as TZDate, [startDay, tz]);
   const [offset, setOffset] = useState(0);
   const [day, setDay] = useState<TZDate>(() => (value ? (startOfDay(new TZDate(new Date(value.startsAt), tz)) as TZDate) : today));
@@ -91,7 +94,7 @@ export function SlotPicker({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <button type="button" onClick={() => setOffset((o) => Math.max(0, o - DAYS))} disabled={offset === 0} aria-label="Earlier days" className="grid size-9 shrink-0 place-items-center rounded-full text-text-2 hover:bg-field disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+        <button type="button" onClick={() => setOffset((o) => Math.max(0, o - DAYS))} disabled={offset === 0} aria-label="Earlier days" className={cn("grid size-9 shrink-0 place-items-center rounded-full text-text-2 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", tileHover)}>
           <ChevronLeft className="size-5" strokeWidth={1.5} />
         </button>
         <div role="radiogroup" aria-label="Day" className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto py-1 [scrollbar-width:none]">
@@ -122,7 +125,7 @@ export function SlotPicker({
             );
           })}
         </div>
-        <button type="button" onClick={() => setOffset((o) => o + DAYS)} aria-label="Later days" className="grid size-9 shrink-0 place-items-center rounded-full text-text-2 hover:bg-field focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+        <button type="button" onClick={() => setOffset((o) => o + DAYS)} aria-label="Later days" className={cn("grid size-9 shrink-0 place-items-center rounded-full text-text-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus", tileHover)}>
           <ChevronRight className="size-5" strokeWidth={1.5} />
         </button>
       </div>

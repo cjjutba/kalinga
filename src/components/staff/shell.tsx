@@ -179,7 +179,7 @@ export function StaffShell({ userName, children }: { userName: string; children:
             type="button"
             onClick={() => setSettingsToggled(!settingsOpen)}
             aria-expanded={settingsOpen}
-            className={cn(itemClass(false), inSettings && "bg-field font-medium text-text hover:bg-field")}
+            className={cn(itemClass(false), inSettings && "bg-divider font-medium text-text hover:bg-divider")}
           >
             <settingsNav.icon className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
             {settingsNav.label}
