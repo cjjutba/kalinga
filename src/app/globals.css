@@ -233,3 +233,26 @@
 @utility tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* The one piece of motion on the marketing page. An element marked for reveal
+   is visible in the HTML, so it reads with JavaScript off and in any crawler.
+   The observer adds the hidden class before paint and takes it off when the
+   element comes into view, which is why there is no flash and no layout shift.
+   Reduced motion cancels both halves. */
+@utility reveal {
+  transition:
+    opacity 500ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@utility reveal-hidden {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-hidden {
+    opacity: 1;
+    transform: none;
+  }
+}
