@@ -204,7 +204,7 @@ export default function Home() {
         <section className={cn(section, "pb-24 lg:pb-32")} aria-labelledby="closer">
           <Reveal className="relative overflow-hidden rounded-sheet">
             <Photo src="/marketing/reception-logbook.webp" alt="A paper appointment logbook open on a clinic counter beside a phone" sizes="(min-width: 1280px) 1152px, 100vw" className="absolute inset-0 h-full w-full" />
-            <div className="relative bg-text/65 px-6 py-16 text-center md:px-10 md:py-24">
+            <div className="relative bg-black/60 px-6 py-16 text-center md:px-10 md:py-24">
               <h2 id="closer" className="text-title font-medium text-balance text-white">
                 {landing.closer.title}
               </h2>

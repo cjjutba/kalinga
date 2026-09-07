@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Create your account" };
 
 export default function SignUpPage() {
   return (
-    <AuthShell photoCaption="Photograph, a puspin">
+    <AuthShell photo="puspin">
       <Suspense fallback={null}>
         <SignUpForm google={googleIsConfigured} />
       </Suspense>

@@ -11,7 +11,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   const { token } = await params;
   const [invitation, session] = await Promise.all([getInvitationPublic(token), getSession()]);
   return (
-    <AuthShell photoCaption="Photograph, a cat">
+    <AuthShell photo="puspin">
       <Suspense fallback={null}>
         <InviteForm invitation={invitation} signedInAs={session?.user.email ?? null} />
       </Suspense>

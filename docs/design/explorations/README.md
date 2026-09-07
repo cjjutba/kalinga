@@ -38,6 +38,12 @@ warm neutral, unposed, nobody in frame.
 | `aspin-clinic.webp` | The hero. An aspin in clinic light, composed with empty floor on the left for the day view to sit over. |
 | `puspin-counter.webp` | A puspin on a clinic counter, for the local section. |
 | `reception-logbook.webp` | A paper appointment book and a phone on a reception counter, for the closing band. The thing this product replaces. |
+| `auth-vet-aspin.webp` | Sign in. A vet steadying an aspin on a steel table, framed below the shoulders so no face is in it. |
+| `auth-puspin-window.webp` | Sign up and the invitation page. A puspin asleep on a clinic windowsill in jalousie light. |
+| `auth-aspin-corridor.webp` | Password reset. A black aspin in a shaded corridor, the darkest of the set. |
+
+Six photographs at $0.222 each, $1.33 in total. Three for the landing page on
+7 September and three for the auth pages the same day.
 
 ## Logo
 
