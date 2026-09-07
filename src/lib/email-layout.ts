@@ -28,7 +28,7 @@ export interface EmailContent {
   signature?: string;
 }
 
-const card = palette.page;
+const card = palette.surface;
 const ink = palette.ink;
 const muted = palette.muted;
 const hairline = palette.hairline;

@@ -12,16 +12,17 @@
 */
 
 :root {
-  /* The ground is white and everything raised off it is a step of grey. It
-     used to be the other way round, which made every screen read as a grey
-     window with white boxes on it rather than a white product. */
-  --page: #ffffff;
-  --sheet: #f5f5f7;
-  --field: #ebebee;
+  /* The ground is a quiet grey and everything raised off it is white. A white
+     card on grey reads as a thing you can pick up, which is what a card is
+     meant to be, and it gives the product a floor to stand on. Dark mode runs
+     the same way round: near black ground, lighter panels on it. */
+  --page: #f5f5f7;
+  --sheet: #ffffff;
+  --field: #f2f2f4;
   --text: #0a0a0a;
   --text-2: #656569;
   --text-3: #a0a0a6;
-  --divider: #e4e4e9;
+  --divider: #e5e5ea;
   --action: #0a0a0a;
   --on-action: #ffffff;
   --action-pressed: #262626;

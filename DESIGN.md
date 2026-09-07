@@ -41,13 +41,13 @@ the same tokens with the second column of values.
 
 | Token | Use | Light | Dark |
 | --- | --- | --- | --- |
-| `--page` | Page background | `#FFFFFF` | `#0A0A0A` |
-| `--sheet` | Sheets, cards, inputs on the page | `#F5F5F7` | `#161618` |
-| `--field` | Inputs and guide cards on a sheet | `#EBEBEE` | `#1F1F22` |
+| `--page` | Page background, the ground | `#F5F5F7` | `#0A0A0A` |
+| `--sheet` | Sheets, cards, inputs on the page | `#FFFFFF` | `#161618` |
+| `--field` | Inputs and guide cards on a sheet | `#F2F2F4` | `#1F1F22` |
 | `--text` | Primary text, icons, links | `#0A0A0A` | `#F5F5F7` |
 | `--text-2` | Secondary text | `#656569` | `#9A9AA1` |
 | `--text-3` | Placeholder only, never content | `#A0A0A6` | `#6B6B70` |
-| `--divider` | Rare. Table rows in dense views | `#E4E4E9` | `#26262A` |
+| `--divider` | Hairlines, and the header of an open group | `#E5E5EA` | `#26262A` |
 | `--action` | Primary pill background | `#0A0A0A` | `#F5F5F7` |
 | `--on-action` | Text on the primary pill | `#FFFFFF` | `#0A0A0A` |
 | `--action-pressed` | Primary pill pressed | `#262626` | `#D9D9DE` |
@@ -59,8 +59,8 @@ the same tokens with the second column of values.
 
 Rules that follow from the table.
 
-- The ground is white in light mode and everything raised off it is a step of grey, not the other way round. `--page` is the ground, `--sheet` is what sits on it, `--field` is what sits on that.
-- An input is always one step of tone away from what it sits on. On a sheet it is `--field`. On the page it is `--sheet`. It never has a border.
+- The ground is grey and everything raised off it is white. `--page` is the ground, `--sheet` is the card that sits on it, `--field` is what sits inside that card. Dark mode runs the same way round, near black ground and lighter panels, which is why one direction serves both.
+- An input is always one step of tone away from what it sits on, and the step goes in whichever direction the thing behind it demands. On a white sheet it goes down to `--field`. On the grey ground it goes up to `--sheet`. It never has a border.
 - **No component writes a colour.** `src/lib/design/surfaces.ts` holds the four cases a control can be in, two of them responsive, and every component names its case instead of its colour. `src/design.test.ts` fails the build if a colour value appears anywhere but `globals.css` and `src/lib/design/palette.ts`, which exists for the browser chrome and email, the two places a CSS variable cannot reach.
 - One shadow, `shadow-lifted`, and only for something that floats over the page: a dialog, a menu, a toast. Nothing that sits on the page has one.
 - Layout constants more than one component needs are tokens too: the booking group's cap, its rail, its panel height and its content column are `--container-booking`, `--spacing-rail`, `--spacing-panel` and `--container-step`.

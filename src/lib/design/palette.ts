@@ -7,14 +7,16 @@
 // column of the table in DESIGN.md.
 
 export const palette = {
-  page: "#ffffff",
-  pageDark: "#0a0a0a",
-  sheet: "#f5f5f7",
+  /** The light ground the product paints. Grey, with white raised on it. */
+  ground: "#f5f5f7",
+  /** White. What is raised off the ground, and the card an email is drawn on. */
+  surface: "#ffffff",
+  groundDark: "#0a0a0a",
   ink: "#0a0a0a",
   muted: "#656569",
-  hairline: "#e4e4e9",
+  hairline: "#e5e5ea",
   onInk: "#ffffff",
 } as const;
 
 /** The colour the browser paints its own chrome with, per scheme. */
-export const chrome = { light: palette.page, dark: palette.pageDark } as const;
+export const chrome = { light: palette.ground, dark: palette.groundDark } as const;
