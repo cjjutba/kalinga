@@ -106,7 +106,11 @@ export function SlotPicker({
                 aria-checked={selected}
                 onClick={() => setDay(d)}
                 className={cn(
-                  "flex min-w-[52px] flex-1 flex-col items-center rounded-input py-2 text-label transition-colors duration-150 motion-reduce:transition-none",
+                  // Seven days have to fit the width they are given. In a
+                  // dialog that is narrower, so the tiles are too, rather than
+                  // the last one hanging half off the edge.
+                  "flex flex-1 flex-col items-center rounded-input py-2 text-label transition-colors duration-150 motion-reduce:transition-none",
+                  compact ? "min-w-[44px]" : "min-w-[52px]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-sheet",
                   selected ? "bg-action text-on-action" : cn(tile, "text-text hover:bg-divider"),
                   byDay && !open && !selected && "text-text-2",
@@ -148,9 +152,6 @@ export function SlotPicker({
           className={cn(
             "grid gap-2",
             compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3",
-            // In a dialog the times scroll inside their own box, so the dialog
-            // itself never grows past the screen and its buttons stay put.
-            compact && "max-h-[15rem] overflow-y-auto pr-1",
           )}
         >
           {slots.map((s) => {
