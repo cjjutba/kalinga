@@ -28,6 +28,8 @@ export interface Organisation {
   openFrom: string;
   openTo: string;
   groomingIntervalWeeks: number;
+  vaccinationIntervalMonths: number;
+  dewormingIntervalMonths: number;
 }
 
 export interface Member {

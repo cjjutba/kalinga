@@ -2,7 +2,6 @@
 
 import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Check, Copy, Plus, Trash2 } from "lucide-react";
 import { PageHeader, NotForRole } from "./page-header";
@@ -456,8 +455,16 @@ export function ClosuresSettings() {
 
 export function RecallSettings() {
   const { org, dispatch } = useOrg();
-  const [weeks, setWeeks] = useState(String(org.groomingIntervalWeeks));
+  // Every interval belongs to the clinic. A shelter clinic deworms monthly, a
+  // house-cat practice vaccinates every three years, and neither should have
+  // to argue with a number written into the product.
+  const [form, setForm] = useState({
+    vaccination: String(org.vaccinationIntervalMonths),
+    deworming: String(org.dewormingIntervalMonths),
+    grooming: String(org.groomingIntervalWeeks),
+  });
   const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
   const sample = { petName: "Kiko", ownerName: "Maria", clinicName: org.name, dueOn: "2026-10-02", bookingUrl: `kalinga.cjjutba.dev/${org.slug}` };
   const booking = { petName: "Kiko", ownerName: "Maria", clinicName: org.name, serviceName: "Vaccination", when: "Fri 2 Oct, 9:30 AM PHT", reference: "KLG-4F7Q", manageUrl: `kalinga.cjjutba.dev/${org.slug}/b/KLG-4F7Q` };
   const previews: Record<string, string> = {
@@ -469,9 +476,16 @@ export function RecallSettings() {
   };
   async function save(e: FormEvent) {
     e.preventDefault();
-    const n = Math.min(12, Math.max(2, Number(weeks) || org.groomingIntervalWeeks));
-    setWeeks(String(n));
-    const r = await dispatch({ type: "org/update", changes: { groomingIntervalWeeks: n } });
+    const whole = (v: string, lo: number, hi: number, fallback: number) => Math.min(hi, Math.max(lo, Math.round(Number(v)) || fallback));
+    const changes = {
+      vaccinationIntervalMonths: whole(form.vaccination, 1, 36, org.vaccinationIntervalMonths),
+      dewormingIntervalMonths: whole(form.deworming, 1, 24, org.dewormingIntervalMonths),
+      groomingIntervalWeeks: whole(form.grooming, 2, 12, org.groomingIntervalWeeks),
+    };
+    setForm({ vaccination: String(changes.vaccinationIntervalMonths), deworming: String(changes.dewormingIntervalMonths), grooming: String(changes.groomingIntervalWeeks) });
+    setBusy(true);
+    const r = await dispatch({ type: "org/update", changes });
+    setBusy(false);
     if (r.ok) {
       setSaved(true);
       window.setTimeout(() => setSaved(false), 1500);
@@ -481,27 +495,22 @@ export function RecallSettings() {
     <SettingsFrame title="Recall rules" lead="What decides that an animal is due, and the words the desk sends.">
       <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
         <form onSubmit={save} noValidate className="flex flex-col gap-4 self-start rounded-card bg-sheet p-6">
-          <h2 className="text-heading font-medium">Intervals</h2>
-          <dl className="flex flex-col gap-2 text-small">
-            <div className="flex justify-between">
-              <dt className="text-text-2">Vaccination</dt>
-              <dd>Yearly from the last dose</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-text-2">Deworming</dt>
-              <dd>Every three months</dd>
-            </div>
-          </dl>
-          <InputField label="Grooming, every" inputMode="numeric" placeholder={placeholder.weeks} value={weeks} onChange={(e) => setWeeks(e.target.value)} helper="Weeks. Four to six is usual." />
+          <div>
+            <h2 className="text-heading font-medium">Intervals</h2>
+            <p className="mt-1 text-small text-text-2">Counted from the last one on the pet record. Change one and every queue recounts.</p>
+          </div>
+          <InputField label="Vaccination, every" inputMode="numeric" placeholder={placeholder.months} value={form.vaccination} onChange={(e) => setForm((f) => ({ ...f, vaccination: e.target.value }))} helper="Months. Twelve is the usual annual booster." disabled={busy} />
+          <InputField label="Deworming, every" inputMode="numeric" placeholder={placeholder.months} value={form.deworming} onChange={(e) => setForm((f) => ({ ...f, deworming: e.target.value }))} helper="Months. Three for an adult, one for a puppy." disabled={busy} />
+          <InputField label="Grooming, every" inputMode="numeric" placeholder={placeholder.weeks} value={form.grooming} onChange={(e) => setForm((f) => ({ ...f, grooming: e.target.value }))} helper="Weeks. Four to six is usual." disabled={busy} />
           <div className="flex items-center justify-end gap-3">
             <Saved show={saved} />
-            <Pill type="submit" size="sm">
+            <Pill type="submit" size="sm" loading={busy} loadingLabel="Saving">
               Save
             </Pill>
           </div>
         </form>
         <div className="flex flex-col gap-3">
-          {templateCatalogue.map((t) => (
+          {templateCatalogue({ vaccinationMonths: org.vaccinationIntervalMonths, dewormingMonths: org.dewormingIntervalMonths, groomingWeeks: org.groomingIntervalWeeks }).map((t) => (
             <Card key={t.id} className="p-5">
               <div className="flex items-baseline justify-between gap-3">
                 <h3 className="text-body font-medium">{t.name}</h3>
@@ -510,7 +519,7 @@ export function RecallSettings() {
               <blockquote className="mt-3 rounded-guide bg-field p-3.5 text-small leading-[1.5]">{previews[t.id]}</blockquote>
             </Card>
           ))}
-          <p className="text-label text-text-2">Wording is fixed in v1 and written to be pasted into Messenger or a text. Editable templates come when a clinic asks for them.</p>
+          <p className="text-label text-text-2">The intervals are yours. The wording is fixed in v1, written to be pasted into Messenger or a text, and becomes editable when a clinic asks for it.</p>
         </div>
       </div>
     </SettingsFrame>

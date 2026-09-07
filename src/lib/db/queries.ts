@@ -36,6 +36,8 @@ export function toOrganisation(o: Row.Organisation): View.Organisation {
     openFrom: o.openFrom,
     openTo: o.openTo,
     groomingIntervalWeeks: o.groomingIntervalWeeks,
+    vaccinationIntervalMonths: o.vaccinationIntervalMonths,
+    dewormingIntervalMonths: o.dewormingIntervalMonths,
   };
 }
 
@@ -58,7 +60,7 @@ export async function getOrganisationById(id: string): Promise<Row.Organisation 
   return row;
 }
 
-export async function updateOrganisation(id: string, changes: Partial<Pick<Row.Organisation, "name" | "address" | "city" | "mobile" | "email" | "timezone" | "openFrom" | "openTo" | "groomingIntervalWeeks">>) {
+export async function updateOrganisation(id: string, changes: Partial<Pick<Row.Organisation, "name" | "address" | "city" | "mobile" | "email" | "timezone" | "openFrom" | "openTo" | "groomingIntervalWeeks" | "vaccinationIntervalMonths" | "dewormingIntervalMonths">>) {
   const [row] = await db.update(organization).set(changes).where(eq(organization.id, id)).returning();
   return row;
 }

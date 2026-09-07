@@ -112,6 +112,8 @@ export const actionSchema = z.discriminatedUnion("type", [
       openFrom: hhmm.optional(),
       openTo: hhmm.optional(),
       groomingIntervalWeeks: z.number().int().min(2).max(12).optional(),
+      vaccinationIntervalMonths: z.number().int().min(1).max(36).optional(),
+      dewormingIntervalMonths: z.number().int().min(1).max(24).optional(),
     }),
   }),
 ]);

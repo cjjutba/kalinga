@@ -128,6 +128,8 @@ export function AuditEventDetail({ orgSlug, id }: { orgSlug: string; id: string 
     openFrom: "Opens",
     openTo: "Closes",
     groomingIntervalWeeks: "Grooming interval, weeks",
+    vaccinationIntervalMonths: "Vaccination interval, months",
+    dewormingIntervalMonths: "Deworming interval, months",
   };
   return (
     <div className="mx-auto max-w-3xl">

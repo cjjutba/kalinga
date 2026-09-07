@@ -1,0 +1,2 @@
+ALTER TABLE "organization" ADD COLUMN "vaccination_interval_months" integer DEFAULT 12 NOT NULL;--> statement-breakpoint
+ALTER TABLE "organization" ADD COLUMN "deworming_interval_months" integer DEFAULT 3 NOT NULL;

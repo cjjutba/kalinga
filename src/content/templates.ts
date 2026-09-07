@@ -40,7 +40,7 @@ export function renderReminder(kind: RecallKind, c: ReminderContext): string {
   const date = niceDate(c.dueOn);
   switch (kind) {
     case "vaccination":
-      return `Hi ${c.ownerName}, this is ${c.clinicName}. ${c.petName}'s annual vaccination is due on ${date}. Book a slot at ${c.bookingUrl} or reply here and we'll fit you in.`;
+      return `Hi ${c.ownerName}, this is ${c.clinicName}. ${c.petName}'s vaccination is due on ${date}. Book a slot at ${c.bookingUrl} or reply here and we'll fit you in.`;
     case "deworming":
       return `Hi ${c.ownerName}, ${c.clinicName} here. ${c.petName} is due for deworming around ${date}. It takes fifteen minutes. Book at ${c.bookingUrl} or reply and we'll sort it out.`;
     case "grooming":
@@ -59,10 +59,19 @@ export function renderBookingChanged(c: BookingContext, kind: "cancelled" | "res
   return `Hi ${c.ownerName}, ${c.petName}'s ${c.serviceName} at ${c.clinicName} has moved to ${c.when}. Reference ${c.reference}. Change or cancel at ${c.manageUrl}.`;
 }
 
-export const templateCatalogue = [
-  { id: "booking_confirmation", name: "Booking confirmation", when: "After a booking is made, shown on the confirmation page" },
-  { id: "booking_changed", name: "Cancellation and reschedule", when: "After a booking is cancelled or moved" },
-  { id: "vaccination", name: "Vaccination due", when: "A year after the last dose" },
-  { id: "deworming", name: "Deworming due", when: "Three months after the last dose" },
-  { id: "grooming", name: "Grooming due", when: "On the clinic's grooming interval, five weeks by default" },
-] as const;
+// When each one goes out. The three recall lines read their timing from the
+// clinic's own intervals, because those are set under Settings and a fixed
+// "a year after the last dose" would start lying the moment somebody changed
+// them.
+const months = (n: number) => (n === 1 ? "A month" : n === 12 ? "A year" : `${n} months`);
+const weeks = (n: number) => (n === 1 ? "A week" : `${n} weeks`);
+
+export function templateCatalogue(intervals: { vaccinationMonths: number; dewormingMonths: number; groomingWeeks: number }) {
+  return [
+    { id: "booking_confirmation", name: "Booking confirmation", when: "After a booking is made, shown on the confirmation page" },
+    { id: "booking_changed", name: "Cancellation and reschedule", when: "After a booking is cancelled or moved" },
+    { id: "vaccination", name: "Vaccination due", when: `${months(intervals.vaccinationMonths)} after the last dose` },
+    { id: "deworming", name: "Deworming due", when: `${months(intervals.dewormingMonths)} after the last dose` },
+    { id: "grooming", name: "Grooming due", when: `${weeks(intervals.groomingWeeks)} after the last groom` },
+  ];
+}
