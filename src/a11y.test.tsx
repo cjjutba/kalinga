@@ -88,7 +88,7 @@ const date = (offset: number) => formatISO(clinicDay(offset), { representation: 
 const ORG = "org-lunhaw";
 
 const snapshot: OrgSnapshot = {
-  organisation: { id: ORG, slug: "lunhaw", name: "Lunhaw Animal Clinic", city: "Cagayan de Oro", address: "Door 3, Velez corner Capistrano", mobile: "0917 555 0100", email: "hello@lunhaw.test", timezone: "Asia/Manila", openFrom: "09:00", openTo: "18:00", groomingIntervalWeeks: 5 },
+  organisation: { id: ORG, slug: "lunhaw", name: "Lunhaw Animal Clinic", city: "Cagayan de Oro", address: "Door 3, Velez corner Capistrano", mobile: "0917 555 0100", email: "hello@lunhaw.test", timezone: "Asia/Manila", openFrom: "09:00", openTo: "18:00", groomingIntervalWeeks: 5, vaccinationIntervalMonths: 12, dewormingIntervalMonths: 3 },
   members: [
     { id: "m-owner", organisationId: ORG, userId: "u1", name: "Dr. Ana Reyes", email: "ana@lunhaw.test", role: "owner", providerId: "pr-ana", invitedAt: iso(subDays(now, 40)) },
     { id: "m-vet", organisationId: ORG, userId: "u2", name: "Dr. Paolo Dimaculangan", email: "paolo@lunhaw.test", role: "vet", providerId: "pr-paolo", invitedAt: iso(subDays(now, 30)) },

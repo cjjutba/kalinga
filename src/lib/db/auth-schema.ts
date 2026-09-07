@@ -105,6 +105,12 @@ export const organization = pgTable(
     groomingIntervalWeeks: integer("grooming_interval_weeks")
       .default(5)
       .notNull(),
+    vaccinationIntervalMonths: integer("vaccination_interval_months")
+      .default(12)
+      .notNull(),
+    dewormingIntervalMonths: integer("deworming_interval_months")
+      .default(3)
+      .notNull(),
   },
   (table) => [uniqueIndex("organization_slug_uidx").on(table.slug)],
 );

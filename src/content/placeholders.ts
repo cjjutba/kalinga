@@ -33,6 +33,7 @@ export const placeholder = {
   buffer: "0",
   price: "500",
   weeks: "5",
+  months: "12",
   weightKg: "8.5",
   paymentRef: "The reference number",
 
