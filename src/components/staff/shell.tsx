@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, CalendarDays, Check, ChevronDown, ChevronsUpDown, ClipboardList, ExternalLink, LogOut, Menu, MoreHorizontal, PawPrint, Plus, Settings, Shield, Users } from "lucide-react";
+import { Bell, CalendarDays, Check, ChevronDown, ChevronsUpDown, ClipboardList, ExternalLink, LogOut, Menu, MoreHorizontal, PawPrint, Plus, Rocket, Settings, Shield, Users } from "lucide-react";
 import { ThemeMenuRow } from "@/components/theme-toggle";
 import { ClinicForm } from "@/components/clinic/clinic-form";
 import { useToast } from "@/components/primitives/toast";
@@ -122,6 +122,11 @@ export function StaffShell({ userName, children }: { userName: string; children:
         <ThemeMenuRow />
         <DropdownMenuSeparator className="my-1.5 bg-divider" />
         <DropdownMenuItem asChild className={menuItem}>
+          <Link href={`${base}/start`} className="flex items-center gap-2">
+            <Rocket className="size-4" strokeWidth={1.5} aria-hidden /> Setup guide
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className={menuItem}>
           <a href={`/${org.slug}`} target="_blank" rel="noreferrer" className="flex items-center gap-2">
             <ExternalLink className="size-4" strokeWidth={1.5} aria-hidden /> Booking page
           </a>
@@ -171,21 +176,25 @@ export function StaffShell({ userName, children }: { userName: string; children:
             <ChevronDown className={cn("ml-auto size-4 shrink-0 text-text-3 transition-transform duration-150 motion-reduce:transition-none", settingsOpen && "rotate-180")} strokeWidth={1.5} aria-hidden />
           </button>
           {settingsOpen ? (
-            <ul className="mt-0.5 flex flex-col gap-0.5 pl-9">
+            // A hairline runs down the group so the six read as one branch of
+            // the tree. The page you are on darkens its own segment of it.
+            <ul className="ml-[1.4rem] mt-0.5 flex flex-col gap-0.5 border-l border-divider pl-2">
               {settingsSections.map((sec) => {
                 const href = sec.segment ? `${base}/settings/${sec.segment}` : `${base}/settings`;
                 const on = sec.segment ? pathname.startsWith(href) : pathname === `${base}/settings`;
                 return (
-                  <li key={sec.label}>
+                  <li key={sec.label} className="relative">
+                    {on ? <span aria-hidden className="absolute -left-2 top-1 bottom-1 w-px bg-text" /> : null}
                     <Link
                       href={href}
                       aria-current={on ? "page" : undefined}
                       className={cn(
-                        "flex items-center rounded-input px-2.5 py-1.5 text-label transition-colors duration-150 motion-reduce:transition-none",
+                        "flex items-center gap-2.5 rounded-input px-2.5 py-1.5 text-small transition-colors duration-150 motion-reduce:transition-none",
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
-                        on ? "bg-sheet font-medium text-text" : "text-text-2 hover:text-text",
+                        on ? "bg-sheet font-medium text-text" : "text-text-2 hover:bg-sheet/70 hover:text-text",
                       )}
                     >
+                      <sec.icon className={cn("size-4 shrink-0", on ? "text-text" : "text-text-3")} strokeWidth={1.5} aria-hidden />
                       {sec.label}
                     </Link>
                   </li>
@@ -248,7 +257,6 @@ export function StaffShell({ userName, children }: { userName: string; children:
               </DialogHeader>
               <div className="mt-4">
                 <ClinicForm
-                  inDialog
                   onBusyChange={setCreatingClinic}
                   onDone={(slug) => {
                     setNewClinicOpen(false);

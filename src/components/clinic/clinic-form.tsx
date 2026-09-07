@@ -2,31 +2,20 @@
 
 import { placeholder } from "@/content/placeholders";
 import { useEffect, useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import { CalendarClock, Clock, ListChecks, UserPlus } from "lucide-react";
 import { InputField, SelectField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
 import { authClient } from "@/lib/auth-client";
 import { applyAction } from "@/lib/actions/apply";
 import { clinicNow, formatTime } from "@/lib/time";
+import { reservedSlugs, slugify } from "@/lib/slug";
 
-// Three fields and the clinic exists. The slug is the link the clinic shares,
-// so the taken state matters more than usual and is checked as you type.
+// A second clinic, made from inside the first. The first one is set up at
+// /new through the stepped onboarding; by the time somebody opens another they
+// already have one on screen and do not need taking out of it, so this is four
+// fields in a dialog and nothing else.
 //
-// Two shapes, one form. A first clinic gets the whole page at /new, with the
-// preview of what pet owners will see. A second one is a dialog inside the
-// staff shell, because by then the person has a clinic open and does not need
-// taking out of it.
-
-const reserved = new Set(["app", "me", "api", "design", "sign-in", "sign-up", "reset", "new", "invite", "privacy", "demo", "kalinga", "admin", "www"]);
-
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 32);
-}
+// The slug is the link the clinic shares, so the taken state matters more than
+// usual and is checked as you type.
 
 const zones = [
   { value: "Asia/Manila", label: "Asia/Manila" },
@@ -34,8 +23,7 @@ const zones = [
   { value: "Asia/Tokyo", label: "Asia/Tokyo" },
 ];
 
-export function ClinicForm({ inDialog, onDone, onBusyChange }: { inDialog?: boolean; onDone?: (slug: string | null) => void; /** Lets the dialog around this form keep itself open while it saves. */ onBusyChange?: (busy: boolean) => void } = {}) {
-  const router = useRouter();
+export function ClinicForm({ onDone, onBusyChange }: { onDone?: (slug: string | null) => void; /** Lets the dialog around this form keep itself open while it saves. */ onBusyChange?: (busy: boolean) => void } = {}) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -56,7 +44,7 @@ export function ClinicForm({ inDialog, onDone, onBusyChange }: { inDialog?: bool
 
   // Check the slug as it settles, so the taken state shows before submit.
   useEffect(() => {
-    if (!slug || reserved.has(slug)) return;
+    if (!slug || reservedSlugs.has(slug)) return;
     const handle = window.setTimeout(async () => {
       const { error } = await authClient.organization.checkSlug({ slug });
       setSlugError(error ? `${slug} is taken. Try ${slug}-${city ? slugify(city).slice(0, 6) : "clinic"}.` : undefined);
@@ -79,7 +67,7 @@ export function ClinicForm({ inDialog, onDone, onBusyChange }: { inDialog?: bool
     if (!slug) {
       setSlugError("Choose a booking address.");
       bad = true;
-    } else if (reserved.has(slug)) {
+    } else if (reservedSlugs.has(slug)) {
       setSlugError(`${slug} is reserved. Try ${slug}-clinic.`);
       bad = true;
     }
@@ -96,14 +84,8 @@ export function ClinicForm({ inDialog, onDone, onBusyChange }: { inDialog?: bool
     }
     await authClient.organization.setActive({ organizationId: data.id });
     await applyAction(data.slug, { type: "org/update", changes: { timezone: tz, city: city.trim() || undefined } });
-    if (inDialog) return onDone?.(data.slug);
-    router.push(`/app/${data.slug}`);
-    router.refresh();
+    onDone?.(data.slug);
   }
-
-  const previewName = name.trim() || "Your clinic";
-  const previewCity = city.trim() || "Your city";
-  const previewSlug = slug || "your-clinic";
 
   const fields = (
     <>
@@ -136,78 +118,17 @@ export function ClinicForm({ inDialog, onDone, onBusyChange }: { inDialog?: bool
     </>
   );
 
-  if (inDialog) {
-    return (
-      <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-        {fields}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Pill type="button" size="sm" variant="secondary" onClick={() => onDone?.(null)} disabled={loading}>
-            Cancel
-          </Pill>
-          <Pill type="submit" size="sm" loading={loading} loadingLabel="Creating">
-            Create clinic
-          </Pill>
-        </div>
-      </form>
-    );
-  }
-
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12">
-      <div className="min-w-0">
-        <h1 className="text-title font-medium text-balance">Set up your clinic</h1>
-        <p className="mt-2 max-w-md text-small text-text-2">Three fields and you can take a booking. Services, hours and staff come next, inside.</p>
-
-        <form onSubmit={submit} noValidate className="mt-6 flex flex-col gap-5 rounded-card bg-sheet p-5 md:p-6">
-          {fields}
-          <Pill type="submit" block loading={loading} loadingLabel="Creating clinic">
-            Create clinic
-          </Pill>
-        </form>
-        <p className="mt-3 text-[13px] text-text-2">The name, city and time zone can change later. The booking address cannot.</p>
+    <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+      {fields}
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Pill type="button" size="sm" variant="secondary" onClick={() => onDone?.(null)} disabled={loading}>
+          Cancel
+        </Pill>
+        <Pill type="submit" size="sm" loading={loading} loadingLabel="Creating">
+          Create clinic
+        </Pill>
       </div>
-
-      <aside className="flex flex-col gap-4 lg:pt-[5.25rem]">
-        <div className="rounded-card bg-sheet p-5">
-          <p className="text-label font-medium text-text-2">What pet owners see</p>
-          <div className="mt-3 rounded-guide bg-field p-4">
-            <p className="truncate text-[17px] font-medium text-text">{previewName}</p>
-            <p className="mt-0.5 truncate text-[13px] text-text-2">{previewCity}</p>
-            <p className="mt-3 truncate text-[13px] tabular text-text-2">kalinga.cjjutba.dev/{previewSlug}</p>
-            <div className="mt-3 flex items-center gap-2 rounded-tag bg-sheet px-3 py-2 text-[13px] text-text-2">
-              <CalendarClock className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
-              Times shown in {tz.split("/")[1].replace("_", " ")}
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-card bg-sheet p-5">
-          <p className="text-label font-medium text-text-2">Then, inside</p>
-          <ul className="mt-3 flex flex-col gap-3">
-            <li className="flex gap-3 text-[15px]">
-              <ListChecks className="mt-0.5 size-4 shrink-0 text-text-2" strokeWidth={1.5} aria-hidden />
-              <span>
-                Add your services
-                <span className="block text-[13px] text-text-2">How long each takes, what it costs.</span>
-              </span>
-            </li>
-            <li className="flex gap-3 text-[15px]">
-              <Clock className="mt-0.5 size-4 shrink-0 text-text-2" strokeWidth={1.5} aria-hidden />
-              <span>
-                Set working hours
-                <span className="block text-[13px] text-text-2">Per vet or groomer, plus closures.</span>
-              </span>
-            </li>
-            <li className="flex gap-3 text-[15px]">
-              <UserPlus className="mt-0.5 size-4 shrink-0 text-text-2" strokeWidth={1.5} aria-hidden />
-              <span>
-                Invite your staff
-                <span className="block text-[13px] text-text-2">Front desk runs the day, vets see their column.</span>
-              </span>
-            </li>
-          </ul>
-        </div>
-      </aside>
-    </div>
+    </form>
   );
 }

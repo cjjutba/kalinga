@@ -35,6 +35,7 @@ const staffRoutes: Record<string, Permission> = {
   "app/[org]/pets/[id]/edit": "edit_clients",
   "app/[org]/pets/[id]/visit": "add_visit",
   "app/[org]/pets/[id]/visits/[visitId]": "view_visit_notes",
+  "app/[org]/start": "day_view",
   "app/[org]/recall": "view_recall",
   "app/[org]/recall/log": "view_recall",
   "app/[org]/settings": "view_settings",
