@@ -5,11 +5,12 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthTitle, PrivacyFooter } from "@/components/auth/auth-shell";
+import { GoogleButton, OrDivider } from "@/components/auth/google";
 import { InputField } from "@/components/primitives/field";
 import { Pill } from "@/components/primitives/pill";
 import { authClient } from "@/lib/auth-client";
 
-export function SignInForm() {
+export function SignInForm({ google = false }: { google?: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next");
@@ -39,6 +40,12 @@ export function SignInForm() {
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
       <AuthTitle>Sign in</AuthTitle>
+      {google ? (
+        <>
+          <GoogleButton next={next ?? undefined} disabled={loading} />
+          <OrDivider />
+        </>
+      ) : null}
       <InputField on="auth" label="Email" type="email" name="email" autoComplete="email" inputMode="email" placeholder={placeholder.email} value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} />
       <InputField
         on="auth"

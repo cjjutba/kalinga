@@ -26,10 +26,10 @@ export default function Home() {
         <Lockup href="/" />
         <nav aria-label="Site" className="flex items-center gap-2">
           <Link href="/sign-in" className="hidden h-10 items-center rounded-full px-4 text-small font-medium text-text hover:bg-sheet sm:inline-flex">
-            Staff sign in
+            Sign in
           </Link>
           <Pill asChild size="sm">
-            <Link href="/sign-up">Create your clinic</Link>
+            <Link href="/sign-up">Get started</Link>
           </Pill>
         </nav>
       </header>
@@ -39,15 +39,13 @@ export default function Home() {
           <div>
             <h1 className="text-[34px] font-medium leading-[1.1] tracking-[-0.01em] text-balance md:text-[44px]">{landing.hero.title}</h1>
             <p className="mt-5 max-w-lg text-body text-text-2">{landing.hero.lead}</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8">
               <Pill asChild>
-                <Link href={landing.hero.primary.href}>{landing.hero.primary.label}</Link>
-              </Pill>
-              <Pill asChild variant="secondary">
-                <Link href={landing.hero.secondary.href}>{landing.hero.secondary.label}</Link>
+                <Link href={landing.hero.primary.href}>
+                  {landing.hero.primary.label} <ArrowRight className="size-4" strokeWidth={1.5} aria-hidden />
+                </Link>
               </Pill>
             </div>
-            <p className="mt-4 text-label text-text-2">Free during the pilot. Your data stays yours.</p>
           </div>
           <div className="relative">
             <Photo className="aspect-[4/5] rounded-sheet md:aspect-[5/6]" caption="Photograph, an aspin portrait" />
