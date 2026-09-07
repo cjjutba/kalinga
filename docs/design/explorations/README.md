@@ -14,12 +14,17 @@ because fal changes them without notice.
 | --- | --- | --- | --- |
 | `boards/2026-09-05-staff-sign-in-gpt-image-2.png` | GPT Image 2, 2560 by 1440, high | $0.222 | **The reference board.** Followed every layout rule. |
 | `boards/2026-09-05-staff-sign-in-nano-banana-pro.png` | Nano Banana Pro, 16:9, 2K | $0.15 | Rejected. Landscape phones, an added title, and the mark drawn as a face, which became the logo. |
+| `boards/2026-09-07-landing-top-gpt-image-2.png` | GPT Image 2, 1440 by 2560, high | $0.222 | Kept. Header, hero with the interface over a photograph, fact strip and the large statement. Layout followed exactly. Its logo, body copy and product interface are invented and are replaced by the real ones. |
+| `boards/2026-09-07-landing-middle-gpt-image-2.png` | GPT Image 2, 1440 by 2560, high | $0.222 | Kept. The three how it works rows and the recall section. |
 
 Two earlier boards were generated in ChatGPT before the work moved to fal and
 were not saved from the chat. They should be added here as
 `boards/2026-09-05-staff-sign-in-chatgpt-earth-tone.png` and
 `boards/2026-09-05-staff-sign-in-chatgpt-monochrome-vet.png`. What they showed
 and why they were rejected is recorded in `../direction.md`.
+
+The landing prompts are in `prompts/landing-prompts-as-sent.md`, and what the
+page is meant to do is in `../landing.md`.
 
 ## Logo
 
