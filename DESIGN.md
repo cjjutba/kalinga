@@ -271,6 +271,13 @@ booking", not "Move to Mon 7 Sep, 9:00 AM PHT". Short enough to read at a
 glance, long enough to say what happens. A test fails the build on a label
 written as a sentence.
 
+**A dialog is three bands.** The title, the part that scrolls, and the buttons
+under a hairline. Only the middle one moves, so a long slot list never pushes
+the way out of the dialog off the bottom of the screen, and nothing inside
+scrolls within the scroll. When the clinic has not set up what the dialog
+needs, it says so and offers the way there rather than presenting a search box
+over an empty file.
+
 **A dialog carries its own work.** The button inside it spins, the buttons
 beside it go quiet, and nothing closes it while the work is in flight, not
 Escape, not a click outside, not the corner cross. It closes when the work is
@@ -317,9 +324,11 @@ and opens upward: appearance, the setup guide, the booking page, privacy, sign
 out. On a phone the same sidebar slides in from the left.
 
 **Settings is a group in the sidebar, not a strip of tabs.** It sits last,
-opens where you are, and its six sections are pages. The group is drawn as one
-branch: a hairline down its left edge, an icon on every section, and the page
-you are on darkens its own segment of that line as well as filling its row.
+opens where you are, and its six sections are pages. Every row in the sidebar
+is the same height, section header and section alike, and each section carries
+an icon. The header takes the deeper of the two tones and the page under it the
+lighter one, so the row you are on is never the same fill as the group it
+belongs to.
 
 ## Motion
 

@@ -146,6 +146,8 @@ export function StaffShell({ userName, children }: { userName: string; children:
 
   const inSettings = pathname.startsWith(`${base}/settings`);
   const settingsOpen = settingsToggled ?? inSettings;
+  // One row shape for the whole sidebar, so a section and a page under it are
+  // the same height and sit on the same left edge.
   const itemClass = (active: boolean) =>
     cn(
       "flex w-full items-center gap-2.5 rounded-input px-2.5 py-2 text-small transition-colors duration-150 motion-reduce:transition-none",
@@ -170,30 +172,27 @@ export function StaffShell({ userName, children }: { userName: string; children:
 
       {can(role, settingsNav.permission) ? (
         <li>
-          <button type="button" onClick={() => setSettingsToggled(!settingsOpen)} aria-expanded={settingsOpen} className={itemClass(inSettings)}>
+          {/* The section header carries the deeper tone and the page under it
+              the lighter one, so the row you are on is never the same fill as
+              the group it belongs to. */}
+          <button
+            type="button"
+            onClick={() => setSettingsToggled(!settingsOpen)}
+            aria-expanded={settingsOpen}
+            className={cn(itemClass(false), inSettings && "bg-field font-medium text-text hover:bg-field")}
+          >
             <settingsNav.icon className="size-4 shrink-0" strokeWidth={1.5} aria-hidden />
             {settingsNav.label}
             <ChevronDown className={cn("ml-auto size-4 shrink-0 text-text-3 transition-transform duration-150 motion-reduce:transition-none", settingsOpen && "rotate-180")} strokeWidth={1.5} aria-hidden />
           </button>
           {settingsOpen ? (
-            // A hairline runs down the group so the six read as one branch of
-            // the tree. The page you are on darkens its own segment of it.
-            <ul className="ml-[1.4rem] mt-0.5 flex flex-col gap-0.5 border-l border-divider pl-2">
+            <ul className="mt-0.5 flex flex-col gap-0.5 pl-4">
               {settingsSections.map((sec) => {
                 const href = sec.segment ? `${base}/settings/${sec.segment}` : `${base}/settings`;
                 const on = sec.segment ? pathname.startsWith(href) : pathname === `${base}/settings`;
                 return (
-                  <li key={sec.label} className="relative">
-                    {on ? <span aria-hidden className="absolute -left-2 top-1 bottom-1 w-px bg-text" /> : null}
-                    <Link
-                      href={href}
-                      aria-current={on ? "page" : undefined}
-                      className={cn(
-                        "flex items-center gap-2.5 rounded-input px-2.5 py-1.5 text-small transition-colors duration-150 motion-reduce:transition-none",
-                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
-                        on ? "bg-sheet font-medium text-text" : "text-text-2 hover:bg-sheet/70 hover:text-text",
-                      )}
-                    >
+                  <li key={sec.label}>
+                    <Link href={href} aria-current={on ? "page" : undefined} className={itemClass(on)}>
                       <sec.icon className={cn("size-4 shrink-0", on ? "text-text" : "text-text-3")} strokeWidth={1.5} aria-hidden />
                       {sec.label}
                     </Link>

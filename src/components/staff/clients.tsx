@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Plus } from "lucide-react";
-import { Frame } from "./dialogs";
+import { DialogActions, Frame } from "./dialogs";
 import { NewPetDialog } from "./pets";
 import { useToast } from "@/components/primitives/toast";
 import { SelectField } from "@/components/primitives/field";
@@ -275,10 +275,14 @@ function PrivacyCard({ orgSlug, owner, petCount, appointmentCount }: { orgSlug: 
           Delete this client
         </Pill>
       </div>
-      <Frame open={open} onOpenChange={setOpen} busy={busy} title={`Delete ${owner.name}`} description={`Removes the client, ${plural(petCount, "pet")} and ${plural(appointmentCount, "appointment")} with their visits and reminders. Their name comes off the audit trail. This cannot be undone.`}>
-        <SelectField label="Reason" value={reason} onChange={setReason} options={deleteReasons.map((r) => ({ value: r, label: r }))} />
-        {reason === "Other" ? <TextareaField label="What happened" placeholder={placeholder.reason} rows={3} value={other} onChange={(e) => setOther(e.target.value)} /> : null}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <Frame
+        open={open}
+        onOpenChange={setOpen}
+        busy={busy}
+        title={`Delete ${owner.name}`}
+        description={`Removes the client, ${plural(petCount, "pet")} and ${plural(appointmentCount, "appointment")} with their visits and reminders. Their name comes off the audit trail. This cannot be undone.`}
+        footer={
+          <DialogActions>
           <Pill variant="secondary" size="sm" onClick={() => setOpen(false)} disabled={busy}>
             Keep the record
           </Pill>
@@ -299,7 +303,11 @@ function PrivacyCard({ orgSlug, owner, petCount, appointmentCount }: { orgSlug: 
           >
             Delete client
           </Pill>
-        </div>
+          </DialogActions>
+        }
+      >
+        <SelectField label="Reason" value={reason} onChange={setReason} options={deleteReasons.map((r) => ({ value: r, label: r }))} />
+        {reason === "Other" ? <TextareaField label="What happened" placeholder={placeholder.reason} rows={3} value={other} onChange={(e) => setOther(e.target.value)} /> : null}
       </Frame>
     </Card>
   );
