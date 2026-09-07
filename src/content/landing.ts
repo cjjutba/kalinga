@@ -5,8 +5,7 @@ export const landing = {
   hero: {
     title: "Your clinic's appointment book, off paper. And it remembers.",
     lead: "Kalinga takes bookings on a page you share on Messenger, runs your day from one screen, and tells you which animals are due for a vaccination, deworming or groom. Built for independent vet clinics in Northern Mindanao.",
-    primary: { label: "Create your clinic", href: "/sign-up" },
-    secondary: { label: "Staff sign in", href: "/sign-in" },
+    primary: { label: "Sign in and get started", href: "/sign-up" },
   },
   problem: {
     title: "The revenue you already earned",

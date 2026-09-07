@@ -13,6 +13,11 @@ import { sendInvitationEmail, sendMagicLinkEmail, sendResetPasswordEmail } from 
 // stored on the membership, checked on the server in every action. Pet owners
 // are never members; they sign in with a magic link and hold no role.
 
+// Google is optional. With both keys set, "Continue with Google" appears on
+// the two auth screens; without them nothing is offered, so a fork of this
+// repository still runs on email and password alone.
+export const googleIsConfigured = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
 export const auth = betterAuth({
   appName: "Kalinga",
   baseURL: process.env.BETTER_AUTH_URL,
@@ -25,6 +30,20 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url }) => {
       await sendResetPasswordEmail({ to: user.email, name: user.name, url });
     },
+  },
+  socialProviders: googleIsConfigured
+    ? {
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID as string,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        },
+      }
+    : undefined,
+  account: {
+    // The same person signing in with Google after signing up with a password
+    // lands on the account they already have, because Google verifies the
+    // address it hands over.
+    accountLinking: { enabled: true, trustedProviders: ["google"] },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 14,
@@ -67,6 +86,8 @@ export const auth = betterAuth({
             openFrom: { type: "string", required: false, defaultValue: "09:00", input: true },
             openTo: { type: "string", required: false, defaultValue: "18:00", input: true },
             groomingIntervalWeeks: { type: "number", required: false, defaultValue: 5, input: true },
+            vaccinationIntervalMonths: { type: "number", required: false, defaultValue: 12, input: true },
+            dewormingIntervalMonths: { type: "number", required: false, defaultValue: 3, input: true },
           },
         },
       },
