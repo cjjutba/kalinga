@@ -99,13 +99,22 @@ reading like every other developer tool.
 **Photography is restrained: three images.** Hero, the local section, the
 closer. Punctuation, not wallpaper. Product screenshots do the explaining.
 
-**Product screenshots are captured, never generated.** One clinic in dev with
-invented names, real bookings, real pixels. More convincing than any mockup and
-it costs nothing. Every name in them is fictional, per the repository rules.
+**The product is drawn, not screenshotted.** This changed during the build. A
+screenshot was the plan, and the plan was wrong: it needs a clinic full of
+invented rows in a database that was just emptied on purpose, it goes stale the
+day it is taken, it cannot follow the reader into dark mode, and it is a heavy
+image of type that a browser could set perfectly. The previews in
+`src/components/marketing/previews.tsx` are built from the same tokens and the
+same status pills the real screens use, so they stay true when the palette
+changes and they weigh nothing. Every name in them is invented and lives in
+`src/content/landing.ts`.
 
 **The pilot call to action becomes a form on the site.** Name, clinic, city,
-mobile. It writes a row and emails when Resend is configured. A mailto to an
-address nobody reads is worse than no button.
+mobile or email. It follows the deletion request route exactly: validated,
+honeypotted, rate limited per connection, emailed through Resend, and written to
+the server log with an address to write to when no mail key is set. No table.
+A lead is not tenant data and inventing one would have meant a new unscoped
+table for four fields a mail server already stores.
 
 ## Motion
 
@@ -126,18 +135,24 @@ JavaScript to be readable.
 
 ## Assets
 
-**Photography, generated with fal.** Boards and photographs use
-`openai/gpt-image-2`; prices and prompts go in `explorations/` beside the
-output, per the rule in that folder's README.
+**Photography, generated with fal.** Three images from `openai/gpt-image-2` at
+$0.222 each on 7 September 2026, converted to webp and none over 80 kB.
 
-1. An aspin in clinic light, portrait.
-2. A puspin, portrait.
-3. A reception desk with a phone and a paper logbook, the "off paper" story.
-4. An OG image at 1200 by 630.
+1. `public/marketing/aspin-clinic.webp`, the hero. Deliberately composed with
+   empty floor on the left so the day view can sit over it.
+2. `public/marketing/puspin-counter.webp`, the local section.
+3. `public/marketing/reception-logbook.webp`, the closing band. A paper
+   appointment book with a phone beside it, which is the thing this product
+   replaces.
+
+**The OG image is drawn, not generated.** `src/app/opengraph-image.tsx` renders
+it with `ImageResponse` at 1200 by 630, using the real mark and the palette
+module. An image model cannot set type, and this is the first thing anyone sees
+when a link lands in Messenger.
 
 One grade across all of them: natural light, warm, muted, shot like photography
 rather than illustration. Filipino subjects and settings, because the
 positioning is Northern Mindanao and not a stock photo of anywhere.
 
-**Product screenshots, captured from the running product.** The day view, the
-booking flow on a phone, the recall queue.
+**Interface previews, drawn.** The day view, the booking flow on a phone and
+the recall queue, all in `src/components/marketing/previews.tsx`.

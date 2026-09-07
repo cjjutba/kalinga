@@ -39,6 +39,7 @@ vi.mock("@/lib/actions/apply", () => ({ applyAction: vi.fn(), findAppointmentRef
 vi.mock("@/lib/actions/slots", () => ({ getStaffSlots: vi.fn(), getPublicSlots: vi.fn() }));
 vi.mock("@/lib/actions/public", () => ({ bookAppointment: vi.fn(), cancelBooking: vi.fn(), rescheduleBooking: vi.fn() }));
 vi.mock("@/lib/actions/privacy", () => ({ submitPrivacyRequest: vi.fn() }));
+vi.mock("@/lib/actions/pilot", () => ({ submitPilotRequest: vi.fn() }));
 
 import type { OrgSnapshot, Role } from "@/lib/domain/types";
 import { OrgDataProvider } from "@/lib/org-data";

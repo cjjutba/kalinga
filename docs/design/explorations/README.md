@@ -23,8 +23,21 @@ were not saved from the chat. They should be added here as
 `boards/2026-09-05-staff-sign-in-chatgpt-monochrome-vet.png`. What they showed
 and why they were rejected is recorded in `../direction.md`.
 
-The landing prompts are in `prompts/landing-prompts-as-sent.md`, and what the
-page is meant to do is in `../landing.md`.
+The landing prompts are in `prompts/landing-prompts-as-sent.md`, the full page
+prompt written for ChatGPT is in `prompts/landing-full-page-chatgpt.md`, and
+what the page is meant to do is in `../landing.md`.
+
+## Photographs
+
+Shipped in `public/marketing/`, converted to webp. All three from GPT Image 2 on
+7 September 2026 at $0.222 each, one grade across the set: 50mm, natural light,
+warm neutral, unposed, nobody in frame.
+
+| File | What it is |
+| --- | --- |
+| `aspin-clinic.webp` | The hero. An aspin in clinic light, composed with empty floor on the left for the day view to sit over. |
+| `puspin-counter.webp` | A puspin on a clinic counter, for the local section. |
+| `reception-logbook.webp` | A paper appointment book and a phone on a reception counter, for the closing band. The thing this product replaces. |
 
 ## Logo
 
