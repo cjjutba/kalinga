@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Reset your password" };
 
 export default function ResetPage() {
   return (
-    <AuthShell photoCaption="Photograph, a black aspin">
+    <AuthShell photo="aspin">
       <Suspense fallback={null}>
         <ResetFlow />
       </Suspense>

@@ -156,3 +156,25 @@ positioning is Northern Mindanao and not a stock photo of anywhere.
 
 **Interface previews, drawn.** The day view, the booking flow on a phone and
 the recall queue, all in `src/components/marketing/previews.tsx`.
+
+## The pages around it
+
+The landing page was the loudest problem, not the only one. Everything a person
+sees before they are inside a clinic now shares a frame.
+
+**The auth pages carry real photographs.** Three more from the same set, named
+in `AuthShell` rather than pathed from each page: the vet and the aspin on sign
+in, the puspin on sign up and the invitation, the black aspin in the corridor on
+password reset. A scrim sits over all of them, always dark, never built from
+`--text`, which would have turned into a white veil under white type the moment
+somebody opened dark mode.
+
+**The privacy notice reads like a document.** Numbered sections, a contents
+list that follows you down the page on a laptop, and an anchor on every heading
+so one answer can be sent to somebody. It is the page that has to be
+trustworthy on sight.
+
+**The short pages share one shell.** `PageShell` gives the deletion request, the
+404 and the error page the same header, the same width and the same footer.
+Three pages inventing their own header is how one product ends up looking like
+three.
