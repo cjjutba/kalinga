@@ -285,7 +285,9 @@ that keeps it and a red one that does it. It says the consequence rather than
 warning that the act cannot be undone, because most of these can be undone and
 the ones that cannot say so in their own words.
 
-**A flow with steps carries them on a rail, and the rail is the page.** The
+**A flow with steps carries them on a rail, and the rail is the page.** Two
+flows use it, a pet owner booking a visit and an owner setting a clinic up, so
+the frame is one primitive, `SteppedShell`, and neither can drift. The
 steps stand on the ground itself with no panel behind them, and from the laptop
 breakpoint up the step being answered is a panel beside them: a hairline, the
 sheet tone, its own height, and the content centred inside a 28rem column.
@@ -311,8 +313,13 @@ them. Reschedule and cancel keep their own dialogs, because they already ask.
 **The staff sidebar belongs to the clinic.** Its top is the clinic name and its
 switcher, not the product name, because the person working here knows what they
 opened. A hairline separates it from the day. The account sits at the bottom
-and opens upward: appearance, the booking page, privacy, sign out. On a phone
-the same sidebar slides in from the left.
+and opens upward: appearance, the setup guide, the booking page, privacy, sign
+out. On a phone the same sidebar slides in from the left.
+
+**Settings is a group in the sidebar, not a strip of tabs.** It sits last,
+opens where you are, and its six sections are pages. The group is drawn as one
+branch: a hairline down its left edge, an icon on every section, and the page
+you are on darkens its own segment of that line as well as filling its row.
 
 ## Motion
 

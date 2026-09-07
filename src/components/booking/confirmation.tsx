@@ -10,12 +10,11 @@ import { Pill } from "@/components/primitives/pill";
 import { useConfirm } from "@/components/primitives/confirm";
 import { Celebrate } from "./celebrate";
 import { PublicFooter } from "./public-footer";
-import { Card } from "@/components/primitives/surfaces";
 import { StatusPill } from "@/components/primitives/status-pill";
 import type { getBookingByReference } from "@/lib/db/queries";
 import { getPublicSlots } from "@/lib/actions/slots";
 import { cancelBooking, rescheduleBooking } from "@/lib/actions/public";
-import { formatLongDate, formatPeso, formatShortDate, formatTimeWithZone } from "@/lib/time";
+import { formatLongDate, formatPeso, formatTimeWithZone } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 type Booking = NonNullable<Awaited<ReturnType<typeof getBookingByReference>>>;

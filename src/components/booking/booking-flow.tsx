@@ -4,7 +4,7 @@ import { placeholder } from "@/content/placeholders";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check } from "lucide-react";
+import { SteppedShell, StepTitle } from "@/components/primitives/stepped";
 import { SlotPicker, type Slot } from "./slot-picker";
 import type { PublicClinic } from "./clinic-page";
 import { InputField, SelectField, TextareaField } from "@/components/primitives/field";
@@ -13,7 +13,7 @@ import { Card } from "@/components/primitives/surfaces";
 import { getPublicSlots } from "@/lib/actions/slots";
 import { bookAppointment } from "@/lib/actions/public";
 import { formatLongDate, formatPeso, formatTimeWithZone, zoneLabel } from "@/lib/time";
-import { controlOn, steppedFlow } from "@/lib/design/surfaces";
+import { controlOn } from "@/lib/design/surfaces";
 import { cn } from "@/lib/utils";
 
 // The page a pet owner actually uses. Five steps: service, vet or any, slot,
@@ -154,258 +154,160 @@ export function BookingFlow({ data }: { data: PublicClinic }) {
     );
 
   return (
-    // Three grounds, one inside the next. The window is the page tone, the
-    // shell holding the rail and the panel is the sheet tone a step in from
-    // it, and the panel comes back to the page tone, so it reads as cut out of
-    // the shell with a hairline round it and an even edge on every side. No
-    // shadows anywhere: the tones do the separating, as everywhere else.
-    //
-    // The panel's height is fixed, so a long step scrolls inside it and the
-    // shell never grows or shrinks between steps.
-    <div className={cn("min-h-dvh lg:flex lg:items-center lg:justify-center lg:p-6", steppedFlow.window)}>
-      <div className={cn("min-h-dvh w-full p-2 lg:min-h-0 lg:max-w-booking lg:rounded-sheet", steppedFlow.frame)}>
-        <div className="lg:flex lg:h-panel">
-          <aside className="hidden w-rail shrink-0 flex-col p-8 lg:flex print:hidden">
-          <div>
-            <p className="text-body font-medium">{org.name}</p>
-            {org.city ? <p className="mt-0.5 text-label text-text-2">{org.city}</p> : null}
-          </div>
-          <ol className="mt-9 flex flex-col gap-6">
-            {steps.map((s, i) => {
-              const done = i < step;
-              const current = i === step;
-              const can = reachable(i) && i !== step;
-              return (
-                <li key={s.name}>
-                  <button
-                    type="button"
-                    onClick={() => can && go(i as Step)}
-                    disabled={!can}
-                    aria-current={current ? "step" : undefined}
-                    className={cn(
-                      "flex w-full items-center gap-3.5 rounded-input text-left transition-opacity duration-150 motion-reduce:transition-none",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-page",
-                      can && "hover:opacity-70",
-                    )}
-                  >
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "grid size-8 shrink-0 place-items-center rounded-full text-[13px] font-medium",
-                        done ? "bg-action text-on-action" : current ? "text-text ring-1 ring-text" : "text-text-3 ring-1 ring-divider",
-                      )}
-                    >
-                      {done ? <Check className="size-3.5" strokeWidth={2} /> : i + 1}
-                    </span>
-                    <span className="min-w-0">
-                      <span className={cn("block text-small font-medium leading-tight", current || done ? "text-text" : "text-text-2")}>{s.name}</span>
-                      <span className="mt-1 block text-label leading-tight text-text-2">{s.lead}</span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-          <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 pt-8">
-            <Link href={`/${org.slug}`} className="rounded-tag text-label text-text-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
-              Back to the clinic
-            </Link>
-            <Link href="/privacy" className="rounded-tag text-label text-text-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
-              Privacy
-            </Link>
-          </div>
-        </aside>
-
-          {/* Below the rail's width there is no panel either: the step sits on
-              the page. From the rail up it becomes the card the rail points at.
-              Content starts at the top of it, never centred, so a step with
-              two choices and a step with a form begin on the same line and
-              nothing jumps between them. */}
-          <main className={cn("flex justify-center px-3 py-6 lg:flex-1 lg:overflow-hidden lg:rounded-card lg:px-4 lg:py-10", steppedFlow.panel)}>
-          <div className="flex w-full max-w-step flex-col gap-8 lg:h-full lg:min-h-0">
-            {/* Everything above the buttons scrolls; the buttons do not, so a
-                long step never hides the way forward. */}
-            <div className="flex flex-col gap-8 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-1">
-            <div className="flex flex-col gap-4 lg:hidden">
-              <button
-                type="button"
-                onClick={back}
-                aria-label={step === 0 ? "Back to the clinic" : `Back to ${steps[step - 1]?.name.toLowerCase()}`}
-                className="grid size-8 shrink-0 place-items-center rounded-full text-text-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-              >
-                <ArrowLeft className="size-[18px]" strokeWidth={2} />
-              </button>
-              <ol className="flex gap-2" aria-label="Booking steps">
-                {steps.map((s, i) => {
-                  const can = reachable(i) && i !== step;
-                  return (
-                    <li key={s.name} className="flex-1">
-                      <button
-                        type="button"
-                        onClick={() => can && go(i as Step)}
-                        disabled={!can}
-                        aria-current={i === step ? "step" : undefined}
-                        aria-label={`Step ${i + 1}, ${s.name}${i < step ? ", done" : i === step ? ", current" : ", not yet"}`}
-                        className={cn(
-                          "h-0.5 w-full rounded-full transition-colors duration-150 motion-reduce:transition-none",
-                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-page",
-                          i <= step ? "bg-action" : "bg-divider",
-                        )}
-                      />
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
-
-            <div className="flex flex-col gap-8">
-              {step === 0 ? (
-                <>
-                  <Title heading="What does your pet need?" lead={`One visit, one service. ${org.name} can add anything else on the day.`} />
-                  <div role="radiogroup" aria-label="Service" className="flex flex-col gap-2">
-                    {services.map((s) => (
-                      <button key={s.id} type="button" role="radio" aria-checked={serviceId === s.id} onClick={() => { setServiceId(s.id); setSlot(null); }} className={choice(serviceId === s.id)}>
-                        <span>
-                          <span className="block text-body font-medium">{s.name}</span>
-                          <span className={cn("block text-small", serviceId === s.id ? "text-on-action/80" : "text-text-2")}>{s.durationMin} minutes</span>
-                        </span>
-                        <span className="text-body tabular">{formatPeso(s.pricePhp)}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              ) : step === 1 ? (
-                <>
-                  <Title
-                    heading="Who would you like to see?"
-                    lead={filtered ? (service?.recallKind === "grooming" ? "Grooming is done by the groomers." : `${service?.name} is done by the vets.`) : "Anyone available, or someone in particular."}
-                  />
-                  <div role="radiogroup" aria-label="Vet" className="flex flex-col gap-2">
-                    {[{ id: "any", name: "Any available", title: "Soonest slot wins" }, ...pool.map((p) => ({ id: p.id, name: p.name, title: p.title }))].map((p) => (
-                      <button key={p.id} type="button" role="radio" aria-checked={providerId === p.id} onClick={() => { setProviderId(p.id); setSlot(null); }} className={choice(providerId === p.id)}>
-                        <span>
-                          <span className="block text-body font-medium">{p.name}</span>
-                          <span className={cn("block text-small", providerId === p.id ? "text-on-action/80" : "text-text-2")}>{p.title}</span>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              ) : step === 2 ? (
-                <>
-                  <Title heading="When suits you?" lead={`Times are clinic time, ${zoneLabel(tz)}. ${service?.name}, ${service?.durationMin} minutes.`} />
-                  {slotError ? (
-                    <div role="alert" className={cn("rounded-guide p-4", controlOn.shell)}>
-                      <p className="text-body font-medium">That slot was just taken</p>
-                      <p className="mt-1 text-small text-text-2">{slotError} Nothing was saved.</p>
-                    </div>
-                  ) : null}
-                  {service ? (
-                    <SlotPicker on="shell" tz={tz} load={load} value={slot} onChange={(s) => { setSlot(s); setSlotError(null); }} who={providerId === "any" ? "Any available" : pool.find((p) => p.id === providerId)?.name ?? ""} reloadKey={`${serviceId}:${providerId}`} />
-                  ) : null}
-                </>
-              ) : step === 3 ? (
-                <>
-                  <Title heading="Who is coming?" lead="So the clinic can confirm this and remind you when your pet is due again." />
-                  <div className="flex flex-col gap-5">
-                    <InputField on="shell" label="Your name" placeholder={placeholder.personName} autoComplete="name" value={details.name} onChange={(e) => setDetails((d) => ({ ...d, name: e.target.value }))} error={errors.name} />
-                    <InputField on="shell" label="Mobile" inputMode="tel" autoComplete="tel" placeholder={placeholder.mobile} value={details.mobile} onChange={(e) => setDetails((d) => ({ ...d, mobile: e.target.value }))} error={errors.mobile} helper="The clinic confirms and reminds you here." />
-                    <InputField on="shell" label="Email" type="email" autoComplete="email" placeholder={placeholder.email} value={details.email} onChange={(e) => setDetails((d) => ({ ...d, email: e.target.value }))} error={errors.email} helper="Your confirmation arrives here." />
-                    <div className="grid grid-cols-[1fr_auto] gap-3">
-                      <InputField on="shell" label="Pet's name" placeholder={placeholder.petName} value={details.petName} onChange={(e) => setDetails((d) => ({ ...d, petName: e.target.value }))} error={errors.petName} />
-                      <SelectField on="shell" label="Species" value={details.species} onChange={(v) => setDetails((d) => ({ ...d, species: v }))} options={[{ value: "dog", label: "Dog" }, { value: "cat", label: "Cat" }]} className="w-32" />
-                    </div>
-                    <TextareaField on="shell" label="Anything the vet should know" hint="Optional" placeholder={placeholder.appointmentNote} rows={3} value={details.notes} onChange={(e) => setDetails((d) => ({ ...d, notes: e.target.value }))} />
-                    <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden>
-                      <label>
-                        Website <input tabIndex={-1} autoComplete="off" value={details.website} onChange={(e) => setDetails((d) => ({ ...d, website: e.target.value }))} />
-                      </label>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Title heading="Check and confirm" lead="Nothing is booked until you press the button." />
-                  <Card className={cn("p-5", controlOn.shell)}>
-                    <dl className="grid grid-cols-[5rem_minmax(0,1fr)] gap-x-4 gap-y-3 text-small">
-                      <dt className="text-text-2">Service</dt>
-                      <dd>
-                        {service?.name}, {formatPeso(service?.pricePhp ?? 0)}
-                      </dd>
-                      <dt className="text-text-2">When</dt>
-                      <dd className="tabular">
-                        {slot ? formatLongDate(slot.startsAt, tz) : ""}
-                        <br />
-                        {slot ? formatTimeWithZone(slot.startsAt, tz) : ""}
-                      </dd>
-                      <dt className="text-text-2">With</dt>
-                      <dd>{providers.find((p) => p.id === slot?.providerId)?.name ?? "Any available"}</dd>
-                      {org.address ? (
-                        <>
-                          <dt className="text-text-2">Where</dt>
-                          <dd>{org.address}</dd>
-                        </>
-                      ) : null}
-                      <dt className="text-text-2">For</dt>
-                      <dd>
-                        {details.petName}, {details.species}
-                      </dd>
-                      <dt className="text-text-2">You</dt>
-                      <dd className="min-w-0">
-                        {details.name}
-                        <br />
-                        <span className="tabular">{details.mobile}</span>
-                        <br />
-                        <span className="break-all">{details.email}</span>
-                      </dd>
-                    </dl>
-                  </Card>
-                  <p className="-mt-4 text-small text-text-2">
-                    Pay at the clinic, cash or GCash. You can change or cancel from the link on your confirmation. By booking you agree to the{" "}
-                    <Link href="/privacy" className="font-medium text-text hover:underline">
-                      privacy notice
-                    </Link>
-                    .
-                  </p>
-                </>
-              )}
-
-            </div>
-            </div>
-
-            {/* Both buttons together at the left, back first and the way
-                forward beside it, so the pair reads in the order it is used
-                and neither drifts to the far edge of the panel. */}
-            <div className="flex flex-wrap items-center gap-3 lg:px-1">
-                {step > 0 ? (
-                  <Pill variant="secondary" onClick={back}>
-                    Back
-                  </Pill>
-                ) : null}
-                {step < 4 ? (
-                  <Pill onClick={next} disabled={(step === 0 && !serviceId) || (step === 2 && !slot)}>
-                    Continue
-                  </Pill>
-                ) : (
-                  <Pill onClick={confirm} loading={submitting} loadingLabel="Booking">
-                    Confirm booking
-                  </Pill>
-                )}
-            </div>
-          </div>
-          </main>
+    <SteppedShell
+      steps={steps}
+      step={step}
+      onStep={(i) => go(i as Step)}
+      reachable={reachable}
+      stepsLabel="Booking steps"
+      onBack={back}
+      backLabel={step === 0 ? "Back to the clinic" : `Back to ${steps[step - 1]?.name.toLowerCase()}`}
+      head={
+        <div>
+          <p className="text-body font-medium">{org.name}</p>
+          {org.city ? <p className="mt-0.5 text-label text-text-2">{org.city}</p> : null}
         </div>
-      </div>
-    </div>
+      }
+      railFooter={
+        <>
+          <Link href={`/${org.slug}`} className="rounded-tag text-label text-text-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+            Back to the clinic
+          </Link>
+          <Link href="/privacy" className="rounded-tag text-label text-text-2 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+            Privacy
+          </Link>
+        </>
+      }
+      actions={
+        <>
+          {step > 0 ? (
+            <Pill variant="secondary" onClick={back}>
+              Back
+            </Pill>
+          ) : null}
+          {step < 4 ? (
+            <Pill onClick={next} disabled={(step === 0 && !serviceId) || (step === 2 && !slot)}>
+              Continue
+            </Pill>
+          ) : (
+            <Pill onClick={confirm} loading={submitting} loadingLabel="Booking">
+              Confirm booking
+            </Pill>
+          )}
+        </>
+      }
+    >
+      {step === 0 ? (
+        <>
+          <StepTitle heading="What does your pet need?" lead={`One visit, one service. ${org.name} can add anything else on the day.`} />
+          <div role="radiogroup" aria-label="Service" className="flex flex-col gap-2">
+            {services.map((s) => (
+              <button key={s.id} type="button" role="radio" aria-checked={serviceId === s.id} onClick={() => { setServiceId(s.id); setSlot(null); }} className={choice(serviceId === s.id)}>
+                <span>
+                  <span className="block text-body font-medium">{s.name}</span>
+                  <span className={cn("block text-small", serviceId === s.id ? "text-on-action/80" : "text-text-2")}>{s.durationMin} minutes</span>
+                </span>
+                <span className="text-body tabular">{formatPeso(s.pricePhp)}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : step === 1 ? (
+        <>
+          <StepTitle
+            heading="Who would you like to see?"
+            lead={filtered ? (service?.recallKind === "grooming" ? "Grooming is done by the groomers." : `${service?.name} is done by the vets.`) : "Anyone available, or someone in particular."}
+          />
+          <div role="radiogroup" aria-label="Vet" className="flex flex-col gap-2">
+            {[{ id: "any", name: "Any available", title: "Soonest slot wins" }, ...pool.map((p) => ({ id: p.id, name: p.name, title: p.title }))].map((p) => (
+              <button key={p.id} type="button" role="radio" aria-checked={providerId === p.id} onClick={() => { setProviderId(p.id); setSlot(null); }} className={choice(providerId === p.id)}>
+                <span>
+                  <span className="block text-body font-medium">{p.name}</span>
+                  <span className={cn("block text-small", providerId === p.id ? "text-on-action/80" : "text-text-2")}>{p.title}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : step === 2 ? (
+        <>
+          <StepTitle heading="When suits you?" lead={`Times are clinic time, ${zoneLabel(tz)}. ${service?.name}, ${service?.durationMin} minutes.`} />
+          {slotError ? (
+            <div role="alert" className={cn("rounded-guide p-4", controlOn.shell)}>
+              <p className="text-body font-medium">That slot was just taken</p>
+              <p className="mt-1 text-small text-text-2">{slotError} Nothing was saved.</p>
+            </div>
+          ) : null}
+          {service ? (
+            <SlotPicker on="shell" tz={tz} load={load} value={slot} onChange={(s) => { setSlot(s); setSlotError(null); }} who={providerId === "any" ? "Any available" : pool.find((p) => p.id === providerId)?.name ?? ""} reloadKey={`${serviceId}:${providerId}`} />
+          ) : null}
+        </>
+      ) : step === 3 ? (
+        <>
+          <StepTitle heading="Who is coming?" lead="So the clinic can confirm this and remind you when your pet is due again." />
+          <div className="flex flex-col gap-5">
+            <InputField on="shell" label="Your name" placeholder={placeholder.personName} autoComplete="name" value={details.name} onChange={(e) => setDetails((d) => ({ ...d, name: e.target.value }))} error={errors.name} />
+            <InputField on="shell" label="Mobile" inputMode="tel" autoComplete="tel" placeholder={placeholder.mobile} value={details.mobile} onChange={(e) => setDetails((d) => ({ ...d, mobile: e.target.value }))} error={errors.mobile} helper="The clinic confirms and reminds you here." />
+            <InputField on="shell" label="Email" type="email" autoComplete="email" placeholder={placeholder.email} value={details.email} onChange={(e) => setDetails((d) => ({ ...d, email: e.target.value }))} error={errors.email} helper="Your confirmation arrives here." />
+            <div className="grid grid-cols-[1fr_auto] gap-3">
+              <InputField on="shell" label="Pet's name" placeholder={placeholder.petName} value={details.petName} onChange={(e) => setDetails((d) => ({ ...d, petName: e.target.value }))} error={errors.petName} />
+              <SelectField on="shell" label="Species" value={details.species} onChange={(v) => setDetails((d) => ({ ...d, species: v }))} options={[{ value: "dog", label: "Dog" }, { value: "cat", label: "Cat" }]} className="w-32" />
+            </div>
+            <TextareaField on="shell" label="Anything the vet should know" hint="Optional" placeholder={placeholder.appointmentNote} rows={3} value={details.notes} onChange={(e) => setDetails((d) => ({ ...d, notes: e.target.value }))} />
+            <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden>
+              <label>
+                Website <input tabIndex={-1} autoComplete="off" value={details.website} onChange={(e) => setDetails((d) => ({ ...d, website: e.target.value }))} />
+              </label>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <StepTitle heading="Check and confirm" lead="Nothing is booked until you press the button." />
+          <Card className={cn("p-5", controlOn.shell)}>
+            <dl className="grid grid-cols-[5rem_minmax(0,1fr)] gap-x-4 gap-y-3 text-small">
+              <dt className="text-text-2">Service</dt>
+              <dd>
+                {service?.name}, {formatPeso(service?.pricePhp ?? 0)}
+              </dd>
+              <dt className="text-text-2">When</dt>
+              <dd className="tabular">
+                {slot ? formatLongDate(slot.startsAt, tz) : ""}
+                <br />
+                {slot ? formatTimeWithZone(slot.startsAt, tz) : ""}
+              </dd>
+              <dt className="text-text-2">With</dt>
+              <dd>{providers.find((p) => p.id === slot?.providerId)?.name ?? "Any available"}</dd>
+              {org.address ? (
+                <>
+                  <dt className="text-text-2">Where</dt>
+                  <dd>{org.address}</dd>
+                </>
+              ) : null}
+              <dt className="text-text-2">For</dt>
+              <dd>
+                {details.petName}, {details.species}
+              </dd>
+              <dt className="text-text-2">You</dt>
+              <dd className="min-w-0">
+                {details.name}
+                <br />
+                <span className="tabular">{details.mobile}</span>
+                <br />
+                <span className="break-all">{details.email}</span>
+              </dd>
+            </dl>
+          </Card>
+          <p className="-mt-4 text-small text-text-2">
+            Pay at the clinic, cash or GCash. You can change or cancel from the link on your confirmation. By booking you agree to the{" "}
+            <Link href="/privacy" className="font-medium text-text hover:underline">
+              privacy notice
+            </Link>
+            .
+          </p>
+        </>
+      )}
+    </SteppedShell>
   );
 }
 
-/** The heading and its one line, the same shape on every step. */
-function Title({ heading, lead }: { heading: string; lead?: string }) {
-  return (
-    <div>
-      <h1 className="text-title font-medium text-balance">{heading}</h1>
-      {lead ? <p className="mt-1.5 text-small text-text-2">{lead}</p> : null}
-    </div>
-  );
-}

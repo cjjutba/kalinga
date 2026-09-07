@@ -781,6 +781,58 @@ confirmation dialog. And a button says one to three words, naming the act and
 never repeating what is on the screen beside it. A test fails the build on a
 label written as a sentence.
 
+## Setting a clinic up is a flow, not a form
+
+**Date.** 7 September 2026.
+
+**Decided.** Opening a clinic used to be four fields and a button. What came
+after was three grey checklist items on the day view and six settings pages to
+hunt through. Setup is now the same stepped flow a pet owner books in: clinic,
+services, staff, hours, closures, recall rules, then the booking link. Six of
+the seven steps are optional and every one writes as it goes, so leaving
+halfway leaves a real clinic rather than a draft.
+
+The frame behind both flows moved to `src/components/primitives/stepped.tsx`.
+Two copies of a rail, a fixed height panel and a button row would have drifted
+apart within a week.
+
+**The checklist stayed.** Anyone who skips a step still meets it on the day
+view, and it now has an address of its own at `/app/[org]/start`, reached from
+the account menu, because a clinic that skipped hours on Monday needs to find
+its way back on Thursday.
+
+## Recall intervals belong to the clinic
+
+**Date.** 7 September 2026.
+
+**Decided.** Vaccination was a year and deworming was three months, both
+written into the code. A shelter clinic deworms monthly and a house-cat
+practice boosts every three years, so both are now columns on the organisation
+and both are edited under Settings, recall rules, beside the grooming interval
+that was already there. The message catalogue reads its timing from them, and
+the vaccination reminder lost the word "annual", which stopped being true the
+moment the number could change.
+
+**Not editable.** The wording of the five messages. That is a bigger feature
+than it looks, with placeholder validation and a preview of its own, and no
+clinic has asked yet.
+
+## Google is optional, and off unless it is configured
+
+**Date.** 7 September 2026.
+
+**Decided.** "Continue with Google" appears on the two auth screens only when
+`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are both set, the same shape as
+Resend. A fork of this public repository still runs on email and password with
+nothing configured, and the button never appears broken. Account linking is on
+for Google, because it verifies the address it hands over, so signing in with
+Google after signing up with a password lands on the account that already
+exists.
+
+The mark is drawn in the current text colour rather than Google's four. A
+colour value in a component is the one thing the design test forbids, and a
+monochrome mark sits better beside a near black pill.
+
 ## Open
 
 **The offer to the first clinic.** Free pilot in exchange for a testimonial and a
